@@ -16,7 +16,8 @@ import {
   Award,
   Briefcase,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Calendar
 } from "lucide-react";
 import { toast } from "sonner";
 
