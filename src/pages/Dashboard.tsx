@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,12 +41,11 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">EJ</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">EarlyJobs</h1>
-              </div>
+              <img 
+                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
+                alt="EarlyJobs Logo" 
+                className="h-10 w-auto"
+              />
             </div>
 
             <div className="flex items-center space-x-4">
@@ -61,7 +59,7 @@ const Dashboard = () => {
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder-avatar.jpg" />
-                  <AvatarFallback className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                  <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
                     {userName.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
@@ -110,7 +108,7 @@ const Dashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               {/* Take Assessment Card */}
-              <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+              <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <BookOpen className="h-8 w-8" />
@@ -121,13 +119,13 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <CardTitle className="text-xl mb-2">Take an Assessment</CardTitle>
-                  <CardDescription className="text-blue-100 mb-4">
+                  <CardDescription className="text-orange-100 mb-4">
                     Showcase your skills with our comprehensive tests and earn verified badges.
                   </CardDescription>
                   <Button 
                     onClick={() => navigate('/assessments')}
                     variant="secondary" 
-                    className="w-full rounded-2xl bg-white text-blue-600 hover:bg-gray-50"
+                    className="w-full rounded-2xl bg-white text-orange-600 hover:bg-gray-50"
                   >
                     Start Test
                   </Button>
@@ -211,7 +209,7 @@ const Dashboard = () => {
             <Card className="rounded-3xl border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-blue-600" />
+                  <Target className="h-5 w-5 text-orange-600" />
                   <span>Quick Actions</span>
                 </CardTitle>
               </CardHeader>
@@ -219,9 +217,9 @@ const Dashboard = () => {
                 <div className="grid md:grid-cols-3 gap-4">
                   <Button 
                     variant="outline" 
-                    className="h-16 rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300 flex flex-col space-y-1"
+                    className="h-16 rounded-2xl border-gray-200 hover:bg-orange-50 hover:border-orange-300 flex flex-col space-y-1"
                   >
-                    <BookOpen className="h-5 w-5 text-blue-600" />
+                    <BookOpen className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Continue Test</span>
                   </Button>
                   <Button 
@@ -257,7 +255,7 @@ const Dashboard = () => {
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
                     <div className={`p-2 rounded-xl ${
-                      activity.type === 'assessment' ? 'bg-blue-100 text-blue-600' :
+                      activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
                       activity.type === 'skill' ? 'bg-purple-100 text-purple-600' :
                       'bg-teal-100 text-teal-600'
                     }`}>
@@ -300,7 +298,7 @@ const Dashboard = () => {
                     <span className="font-medium">3/5</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                    <div className="bg-orange-600 h-2 rounded-full" style={{width: '60%'}}></div>
                   </div>
                 </div>
                 <div className="space-y-2">

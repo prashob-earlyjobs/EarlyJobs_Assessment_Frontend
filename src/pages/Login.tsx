@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -64,8 +63,12 @@ const Login = () => {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">EJ</span>
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
+              alt="EarlyJobs Logo" 
+              className="h-16 w-auto"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome to EarlyJobs</h1>
           <p className="text-gray-600 mt-2">Your career journey starts here</p>
@@ -95,7 +98,7 @@ const Login = () => {
                       placeholder="your@email.com"
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-blue-500"
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />
                   </div>
@@ -108,7 +111,7 @@ const Login = () => {
                         placeholder="Enter your password"
                         value={loginData.password}
                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        className="h-12 rounded-2xl border-gray-200 focus:border-blue-500 pr-12"
+                        className="h-12 rounded-2xl border-gray-200 focus:border-orange-500 pr-12"
                         required
                       />
                       <button
@@ -120,7 +123,7 @@ const Login = () => {
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg">
+                  <Button type="submit" className="w-full h-12 bg-orange-500 hover:bg-orange-600 rounded-2xl text-base shadow-lg">
                     Sign In
                   </Button>
                 </form>
@@ -182,7 +185,7 @@ const Login = () => {
                       placeholder="Your full name"
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-blue-500"
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />
                   </div>
@@ -194,7 +197,7 @@ const Login = () => {
                       placeholder="your@email.com"
                       value={signupData.email}
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-blue-500"
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />
                   </div>
@@ -206,7 +209,7 @@ const Login = () => {
                       placeholder="Create a strong password"
                       value={signupData.password}
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-blue-500"
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />
                   </div>
@@ -218,11 +221,11 @@ const Login = () => {
                       placeholder="Confirm your password"
                       value={signupData.confirmPassword}
                       onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-blue-500"
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg">
+                  <Button type="submit" className="w-full h-12 bg-orange-500 hover:bg-orange-600 rounded-2xl text-base shadow-lg">
                     Create Account
                   </Button>
                 </form>

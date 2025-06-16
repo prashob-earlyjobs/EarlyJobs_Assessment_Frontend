@@ -199,9 +199,11 @@ const Jobs = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">EJ</span>
-              </div>
+              <img 
+                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
+                alt="EarlyJobs Logo" 
+                className="h-10 w-auto"
+              />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Job Opportunities</h1>
               </div>
@@ -209,7 +211,7 @@ const Jobs = () => {
 
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
                   AJ
                 </AvatarFallback>
               </Avatar>
