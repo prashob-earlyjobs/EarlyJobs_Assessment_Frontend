@@ -21,13 +21,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
   BookOpen, 
   BarChart3, 
   Award, 
   Briefcase, 
   Bell, 
-  Settings, 
   TrendingUp,
   Clock,
   Target,
@@ -45,6 +49,7 @@ const Dashboard = () => {
   const userName = "Alex Johnson";
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
@@ -63,15 +68,47 @@ const Dashboard = () => {
     setShowCertificateDialog(true);
   };
 
-  const downloadCertificateAsPDF = () => {
-    // In a real application, you would use a library like html2canvas + jsPDF
-    // For now, we'll simulate the download
-    const link = document.createElement('a');
-    link.href = '#'; // This would be the actual PDF blob URL
-    link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf`;
-    
-    toast.success("Certificate downloaded successfully!");
-    setShowCertificateDialog(false);
+  const downloadCertificateAsPDF = async () => {
+    try {
+      // Create a temporary container for the certificate
+      const certificateElement = document.getElementById('certificate');
+      if (!certificateElement) {
+        toast.error("Certificate not found");
+        return;
+      }
+
+      // For now, we'll create a simple text-based PDF simulation
+      // In a real application, you would use libraries like html2canvas + jsPDF
+      const certificateContent = `
+CERTIFICATE OF ACHIEVEMENT
+
+This is to certify that
+${userName}
+has successfully completed the
+React Developer Assessment
+with a score of 85%
+
+Skills Verified: JavaScript, React, Node.js, Problem Solving
+Date: ${new Date().toLocaleDateString()}
+Certificate ID: EJ-CERT-2024-001
+      `;
+
+      const blob = new Blob([certificateContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
+      toast.success("Certificate downloaded successfully!");
+      setShowCertificateDialog(false);
+    } catch (error) {
+      toast.error("Failed to download certificate");
+    }
   };
 
   const certificateData = {
@@ -82,6 +119,12 @@ const Dashboard = () => {
     skillsVerified: ["JavaScript", "React", "Node.js", "Problem Solving"],
     certificateId: "EJ-CERT-2024-001"
   };
+
+  const notifications = [
+    { id: 1, title: "New Assessment Available", message: "React Advanced Assessment is now available", time: "2 hours ago", unread: true },
+    { id: 2, title: "Job Match Found", message: "5 new jobs match your skills", time: "1 day ago", unread: true },
+    { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
+  ];
 
   const stats = [
     { label: "Assessments Completed", value: "12", icon: BookOpen, color: "text-blue-600" },
@@ -107,34 +150,68 @@ const Dashboard = () => {
               <img 
                 src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
                 alt="EarlyJobs Logo" 
-                className="h-10 w-auto"
+                className="h-12 w-auto"
               />
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="relative rounded-2xl">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-              </Button>
-              <Button variant="ghost" size="sm" className="rounded-2xl">
-                <Settings className="h-5 w-5" />
-              </Button>
+              <Popover open={showNotifications} onOpenChange={setShowNotifications}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="relative rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                  >
+                    <Bell className="h-5 w-5" />
+                    {notifications.some(n => n.unread) && (
+                      <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0 rounded-2xl">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.map((notification) => (
+                      <div key={notification.id} className={`p-4 border-b last:border-b-0 hover:bg-gray-50 ${notification.unread ? 'bg-orange-50/50' : ''}`}>
+                        <div className="flex items-start space-x-3">
+                          <div className={`p-2 rounded-full ${notification.unread ? 'bg-orange-100' : 'bg-gray-100'}`}>
+                            <Bell className={`h-4 w-4 ${notification.unread ? 'text-orange-600' : 'text-gray-600'}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                            <p className="text-sm text-gray-600">{notification.message}</p>
+                            <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                          </div>
+                          {notification.unread && (
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-1"></div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleProfileClick}
-                className="rounded-2xl text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                className="rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
               >
                 <User className="h-5 w-5" />
               </Button>
+              
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setShowLogoutDialog(true)}
-                className="rounded-2xl text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="rounded-2xl p-3 hover:bg-red-50 hover:text-red-600 transition-colors"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
+              
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder-avatar.jpg" />
@@ -170,13 +247,12 @@ const Dashboard = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Certificate Dialog */}
       <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Your Certificate</span>
-              <Button onClick={downloadCertificateAsPDF} className="rounded-2xl">
+              <Button onClick={downloadCertificateAsPDF} className="rounded-2xl bg-orange-600 hover:bg-orange-700">
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF
               </Button>
@@ -189,7 +265,6 @@ const Dashboard = () => {
       </Dialog>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Hi {userName.split(' ')[0]}, ready to upgrade your career?
@@ -199,7 +274,6 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
             <Card key={index} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -219,10 +293,8 @@ const Dashboard = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Action Cards */}
           <div className="lg:col-span-2 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Take Assessment Card */}
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -247,7 +319,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* View Reports Card */}
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-600 to-purple-700 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -270,7 +341,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Bulk Applying Card */}
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-teal-600 to-teal-700 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -295,7 +365,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Job Opportunities Card */}
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-600 to-green-700 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -321,7 +390,6 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            {/* Quick Actions */}
             <Card className="rounded-3xl border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -359,9 +427,7 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Recent Activity */}
             <Card className="rounded-3xl border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -404,7 +470,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Progress Card */}
             <Card className="rounded-3xl border-0 shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
               <CardHeader>
                 <CardTitle className="text-lg">This Week's Progress</CardTitle>
