@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -67,7 +68,7 @@ const Dashboard = () => {
     // For now, we'll simulate the download
     const link = document.createElement('a');
     link.href = '#'; // This would be the actual PDF blob URL
-    link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf';
+    link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf`;
     
     toast.success("Certificate downloaded successfully!");
     setShowCertificateDialog(false);
