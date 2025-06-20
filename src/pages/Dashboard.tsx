@@ -1,8 +1,19 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   BookOpen, 
   BarChart3, 
@@ -15,13 +26,15 @@ import {
   Target,
   Users,
   LogOut,
-  CreditCard
+  CreditCard,
+  User
 } from "lucide-react";
 import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const userName = "Alex Johnson";
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
@@ -30,6 +43,10 @@ const Dashboard = () => {
 
   const handleBulkApplyBrowse = () => {
     navigate('/bulk-applying');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
   };
 
   const stats = [
@@ -71,7 +88,15 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={handleLogout}
+                onClick={handleProfileClick}
+                className="rounded-2xl text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              >
+                <User className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowLogoutDialog(true)}
                 className="rounded-2xl text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <LogOut className="h-5 w-5" />
@@ -92,6 +117,24 @@ const Dashboard = () => {
           </div>
         </div>
       </header>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to logout? You will need to sign in again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="rounded-2xl bg-red-600 hover:bg-red-700">
+              Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section */}
@@ -252,9 +295,10 @@ const Dashboard = () => {
                   </Button>
                   <Button 
                     variant="outline" 
+                    onClick={handleProfileClick}
                     className="h-16 rounded-2xl border-gray-200 hover:bg-teal-50 hover:border-teal-300 flex flex-col space-y-1"
                   >
-                    <Briefcase className="h-5 w-5 text-teal-600" />
+                    <User className="h-5 w-5 text-teal-600" />
                     <span className="text-sm">Update Profile</span>
                   </Button>
                 </div>

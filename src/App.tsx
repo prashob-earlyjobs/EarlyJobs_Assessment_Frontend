@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import Assessments from "./pages/Assessments";
 import Assessment from "./pages/Assessment";
 import VideoQuestion from "./pages/VideoQuestion";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/assessment/:id" element={<Assessment />} />
           <Route path="/video-question/:id" element={<VideoQuestion />} />
