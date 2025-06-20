@@ -13,12 +13,25 @@ import {
   TrendingUp,
   Clock,
   Target,
-  Users
+  Users,
+  LogOut,
+  CreditCard
 } from "lucide-react";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const userName = "Alex Johnson";
+
+  const handleLogout = () => {
+    toast.success("Logged out successfully!");
+    navigate('/');
+  };
+
+  const handleBulkApply = (count: number) => {
+    // This will be implemented with Razorpay payment
+    toast.success(`Initiating bulk application for ${count} companies`);
+  };
 
   const stats = [
     { label: "Assessments Completed", value: "12", icon: BookOpen, color: "text-blue-600" },
@@ -35,7 +48,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -55,6 +68,14 @@ const Dashboard = () => {
               </Button>
               <Button variant="ghost" size="sm" className="rounded-2xl">
                 <Settings className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout}
+                className="rounded-2xl text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-5 w-5" />
               </Button>
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
@@ -155,27 +176,55 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Skill Passport Card */}
+              {/* Bulk Applying Card */}
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-teal-600 to-teal-700 text-white">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <Award className="h-8 w-8" />
+                    <CreditCard className="h-8 w-8" />
                     <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                      8 Skills
+                      Premium
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardTitle className="text-xl mb-2">Skill Passport</CardTitle>
+                  <CardTitle className="text-xl mb-2">Bulk Applying</CardTitle>
                   <CardDescription className="text-teal-100 mb-4">
-                    Your verified digital credential showcasing all your proven skills.
+                    Apply to multiple companies at once. Choose from 10, 20, 50, or 100 applications.
                   </CardDescription>
-                  <Button 
-                    variant="secondary" 
-                    className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50"
-                  >
-                    View Passport
-                  </Button>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <Button 
+                      onClick={() => handleBulkApply(10)}
+                      variant="secondary" 
+                      size="sm"
+                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
+                    >
+                      10 Jobs
+                    </Button>
+                    <Button 
+                      onClick={() => handleBulkApply(20)}
+                      variant="secondary" 
+                      size="sm"
+                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
+                    >
+                      20 Jobs
+                    </Button>
+                    <Button 
+                      onClick={() => handleBulkApply(50)}
+                      variant="secondary" 
+                      size="sm"
+                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
+                    >
+                      50 Jobs
+                    </Button>
+                    <Button 
+                      onClick={() => handleBulkApply(100)}
+                      variant="secondary" 
+                      size="sm"
+                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
+                    >
+                      100 Jobs
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 

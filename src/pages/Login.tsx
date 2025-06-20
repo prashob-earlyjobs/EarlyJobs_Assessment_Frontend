@@ -1,19 +1,26 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Mail, Phone, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [signupData, setSignupData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [signupData, setSignupData] = useState({ 
+    name: "", 
+    email: "", 
+    mobile: "", 
+    password: "", 
+    confirmPassword: "" 
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +43,8 @@ const Login = () => {
     navigate('/dashboard');
   };
 
-  const handleOTPAuth = () => {
-    toast.success("OTP sent successfully!");
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-50"
@@ -63,11 +66,11 @@ const Login = () => {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
             <img 
               src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
               alt="EarlyJobs Logo" 
-              className="h-16 w-auto"
+              className="h-10 w-auto"
             />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome to EarlyJobs</h1>
@@ -123,7 +126,7 @@ const Login = () => {
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full h-12 bg-orange-500 hover:bg-orange-600 rounded-2xl text-base shadow-lg">
+                  <Button type="submit" className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg">
                     Sign In
                   </Button>
                 </form>
@@ -145,25 +148,6 @@ const Login = () => {
                     </svg>
                     Continue with Google
                   </Button>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      onClick={handleOTPAuth}
-                      variant="outline"
-                      className="h-12 rounded-2xl border-gray-200 hover:bg-gray-50"
-                    >
-                      <Mail className="w-4 h-4 mr-2" />
-                      Email OTP
-                    </Button>
-                    <Button
-                      onClick={handleOTPAuth}
-                      variant="outline"
-                      className="h-12 rounded-2xl border-gray-200 hover:bg-gray-50"
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      SMS OTP
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </TabsContent>
@@ -202,6 +186,18 @@ const Login = () => {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="mobile">Mobile Number</Label>
+                    <Input
+                      id="mobile"
+                      type="tel"
+                      placeholder="+91 9876543210"
+                      value={signupData.mobile}
+                      onChange={(e) => setSignupData({ ...signupData, mobile: e.target.value })}
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
@@ -225,7 +221,7 @@ const Login = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full h-12 bg-orange-500 hover:bg-orange-600 rounded-2xl text-base shadow-lg">
+                  <Button type="submit" className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg">
                     Create Account
                   </Button>
                 </form>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,9 @@ import {
   Flag,
   CheckCircle,
   Save,
-  AlertCircle
+  AlertCircle,
+  CreditCard,
+  Shield
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,6 +26,43 @@ const Assessment = () => {
   const [timeRemaining, setTimeRemaining] = useState(45 * 60); // 45 minutes in seconds
   const [answers, setAnswers] = useState<{[key: number]: string}>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showPayment, setShowPayment] = useState(true);
+
+  const assessmentFee = 299; // ₹299 for assessment
+
+  const handlePayment = async () => {
+    // Simulate Razorpay payment
+    const options = {
+      key: 'rzp_test_xxxxxxxxxx', // This would be your Razorpay test key
+      amount: assessmentFee * 100, // Amount in paise
+      currency: 'INR',
+      name: 'EarlyJobs',
+      description: 'Assessment Fee',
+      handler: function (response: any) {
+        console.log('Payment successful:', response);
+        toast.success('Payment successful! Starting assessment...');
+        setPaymentCompleted(true);
+        setShowPayment(false);
+      },
+      prefill: {
+        name: 'Alex Johnson',
+        email: 'alex@example.com',
+        contact: '9876543210'
+      },
+      theme: {
+        color: '#ea580c'
+      }
+    };
+
+    // In a real implementation, you would load Razorpay script and create payment
+    // For now, we'll simulate successful payment
+    setTimeout(() => {
+      toast.success('Payment successful! Starting assessment...');
+      setPaymentCompleted(true);
+      setShowPayment(false);
+    }, 1000);
+  };
 
   const questions = [
     {
@@ -88,6 +126,8 @@ const Assessment = () => {
   const progress = ((currentQuestion - 1) / totalQuestions) * 100;
 
   useEffect(() => {
+    if (!paymentCompleted) return;
+    
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
@@ -99,7 +139,7 @@ const Assessment = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [paymentCompleted]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -163,12 +203,78 @@ const Assessment = () => {
     navigate(`/results/${id}`);
   };
 
+  // Show payment screen first
+  if (showPayment) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
+          <CardHeader className="text-center pb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="h-8 w-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl text-gray-900">Complete Payment</CardTitle>
+            <p className="text-gray-600 mt-2">Secure your assessment slot</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <h3 className="font-semibold text-gray-900 mb-2">React Developer Assessment</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex justify-between">
+                  <span>Duration:</span>
+                  <span>45 minutes</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Questions:</span>
+                  <span>{totalQuestions}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Attempts:</span>
+                  <span>1</span>
+                </div>
+                <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
+                  <span>Assessment Fee:</span>
+                  <span>₹{assessmentFee}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
+              <div className="flex items-center space-x-2 text-green-700">
+                <Shield className="h-5 w-5" />
+                <span className="font-medium">Secure Payment</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                Your payment is processed securely through Razorpay
+              </p>
+            </div>
+
+            <Button 
+              onClick={handlePayment}
+              className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+            >
+              Pay ₹{assessmentFee} & Start Assessment
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => navigate('/assessments')}
+              className="w-full h-12 rounded-2xl border-gray-200"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Assessments
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const currentQuestionData = questions[currentQuestion - 1];
   const isAnswered = answers[currentQuestion] !== undefined;
   const isFlagged = flaggedQuestions.has(currentQuestion);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -191,7 +297,7 @@ const Assessment = () => {
             <div className="flex items-center space-x-6">
               {/* Timer */}
               <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${
-                timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
               }`}>
                 <Clock className="h-5 w-5" />
                 <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
@@ -233,7 +339,7 @@ const Assessment = () => {
                         className={`
                           h-10 w-10 rounded-xl border-2 text-sm font-medium transition-all relative
                           ${isCurrentQuestion 
-                            ? 'border-blue-500 bg-blue-500 text-white shadow-lg' 
+                            ? 'border-orange-500 bg-orange-500 text-white shadow-lg' 
                             : isQuestionAnswered
                             ? 'border-green-200 bg-green-100 text-green-700 hover:bg-green-200'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
@@ -267,7 +373,7 @@ const Assessment = () => {
                 <div className="mt-6 pt-4 border-t">
                   <div className="flex items-center space-x-2 text-xs text-gray-500 mb-3">
                     <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                      <div className="w-3 h-3 bg-orange-500 rounded"></div>
                       <span>Current</span>
                     </div>
                     <div className="flex items-center space-x-1">
@@ -333,7 +439,7 @@ const Assessment = () => {
                     {currentQuestionData.options.map((option, index) => (
                       <div 
                         key={index} 
-                        className="flex items-start space-x-3 p-4 rounded-2xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer"
+                        className="flex items-start space-x-3 p-4 rounded-2xl border border-gray-200 hover:bg-orange-50 hover:border-orange-300 transition-colors cursor-pointer"
                         onClick={() => handleAnswerChange(option)}
                       >
                         <RadioGroupItem value={option} id={`option-${index}`} className="mt-1" />
@@ -379,7 +485,7 @@ const Assessment = () => {
                     ) : (
                       <Button
                         onClick={handleNext}
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl px-6 shadow-lg"
+                        className="bg-orange-600 hover:bg-orange-700 text-white rounded-2xl px-6 shadow-lg"
                       >
                         Next
                         <ArrowRight className="h-4 w-4 ml-2" />
