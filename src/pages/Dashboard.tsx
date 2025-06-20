@@ -28,9 +28,8 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const handleBulkApply = (count: number) => {
-    // This will be implemented with Razorpay payment
-    toast.success(`Initiating bulk application for ${count} companies`);
+  const handleBulkApplyBrowse = () => {
+    navigate('/bulk-applying');
   };
 
   const stats = [
@@ -191,40 +190,13 @@ const Dashboard = () => {
                   <CardDescription className="text-teal-100 mb-4">
                     Apply to multiple companies at once. Choose from 10, 20, 50, or 100 applications.
                   </CardDescription>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <Button 
-                      onClick={() => handleBulkApply(10)}
-                      variant="secondary" 
-                      size="sm"
-                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      10 Jobs
-                    </Button>
-                    <Button 
-                      onClick={() => handleBulkApply(20)}
-                      variant="secondary" 
-                      size="sm"
-                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      20 Jobs
-                    </Button>
-                    <Button 
-                      onClick={() => handleBulkApply(50)}
-                      variant="secondary" 
-                      size="sm"
-                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      50 Jobs
-                    </Button>
-                    <Button 
-                      onClick={() => handleBulkApply(100)}
-                      variant="secondary" 
-                      size="sm"
-                      className="rounded-xl bg-white/20 text-white hover:bg-white/30 border-0"
-                    >
-                      100 Jobs
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={handleBulkApplyBrowse}
+                    variant="secondary" 
+                    className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
+                  >
+                    Browse Plans
+                  </Button>
                 </CardContent>
               </Card>
 

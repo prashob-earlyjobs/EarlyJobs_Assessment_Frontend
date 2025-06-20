@@ -13,6 +13,10 @@ import Assessment from "./pages/Assessment";
 import VideoQuestion from "./pages/VideoQuestion";
 import Results from "./pages/Results";
 import Jobs from "./pages/Jobs";
+import BulkApplying from "./pages/BulkApplying";
+import BulkApplyingVerify from "./pages/BulkApplyingVerify";
+import BulkApplyingPayment from "./pages/BulkApplyingPayment";
+import BulkApplyingSuccess from "./pages/BulkApplyingSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +37,10 @@ const App = () => (
           <Route path="/video-question/:id" element={<VideoQuestion />} />
           <Route path="/results/:id" element={<Results />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/bulk-applying" element={<BulkApplying />} />
+          <Route path="/bulk-applying/verify/:count" element={<BulkApplyingVerify />} />
+          <Route path="/bulk-applying/payment/:count" element={<BulkApplyingPayment />} />
+          <Route path="/bulk-applying/success" element={<BulkApplyingSuccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
