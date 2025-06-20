@@ -14,6 +14,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   BookOpen, 
   BarChart3, 
@@ -27,14 +33,17 @@ import {
   Users,
   LogOut,
   CreditCard,
-  User
+  User,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
+import Certificate from "@/components/Certificate";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const userName = "Alex Johnson";
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showCertificateDialog, setShowCertificateDialog] = useState(false);
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
@@ -47,6 +56,30 @@ const Dashboard = () => {
 
   const handleProfileClick = () => {
     navigate('/profile');
+  };
+
+  const handleDownloadCertificate = () => {
+    setShowCertificateDialog(true);
+  };
+
+  const downloadCertificateAsPDF = () => {
+    // In a real application, you would use a library like html2canvas + jsPDF
+    // For now, we'll simulate the download
+    const link = document.createElement('a');
+    link.href = '#'; // This would be the actual PDF blob URL
+    link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf';
+    
+    toast.success("Certificate downloaded successfully!");
+    setShowCertificateDialog(false);
+  };
+
+  const certificateData = {
+    candidateName: userName,
+    assessmentName: "React Developer Assessment",
+    score: 85,
+    date: new Date().toLocaleDateString(),
+    skillsVerified: ["JavaScript", "React", "Node.js", "Problem Solving"],
+    certificateId: "EJ-CERT-2024-001"
   };
 
   const stats = [
@@ -135,6 +168,24 @@ const Dashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Certificate Dialog */}
+      <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Your Certificate</span>
+              <Button onClick={downloadCertificateAsPDF} className="rounded-2xl">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <Certificate {...certificateData} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section */}
@@ -288,6 +339,7 @@ const Dashboard = () => {
                   </Button>
                   <Button 
                     variant="outline" 
+                    onClick={handleDownloadCertificate}
                     className="h-16 rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300 flex flex-col space-y-1"
                   >
                     <Award className="h-5 w-5 text-purple-600" />

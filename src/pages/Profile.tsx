@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,12 +20,15 @@ import {
   Save,
   ArrowLeft,
   Plus,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
   
   const [profileData, setProfileData] = useState({
     firstName: "Alex",
@@ -45,7 +47,9 @@ const Profile = () => {
     experience: "3",
     expectedSalary: "80000",
     noticePeriod: "30",
-    workMode: "hybrid"
+    workMode: "hybrid",
+    profilePhoto: null as File | null,
+    resume: null as File | null
   });
 
   const [education, setEducation] = useState([
@@ -69,6 +73,66 @@ const Profile = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error("Photo size should be less than 5MB");
+        return;
+      }
+      setProfileData(prev => ({ ...prev, profilePhoto: file }));
+      toast.success("Photo uploaded successfully!");
+    }
+  };
+
+  const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("Resume size should be less than 10MB");
+        return;
+      }
+      setProfileData(prev => ({ ...prev, resume: file }));
+      
+      // Mock auto-fill functionality (in real app, this would parse the resume)
+      setTimeout(() => {
+        // Simulate extracting data from resume
+        setProfileData(prev => ({
+          ...prev,
+          firstName: "Alexander",
+          lastName: "Johnson",
+          currentJobTitle: "Senior Software Developer",
+          experience: "5",
+          bio: "Experienced full-stack developer with expertise in React, Node.js, and cloud technologies. Led multiple successful projects and mentored junior developers.",
+          expectedSalary: "120000"
+        }));
+        
+        // Add extracted skills
+        setSkills(["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "TypeScript"]);
+        
+        // Add extracted education
+        setEducation([
+          {
+            id: 1,
+            degree: "Master of Computer Science",
+            institution: "Stanford University",
+            year: "2019",
+            percentage: "3.8 GPA"
+          },
+          {
+            id: 2,
+            degree: "Bachelor of Computer Science",
+            institution: "University of Technology",
+            year: "2017",
+            percentage: "85%"
+          }
+        ]);
+        
+        toast.success("Resume uploaded and profile auto-filled!");
+      }, 2000);
+    }
   };
 
   const addSkill = () => {
@@ -105,6 +169,9 @@ const Profile = () => {
 
   const handleSave = () => {
     toast.success("Profile updated successfully!");
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 1500);
   };
 
   return (
@@ -147,15 +214,60 @@ const Profile = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src="/placeholder-avatar.jpg" />
+                  <AvatarImage src={profileData.profilePhoto ? URL.createObjectURL(profileData.profilePhoto) : "/placeholder-avatar.jpg"} />
                   <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white text-xl">
                     {profileData.firstName[0]}{profileData.lastName[0]}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" className="rounded-2xl">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Photo
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="rounded-2xl"
+                    onClick={() => photoInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Photo
+                  </Button>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-gray-500">Max size: 5MB</p>
+                </div>
+              </div>
+
+              {/* Resume Upload */}
+              <div className="p-4 border border-dashed border-gray-300 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-8 w-8 text-blue-600" />
+                    <div>
+                      <h3 className="font-medium">Upload Resume</h3>
+                      <p className="text-sm text-gray-500">
+                        {profileData.resume ? profileData.resume.name : "Auto-fill profile data from your resume"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="rounded-2xl"
+                    onClick={() => resumeInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Choose File
+                  </Button>
+                </div>
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleResumeUpload}
+                  className="hidden"
+                />
+                <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX (Max: 10MB)</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
