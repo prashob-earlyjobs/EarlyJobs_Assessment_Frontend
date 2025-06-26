@@ -1,9 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
@@ -20,6 +20,8 @@ import BulkApplyingPayment from "./pages/BulkApplyingPayment";
 import BulkApplyingSuccess from "./pages/BulkApplyingSuccess";
 import NotFound from "./pages/NotFound";
 
+import ProtectedRoute from "./components/services/protectedRoute";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -27,22 +29,105 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/assessments" element={<Assessments />} />
-          <Route path="/assessment/:id" element={<Assessment />} />
-          <Route path="/video-question/:id" element={<VideoQuestion />} />
-          <Route path="/results/:id" element={<Results />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/bulk-applying" element={<BulkApplying />} />
-          <Route path="/bulk-applying/verify/:count" element={<BulkApplyingVerify />} />
-          <Route path="/bulk-applying/payment/:count" element={<BulkApplyingPayment />} />
-          <Route path="/bulk-applying/success" element={<BulkApplyingSuccess />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assessments"
+            element={
+              <ProtectedRoute>
+                <Assessments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assessment/:id"
+            element={
+              <ProtectedRoute>
+                <Assessment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/video-question/:id"
+            element={
+              <ProtectedRoute>
+                <VideoQuestion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/results/:id"
+            element={
+              <ProtectedRoute>
+                <Results />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute>
+                <Jobs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bulk-applying"
+            element={
+              <ProtectedRoute>
+                <BulkApplying />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bulk-applying/verify/:count"
+            element={
+              <ProtectedRoute>
+                <BulkApplyingVerify />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bulk-applying/payment/:count"
+            element={
+              <ProtectedRoute>
+                <BulkApplyingPayment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bulk-applying/success"
+            element={
+              <ProtectedRoute>
+                <BulkApplyingSuccess />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

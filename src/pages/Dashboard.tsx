@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,12 +26,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { 
-  BookOpen, 
-  BarChart3, 
-  Award, 
-  Briefcase, 
-  Bell, 
+import {
+  BookOpen,
+  BarChart3,
+  Award,
+  Briefcase,
+  Bell,
   TrendingUp,
   Clock,
   Target,
@@ -43,13 +43,69 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Certificate from "@/components/Certificate";
+import { isUserLoggedIn } from "@/components/services/servicesapis";
+import { useUser } from "@/context";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const userName = "Alex Johnson";
+  const { userCredentials, setUserCredentials } = useUser();
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    email: "",
+    profile: {
+
+      preferredJobRole: "",
+    },
+    mobile: ""
+  });
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  useEffect(() => {
+    // Simulate fetching user data
+    const fetchUserData = async () => {
+      try {
+
+        const response = await isUserLoggedIn();
+        if (!response.success) {
+          toast.error("You need to log in first!");
+          navigate('/login');
+          return;
+        }
+        setUserCredentials({
+          authProvider: response.user.authProvider,
+          avatar: response.user.avatar,
+          createdAt: response.user.createdAt,
+          email: response.user.email,
+          isActive: response.user.isActive,
+          isEmailVerified: response.user.isEmailVerified,
+          isPhoneVerified: response.user.isPhoneVerified,
+          lastLogin: response.user.lastLogin,
+          mobile: response.user.mobile,
+          name: response.user.name,
+          profile: {
+            skills: response.user.profile.skills || [],
+            experience: response.user.profile.experience || [],
+            education: response.user.profile.education || [],
+            bio: response.user.profile.bio || '',
+            prefJobLocations: response.user.profile.prefJobLocations || [],
+          },
+          updatedAt: response.user.updatedAt,
+          _id: response.user._id,
+        });
+        console.log("User data fetched successfully:", response);
+        setUserDetails(response.user);
+      } catch (error) {
+        toast.error("Failed to fetch user data. Please try again later.");
+        console.error("Error fetching user data:", error);
+      }
+
+      // In a real application, you would fetch user data from an API
+      // For now, we will just simulate a delay
+    };
+    fetchUserData();
+  }, []);
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
@@ -83,7 +139,7 @@ const Dashboard = () => {
 CERTIFICATE OF ACHIEVEMENT
 
 This is to certify that
-${userName}
+${userDetails.name}
 has successfully completed the
 React Developer Assessment
 with a score of 85%
@@ -95,14 +151,14 @@ Certificate ID: EJ-CERT-2024-001
 
       const blob = new Blob([certificateContent], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
-      link.download = `EarlyJobs_Certificate_${userName.replace(' ', '_')}.pdf`;
+      link.download = `EarlyJobs_Certificate_${userDetails.name.replace(' ', '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       URL.revokeObjectURL(url);
       toast.success("Certificate downloaded successfully!");
       setShowCertificateDialog(false);
@@ -112,7 +168,7 @@ Certificate ID: EJ-CERT-2024-001
   };
 
   const certificateData = {
-    candidateName: userName,
+    candidateName: userDetails.name,
     assessmentName: "React Developer Assessment",
     score: 85,
     date: new Date().toLocaleDateString(),
@@ -147,9 +203,9 @@ Certificate ID: EJ-CERT-2024-001
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img 
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-                alt="EarlyJobs Logo" 
+              <img
+                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                alt="EarlyJobs Logo"
                 className="h-12 w-auto"
               />
             </div>
@@ -157,9 +213,9 @@ Certificate ID: EJ-CERT-2024-001
             <div className="flex items-center space-x-4">
               <Popover open={showNotifications} onOpenChange={setShowNotifications}>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="relative rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                   >
                     <Bell className="h-5 w-5" />
@@ -193,35 +249,35 @@ Certificate ID: EJ-CERT-2024-001
                   </div>
                 </PopoverContent>
               </Popover>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
+
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleProfileClick}
                 className="rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
               >
                 <User className="h-5 w-5" />
               </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
+
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowLogoutDialog(true)}
                 className="rounded-2xl p-3 hover:bg-red-50 hover:text-red-600 transition-colors"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
-              
+
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src="/placeholder-avatar.jpg" />
                   <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
-                    {userName.split(' ').map(n => n[0]).join('')}
+                    {userDetails.name.split(' ').map(n => n[0]).join('')?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">{userName}</p>
-                  <p className="text-xs text-gray-500">Software Developer</p>
+                  <p className="text-sm font-medium text-gray-900">{userDetails.name}</p>
+                  <p className="text-xs text-gray-500">{userDetails.profile.preferredJobRole}</p>
                 </div>
               </div>
             </div>
@@ -309,12 +365,12 @@ Certificate ID: EJ-CERT-2024-001
                   <CardDescription className="text-orange-100 mb-4">
                     Showcase your skills with our comprehensive tests and earn verified badges.
                   </CardDescription>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/assessments')}
-                    variant="secondary" 
+                    variant="secondary"
                     className="w-full rounded-2xl bg-white text-orange-600 hover:bg-gray-50"
                   >
-                    Start Test
+                    View Assessments
                   </Button>
                 </CardContent>
               </Card>
@@ -331,9 +387,9 @@ Certificate ID: EJ-CERT-2024-001
                   <CardDescription className="text-purple-100 mb-4">
                     Track your progress and see detailed analytics of your performance.
                   </CardDescription>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/results/latest')}
-                    variant="secondary" 
+                    variant="secondary"
                     className="w-full rounded-2xl bg-white text-purple-600 hover:bg-gray-50"
                   >
                     View Reports
@@ -355,9 +411,9 @@ Certificate ID: EJ-CERT-2024-001
                   <CardDescription className="text-teal-100 mb-4">
                     Apply to multiple companies at once. Choose from 10, 20, 50, or 100 applications.
                   </CardDescription>
-                  <Button 
+                  <Button
                     onClick={handleBulkApplyBrowse}
-                    variant="secondary" 
+                    variant="secondary"
                     className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
                   >
                     Browse Plans
@@ -379,9 +435,9 @@ Certificate ID: EJ-CERT-2024-001
                   <CardDescription className="text-green-100 mb-4">
                     Discover jobs matched to your skills and assessment scores.
                   </CardDescription>
-                  <Button 
+                  <Button
                     onClick={() => navigate('/jobs')}
-                    variant="secondary" 
+                    variant="secondary"
                     className="w-full rounded-2xl bg-white text-green-600 hover:bg-gray-50"
                   >
                     Browse Jobs
@@ -399,23 +455,23 @@ Certificate ID: EJ-CERT-2024-001
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="h-16 rounded-2xl border-gray-200 hover:bg-orange-50 hover:border-orange-300 flex flex-col space-y-1"
                   >
                     <BookOpen className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Continue Test</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={handleDownloadCertificate}
                     className="h-16 rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300 flex flex-col space-y-1"
                   >
                     <Award className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Download Certificate</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={handleProfileClick}
                     className="h-16 rounded-2xl border-gray-200 hover:bg-teal-50 hover:border-teal-300 flex flex-col space-y-1"
                   >
@@ -438,11 +494,10 @@ Certificate ID: EJ-CERT-2024-001
               <CardContent className="space-y-4">
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
-                    <div className={`p-2 rounded-xl ${
-                      activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
+                    <div className={`p-2 rounded-xl ${activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
                       activity.type === 'skill' ? 'bg-purple-100 text-purple-600' :
-                      'bg-teal-100 text-teal-600'
-                    }`}>
+                        'bg-teal-100 text-teal-600'
+                      }`}>
                       {activity.type === 'assessment' && <BookOpen className="h-4 w-4" />}
                       {activity.type === 'skill' && <Award className="h-4 w-4" />}
                       {activity.type === 'job' && <Briefcase className="h-4 w-4" />}
@@ -452,13 +507,12 @@ Certificate ID: EJ-CERT-2024-001
                         {activity.title}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs rounded-full ${
-                            activity.status === 'Completed' || activity.status === 'Achieved' ? 'bg-green-100 text-green-700' :
+                        <Badge
+                          variant="secondary"
+                          className={`text-xs rounded-full ${activity.status === 'Completed' || activity.status === 'Achieved' ? 'bg-green-100 text-green-700' :
                             activity.status === 'Applied' ? 'bg-blue-100 text-blue-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}
+                              'bg-yellow-100 text-yellow-700'
+                            }`}
                         >
                           {activity.status}
                         </Badge>
@@ -481,7 +535,7 @@ Certificate ID: EJ-CERT-2024-001
                     <span className="font-medium">3/5</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-orange-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                    <div className="bg-orange-600 h-2 rounded-full" style={{ width: '60%' }}></div>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -490,7 +544,7 @@ Certificate ID: EJ-CERT-2024-001
                     <span className="font-medium">2/3</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-600 h-2 rounded-full" style={{width: '67%'}}></div>
+                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: '67%' }}></div>
                   </div>
                 </div>
               </CardContent>

@@ -6,9 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Clock, 
-  ArrowLeft, 
+import {
+  Clock,
+  ArrowLeft,
   ArrowRight,
   Flag,
   CheckCircle,
@@ -18,17 +18,51 @@ import {
   Shield
 } from "lucide-react";
 import { toast } from "sonner";
+import { getAssessmentById } from "@/components/services/servicesapis";
 
 const Assessment = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [timeRemaining, setTimeRemaining] = useState(45 * 60); // 45 minutes in seconds
-  const [answers, setAnswers] = useState<{[key: number]: string}>({});
+  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(true);
+  type AssessmentType = {
+    title: string;
+    timeLimit: number;
+    questions: [];
+    type: string;
+    // Add other fields as needed
+  };
 
+  const [assessmentData, setAssessmentData] = useState<AssessmentType>({
+    title: "",
+    timeLimit: 0,
+    questions: [],
+    type: "",
+  });
+  console.log("Assessment ID:", id);
+
+  useEffect(() => {
+    const fetchAssessment = async () => {
+      try {
+        const response = await getAssessmentById(id);
+        if (!response.success) throw new Error(response.message || "Failed to fetch assessment data");
+        console.log("Fetched assessment data:", response.data);
+        setAssessmentData(response.data.assessment);
+
+      }
+      catch (error) {
+        console.error("Failed to fetch assessment data:", error);
+        toast.error("Failed to load assessment data. Please try again later.");
+        // navigate('/assessments');
+      }
+
+    }
+    fetchAssessment()
+  }, [id]);
   const assessmentFee = 299; // ₹299 for assessment
 
   const handlePayment = async () => {
@@ -127,7 +161,7 @@ const Assessment = () => {
 
   useEffect(() => {
     if (!paymentCompleted) return;
-    
+
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
@@ -145,7 +179,7 @@ const Assessment = () => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
@@ -198,7 +232,7 @@ const Assessment = () => {
         return;
       }
     }
-    
+
     toast.success("Assessment submitted successfully!");
     navigate(`/results/${id}`);
   };
@@ -217,19 +251,24 @@ const Assessment = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-gray-50 rounded-2xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">React Developer Assessment</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Duration:</span>
-                  <span>45 minutes</span>
+                  <span>{assessmentData.timeLimit} minutes</span>
                 </div>
+
                 <div className="flex justify-between">
                   <span>Questions:</span>
-                  <span>{totalQuestions}</span>
+                  <span>{assessmentData.questions?.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Attempts:</span>
                   <span>1</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Assessment Type:</span>
+                  <span>{assessmentData.type}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
                   <span>Assessment Fee:</span>
@@ -248,7 +287,7 @@ const Assessment = () => {
               </p>
             </div>
 
-            <Button 
+            <Button
               onClick={handlePayment}
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
             >
@@ -296,9 +335,8 @@ const Assessment = () => {
 
             <div className="flex items-center space-x-6">
               {/* Timer */}
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${
-                timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-              }`}>
+              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+                }`}>
                 <Clock className="h-5 w-5" />
                 <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
               </div>
@@ -338,11 +376,11 @@ const Assessment = () => {
                         onClick={() => handleQuestionJump(questionNumber)}
                         className={`
                           h-10 w-10 rounded-xl border-2 text-sm font-medium transition-all relative
-                          ${isCurrentQuestion 
-                            ? 'border-orange-500 bg-orange-500 text-white shadow-lg' 
+                          ${isCurrentQuestion
+                            ? 'border-orange-500 bg-orange-500 text-white shadow-lg'
                             : isQuestionAnswered
-                            ? 'border-green-200 bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                              ? 'border-green-200 bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                           }
                         `}
                       >
@@ -412,7 +450,7 @@ const Assessment = () => {
                       </Badge>
                     )}
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -431,20 +469,20 @@ const Assessment = () => {
                     {currentQuestionData.question}
                   </h2>
 
-                  <RadioGroup 
-                    value={answers[currentQuestion] || ""} 
+                  <RadioGroup
+                    value={answers[currentQuestion] || ""}
                     onValueChange={handleAnswerChange}
                     className="space-y-4"
                   >
                     {currentQuestionData.options.map((option, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="flex items-start space-x-3 p-4 rounded-2xl border border-gray-200 hover:bg-orange-50 hover:border-orange-300 transition-colors cursor-pointer"
                         onClick={() => handleAnswerChange(option)}
                       >
                         <RadioGroupItem value={option} id={`option-${index}`} className="mt-1" />
-                        <Label 
-                          htmlFor={`option-${index}`} 
+                        <Label
+                          htmlFor={`option-${index}`}
                           className="flex-1 text-base leading-relaxed cursor-pointer"
                         >
                           {option}
@@ -505,7 +543,7 @@ const Assessment = () => {
                     <div>
                       <h3 className="font-medium text-orange-900 mb-1">Incomplete Assessment</h3>
                       <p className="text-sm text-orange-700">
-                        You have {totalQuestions - Object.keys(answers).length} unanswered questions. 
+                        You have {totalQuestions - Object.keys(answers).length} unanswered questions.
                         You can still submit, but consider reviewing them first.
                       </p>
                     </div>

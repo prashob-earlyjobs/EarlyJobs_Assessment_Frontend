@@ -1,88 +1,169 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Briefcase, 
-  GraduationCap, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  GraduationCap,
   Calendar,
   Upload,
   Save,
   ArrowLeft,
   Plus,
   X,
-  FileText
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
+import { isUserLoggedIn, updateProfile } from "@/components/services/servicesapis";
 
 const Profile = () => {
   const navigate = useNavigate();
   const photoInputRef = useRef<HTMLInputElement>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);
-  
-  const [profileData, setProfileData] = useState({
-    firstName: "Alex",
-    lastName: "Johnson",
-    email: "alex.johnson@email.com",
-    phone: "+1234567890",
-    dateOfBirth: "1995-06-15",
-    gender: "male",
-    address: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    country: "United States",
-    bio: "Passionate software developer with 3+ years of experience in full-stack development.",
-    currentJobTitle: "Software Developer",
-    experience: "3",
-    expectedSalary: "80000",
-    noticePeriod: "30",
-    workMode: "hybrid",
-    profilePhoto: null as File | null,
-    resume: null as File | null
-  });
-
-  const [education, setEducation] = useState([
-    {
-      id: 1,
-      degree: "Bachelor of Computer Science",
-      institution: "University of Technology",
-      year: "2017",
-      percentage: "85"
-    }
-  ]);
-
-  const [skills, setSkills] = useState([
-    "JavaScript", "React", "Node.js", "Python", "SQL"
-  ]);
 
   const [newSkill, setNewSkill] = useState("");
 
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    profile: {
+      address: {
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+      },
+      professionalInformation: {
+        currentJobTitle: "",
+        expectedSalaryAnnual: "",
+        noticePeriod: 0,
+        workMode: "",
+        experience: 0,
+        education: [
+          {
+            id: Date.now().toString(),
+            degree: "",
+            institution: "",
+            year: "",
+            percentage: "",
+            fieldOfStudy: "",
+
+          },
+        ],
+      },
+      gender: "",
+      dateOfBirth: "",
+      bio: "",
+      experience: [],
+      prefJobLocations: [] as string[],
+      preferredJobRole: "",
+      skills: [] as string[],
+    },
+    profilePhoto: null as File | null,
+    resume: null as File | null,
+  });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await isUserLoggedIn();
+        if (!response.success) {
+          toast.error("You need to log in first!");
+          navigate("/login");
+          return;
+        }
+        const userData = {
+          ...response.user,
+          profile: {
+            ...response.user.profile,
+            professionalInformation: {
+              ...response.user.profile.professionalInformation,
+              education:
+                Array.isArray(response.user.profile.professionalInformation.education)
+                  ? response.user.profile.professionalInformation.education
+                  : [
+                    {
+                      id: Date.now().toString(),
+                      degree: "",
+                      institution: "",
+                      year: "",
+                      percentage: "",
+                      fieldOfStudy: "",
+                    },
+                  ],
+            },
+          },
+        };
+        setProfileData((prev) => ({ ...prev, ...userData }));
+      } catch (error) {
+        toast.error("Failed to fetch user data. Please try again later.");
+      }
+    };
+    fetchUserData();
+  }, [navigate]);
+
   const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field.startsWith("profile.address.")) {
+      const subField = field.split(".")[2];
+      setProfileData((prev) => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          address: {
+            ...prev.profile.address,
+            [subField]: value,
+          },
+        },
+      }));
+    } else if (field.startsWith("profile.professionalInformation.")) {
+      const subField = field.split(".")[2];
+      setProfileData((prev) => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          professionalInformation: {
+            ...prev.profile.professionalInformation,
+            [subField]: value,
+          },
+        },
+      }));
+    } else if (field.startsWith("profile.")) {
+      const subField = field.split(".")[1];
+      setProfileData((prev) => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          [subField]: value,
+        },
+      }));
+    } else {
+      setProfileData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         toast.error("Photo size should be less than 5MB");
         return;
       }
-      setProfileData(prev => ({ ...prev, profilePhoto: file }));
+      setProfileData((prev) => ({ ...prev, profilePhoto: file }));
       toast.success("Photo uploaded successfully!");
     }
   };
@@ -90,108 +171,143 @@ const Profile = () => {
   const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast.error("Resume size should be less than 10MB");
         return;
       }
-      setProfileData(prev => ({ ...prev, resume: file }));
-      
-      // Mock auto-fill functionality (in real app, this would parse the resume)
-      setTimeout(() => {
-        // Simulate extracting data from resume
-        setProfileData(prev => ({
-          ...prev,
-          firstName: "Alexander",
-          lastName: "Johnson",
-          currentJobTitle: "Senior Software Developer",
-          experience: "5",
-          bio: "Experienced full-stack developer with expertise in React, Node.js, and cloud technologies. Led multiple successful projects and mentored junior developers.",
-          expectedSalary: "120000"
-        }));
-        
-        // Add extracted skills
-        setSkills(["JavaScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker", "TypeScript"]);
-        
-        // Add extracted education
-        setEducation([
-          {
-            id: 1,
-            degree: "Master of Computer Science",
-            institution: "Stanford University",
-            year: "2019",
-            percentage: "3.8 GPA"
-          },
-          {
-            id: 2,
-            degree: "Bachelor of Computer Science",
-            institution: "University of Technology",
-            year: "2017",
-            percentage: "85%"
-          }
-        ]);
-        
-        toast.success("Resume uploaded and profile auto-filled!");
-      }, 2000);
+      setProfileData((prev) => ({ ...prev, resume: file }));
     }
   };
 
   const addSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
+    if (newSkill.trim() && !profileData.profile.skills.includes(newSkill.trim())) {
+      setProfileData((prev) => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          skills: [...new Set([...prev.profile.skills, newSkill.trim()])],
+        },
+      }));
       setNewSkill("");
+      toast.success("Skill added successfully!");
     }
   };
 
   const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(skill => skill !== skillToRemove));
+    setProfileData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        skills: prev.profile.skills.filter((skill) => skill !== skillToRemove),
+      },
+    }));
+    toast.success("Skill removed successfully!");
   };
 
   const addEducation = () => {
     const newEducation = {
-      id: Date.now(),
+      id: Date.now().toString(),
       degree: "",
       institution: "",
       year: "",
-      percentage: ""
+      percentage: "",
+      fieldOfStudy: "",
     };
-    setEducation([...education, newEducation]);
+    setProfileData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        professionalInformation: {
+          ...prev.profile.professionalInformation,
+          education: [...prev.profile.professionalInformation.education, newEducation],
+        },
+      },
+    }));
+    toast.success("New education entry added!");
   };
 
-  const updateEducation = (id: number, field: string, value: string) => {
-    setEducation(education.map(edu => 
-      edu.id === id ? { ...edu, [field]: value } : edu
-    ));
+  const updateEducation = (id: string, field: string, value: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        professionalInformation: {
+          ...prev.profile.professionalInformation,
+          education: prev.profile.professionalInformation.education.map((edu) =>
+            edu.id === id ? { ...edu, [field]: value } : edu
+          ),
+        },
+      },
+    }));
   };
 
-  const removeEducation = (id: number) => {
-    setEducation(education.filter(edu => edu.id !== id));
+  const removeEducation = (id: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        professionalInformation: {
+          ...prev.profile.professionalInformation,
+          education: prev.profile.professionalInformation.education.filter((edu) => edu.id !== id),
+        },
+      },
+    }));
+    toast.success("Education entry removed successfully!");
   };
 
-  const handleSave = () => {
-    toast.success("Profile updated successfully!");
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1500);
+  const handleSave = async () => {
+    console.log("Saving profile data:", profileData);
+    try {
+      const response = await updateProfile(profileData);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to update profile");
+      }
+      const updatedUserData = {
+        ...response.data.user,
+        profile: {
+          ...response.data.user.profile,
+          professionalInformation: {
+            ...response.data.user.profile.professionalInformation,
+            education:
+              Array.isArray(response.data.user.profile.professionalInformation.education)
+                ? response.data.user.profile.professionalInformation.education
+                : [
+                  {
+                    id: Date.now().toString(),
+                    degree: "",
+                    institution: "",
+                    year: "",
+                    percentage: "",
+                    fieldOfStudy: "",
+                  },
+                ],
+          },
+        },
+      };
+      setProfileData(updatedUserData);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update profile. Please try again later.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/dashboard')}
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
                 className="rounded-2xl"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Back to Dashboard
               </Button>
-              <img 
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-                alt="EarlyJobs Logo" 
+              <img
+                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                alt="EarlyJobs Logo"
                 className="h-10 w-auto"
               />
             </div>
@@ -202,7 +318,6 @@ const Profile = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid gap-8">
-          {/* Profile Picture & Basic Info */}
           <Card className="rounded-3xl border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -214,14 +329,20 @@ const Profile = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profileData.profilePhoto ? URL.createObjectURL(profileData.profilePhoto) : "/placeholder-avatar.jpg"} />
+                  <AvatarImage
+                    src={
+                      profileData.profilePhoto
+                        ? URL.createObjectURL(profileData.profilePhoto)
+                        : "/placeholder-avatar.jpg"
+                    }
+                  />
                   <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white text-xl">
-                    {profileData.firstName[0]}{profileData.lastName[0]}
+                    {profileData.name.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="rounded-2xl"
                     onClick={() => photoInputRef.current?.click()}
                   >
@@ -239,7 +360,6 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Resume Upload */}
               <div className="p-4 border border-dashed border-gray-300 rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -251,8 +371,8 @@ const Profile = () => {
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="rounded-2xl"
                     onClick={() => resumeInputRef.current?.click()}
                   >
@@ -272,20 +392,11 @@ const Profile = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="name">Full Name</Label>
                   <Input
-                    id="firstName"
-                    value={profileData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="rounded-2xl"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    value={profileData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    id="name"
+                    value={profileData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -293,19 +404,22 @@ const Profile = () => {
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
+                    readOnly
                     type="email"
                     value={profileData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="rounded-2xl"
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="rounded-2xl cursor-not-allowed bg-gray-100"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="mobile">Phone Number</Label>
                   <Input
-                    id="phone"
-                    value={profileData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="rounded-2xl"
+                    id="mobile"
+                    value={profileData.mobile}
+                    readOnly
+                    onChange={(e) => handleInputChange("mobile", e.target.value)}
+                    className="rounded-2xl cursor-not-allowed bg-gray-100"
+
                   />
                 </div>
                 <div className="space-y-2">
@@ -313,22 +427,26 @@ const Profile = () => {
                   <Input
                     id="dateOfBirth"
                     type="date"
-                    value={profileData.dateOfBirth}
-                    onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                    className="rounded-2xl"
+                    readOnly
+                    value={profileData.profile.dateOfBirth}
+                    onChange={(e) => handleInputChange("profile.dateOfBirth", e.target.value)}
+                    className="rounded-2xl cursor-not-allowed bg-gray-100"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
-                  <Select value={profileData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+                  <Select
+                    value={profileData.profile.gender}
+                    onValueChange={(value) => handleInputChange("profile.gender", value)}
+                    disabled
+                  >
                     <SelectTrigger className="rounded-2xl">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Gender" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -338,16 +456,16 @@ const Profile = () => {
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
-                  value={profileData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  className="rounded-2xl min-h-[100px]"
+                  readOnly
+                  value={profileData.profile.bio}
+                  onChange={(e) => handleInputChange("profile.bio", e.target.value)}
+                  className="rounded-2xl min-h-[100px] cursor-not-allowed bg-gray-100"
                   placeholder="Tell us about yourself..."
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Address Information */}
           <Card className="rounded-3xl border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -358,11 +476,11 @@ const Profile = () => {
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address">Street Address</Label>
+                  <Label htmlFor="street">Street Address</Label>
                   <Input
-                    id="address"
-                    value={profileData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    id="street"
+                    value={profileData.profile.address?.street}
+                    onChange={(e) => handleInputChange("profile.address.street", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -370,8 +488,8 @@ const Profile = () => {
                   <Label htmlFor="city">City</Label>
                   <Input
                     id="city"
-                    value={profileData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    value={profileData.profile.address?.city}
+                    onChange={(e) => handleInputChange("profile.address.city", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -379,8 +497,8 @@ const Profile = () => {
                   <Label htmlFor="state">State</Label>
                   <Input
                     id="state"
-                    value={profileData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
+                    value={profileData.profile.address?.state}
+                    onChange={(e) => handleInputChange("profile.address.state", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -388,8 +506,8 @@ const Profile = () => {
                   <Label htmlFor="zipCode">ZIP Code</Label>
                   <Input
                     id="zipCode"
-                    value={profileData.zipCode}
-                    onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                    value={profileData.profile.address?.zipCode}
+                    onChange={(e) => handleInputChange("profile.address.zipCode", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -397,8 +515,8 @@ const Profile = () => {
                   <Label htmlFor="country">Country</Label>
                   <Input
                     id="country"
-                    value={profileData.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
+                    value={profileData.profile.address?.country}
+                    onChange={(e) => handleInputChange("profile.address.country", e.target.value)}
                     className="rounded-2xl"
                   />
                 </div>
@@ -406,7 +524,6 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Professional Information */}
           <Card className="rounded-3xl border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -420,8 +537,10 @@ const Profile = () => {
                   <Label htmlFor="currentJobTitle">Current Job Title</Label>
                   <Input
                     id="currentJobTitle"
-                    value={profileData.currentJobTitle}
-                    onChange={(e) => handleInputChange('currentJobTitle', e.target.value)}
+                    value={profileData.profile.professionalInformation?.currentJobTitle}
+                    onChange={(e) =>
+                      handleInputChange("profile.professionalInformation.currentJobTitle", e.target.value)
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -430,8 +549,10 @@ const Profile = () => {
                   <Input
                     id="experience"
                     type="number"
-                    value={profileData.experience}
-                    onChange={(e) => handleInputChange('experience', e.target.value)}
+                    value={profileData.profile.professionalInformation?.experience.toString() || ""}
+                    onChange={(e) =>
+                      handleInputChange("profile.professionalInformation.experience", e.target.value)
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -440,8 +561,10 @@ const Profile = () => {
                   <Input
                     id="expectedSalary"
                     type="number"
-                    value={profileData.expectedSalary}
-                    onChange={(e) => handleInputChange('expectedSalary', e.target.value)}
+                    value={profileData.profile.professionalInformation?.expectedSalaryAnnual}
+                    onChange={(e) =>
+                      handleInputChange("profile.professionalInformation.expectedSalaryAnnual", e.target.value)
+                    }
                     className="rounded-2xl"
                     placeholder="80000"
                   />
@@ -451,20 +574,27 @@ const Profile = () => {
                   <Input
                     id="noticePeriod"
                     type="number"
-                    value={profileData.noticePeriod}
-                    onChange={(e) => handleInputChange('noticePeriod', e.target.value)}
+                    value={profileData.profile.professionalInformation?.noticePeriod.toString() || ""}
+                    onChange={(e) =>
+                      handleInputChange("profile.professionalInformation.noticePeriod", e.target.value)
+                    }
                     className="rounded-2xl"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="workMode">Preferred Work Mode</Label>
-                  <Select value={profileData.workMode} onValueChange={(value) => handleInputChange('workMode', value)}>
+                  <Select
+                    value={profileData.profile.professionalInformation?.workMode}
+                    onValueChange={(value) =>
+                      handleInputChange("profile.professionalInformation.workMode", value)
+                    }
+                  >
                     <SelectTrigger className="rounded-2xl">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Work Mode" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="remote">Remote</SelectItem>
-                      <SelectItem value="office">Office</SelectItem>
+                      <SelectItem value="Onsite">Onsite</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
                     </SelectContent>
                   </Select>
@@ -473,7 +603,6 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Skills */}
           <Card className="rounded-3xl border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -483,7 +612,7 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill, index) => (
+                {profileData.profile.skills.map((skill, index) => (
                   <Badge key={index} variant="secondary" className="rounded-full px-3 py-1">
                     {skill}
                     <Button
@@ -503,7 +632,7 @@ const Profile = () => {
                   onChange={(e) => setNewSkill(e.target.value)}
                   placeholder="Add a skill"
                   className="rounded-2xl"
-                  onKeyPress={(e) => e.key === 'Enter' && addSkill()}
+                  onKeyPress={(e) => e.key === "Enter" && addSkill()}
                 />
                 <Button onClick={addSkill} className="rounded-2xl">
                   <Plus className="h-4 w-4" />
@@ -512,7 +641,6 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Education */}
           <Card className="rounded-3xl border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -527,62 +655,79 @@ const Profile = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {education.map((edu) => (
-                <div key={edu.id} className="p-4 border rounded-2xl relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeEducation(edu.id)}
-                    className="absolute top-2 right-2"
+              {Array.isArray(profileData.profile.professionalInformation.education) &&
+                profileData.profile.professionalInformation.education.map((edu) => (
+                  <div
+                    key={edu.id}
+                    className="p-4 border rounded-2xl relative bg-white shadow-md transition-all duration-200 hover:shadow-lg"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Degree</Label>
-                      <Input
-                        value={edu.degree}
-                        onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
-                        className="rounded-2xl"
-                        placeholder="Bachelor of Computer Science"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Institution</Label>
-                      <Input
-                        value={edu.institution}
-                        onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
-                        className="rounded-2xl"
-                        placeholder="University Name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Year of Graduation</Label>
-                      <Input
-                        value={edu.year}
-                        onChange={(e) => updateEducation(edu.id, 'year', e.target.value)}
-                        className="rounded-2xl"
-                        placeholder="2023"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Percentage/CGPA</Label>
-                      <Input
-                        value={edu.percentage}
-                        onChange={(e) => updateEducation(edu.id, 'percentage', e.target.value)}
-                        className="rounded-2xl"
-                        placeholder="85% or 8.5 CGPA"
-                      />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeEducation(edu.id)}
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Degree</Label>
+                        <Input
+                          value={edu.degree || ""}
+                          onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
+                          className="rounded-2xl border-gray-300 focus:border-orange-500"
+                          placeholder="Bachelor of Computer Science"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Institution</Label>
+                        <Input
+                          value={edu.institution || ""}
+                          onChange={(e) => updateEducation(edu.id, "institution", e.target.value)}
+                          className="rounded-2xl border-gray-300 focus:border-orange-500"
+                          placeholder="University Name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Year of Graduation</Label>
+                        <Input
+                          type="number"
+                          value={edu.year || ""}
+                          onChange={(e) => updateEducation(edu.id, "year", e.target.value)}
+                          className="rounded-2xl border-gray-300 focus:border-orange-500"
+                          placeholder="2023"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Percentage/CGPA</Label>
+                        <Input
+                          value={edu.percentage || ""}
+                          type="number"
+                          onChange={(e) => updateEducation(edu.id, "percentage", e.target.value)}
+                          className="rounded-2xl border-gray-300 focus:border-orange-500"
+                          placeholder="85% or 8.5 CGPA"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Field of Study</Label>
+                        <Input
+                          value={edu.fieldOfStudy || ""}
+                          onChange={(e) => updateEducation(edu.id, "fieldOfStudy", e.target.value)}
+                          className="rounded-2xl border-gray-300 focus:border-orange-500"
+                          placeholder="Computer Science, Electrical Engineering, etc."
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              {profileData.profile.professionalInformation.education.length === 0 && (
+                <p className="text-center text-gray-500">No education entries added yet.</p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Save Button */}
           <div className="flex justify-center">
-            <Button onClick={handleSave} className="rounded-2xl px-8 py-3 text-lg">
+            <Button onClick={handleSave} className="rounded-2xl px-8 py-3 text-lg bg-orange-600 text-white hover:bg-orange-700">
               <Save className="h-5 w-5 mr-2" />
               Save Profile
             </Button>
