@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Certificate from "@/components/Certificate";
-import { isUserLoggedIn } from "@/components/services/servicesapis";
+import { isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 
 const Dashboard = () => {
@@ -107,9 +107,24 @@ const Dashboard = () => {
     fetchUserData();
   }, []);
 
-  const handleLogout = () => {
-    toast.success("Logged out successfully!");
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      const response = await userLogout();
+      if (!response.success) {
+        throw new Error("Logout failed");
+      }
+      toast.success("Logged out successfully!");
+      setUserCredentials(null); // Clear user credentials
+      navigate('/login');
+    }
+
+
+    catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+    // toast.success("Logged out successfully!");
+    // navigate('/');
   };
 
   const handleBulkApplyBrowse = () => {

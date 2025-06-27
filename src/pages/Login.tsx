@@ -9,8 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { isUserLoggedIn, userLogin, userSignup } from "@/components/services/servicesapis";
 import Cookies from "js-cookie";
+import { isUserLoggedIn, userLogin, userSignup } from "@/components/services/servicesapis";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,20 +20,21 @@ const Login = () => {
     name: "",
     email: "",
     mobile: "",
+    referrerId: "",
     password: "",
     confirmPassword: ""
   });
-  // useEffect(() => {
-  //   const checkUserLoggedIn = async () => {
-  //     const response = await isUserLoggedIn();
-  //     console.log("User logged in status:", response);
-  //     if (response.success) {
-  //       navigate('/dashboard');
-  //     }
+  useEffect(() => {
+    const checkUserLoggedIn = async () => {
+      const response = await isUserLoggedIn();
+      console.log("User logged in status:", response);
+      if (response.success) {
+        navigate('/dashboard');
+      }
 
-  //   }
-  //   checkUserLoggedIn();
-  // }, []);
+    }
+    checkUserLoggedIn();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,7 @@ const Login = () => {
       toast.error("Passwords don't match!");
       return;
     }
+    console.log("signupData", signupData);
     const response = await userSignup(signupData);
     if (!response.success) {
       toast.error(response.message);
@@ -225,6 +227,18 @@ const Login = () => {
                       placeholder="+91 9876543210"
                       value={signupData.mobile}
                       onChange={(e) => setSignupData({ ...signupData, mobile: e.target.value })}
+                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="referrerId">Refferer ID</Label>
+                    <Input
+                      id="referrerId"
+                      type="tel"
+                      placeholder="Enter Refferer ID"
+                      value={signupData.referrerId}
+                      onChange={(e) => setSignupData({ ...signupData, referrerId: e.target.value })}
                       className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
                     />

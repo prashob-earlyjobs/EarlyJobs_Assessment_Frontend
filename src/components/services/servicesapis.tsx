@@ -1,7 +1,6 @@
-import axios from "axios";
 import Cookies from "js-cookie";
-const url = import.meta.env.VITE_APP_BACKEND;
 import axiosInstance from "./apiinterseptor"; // Corrected import path
+import { toast } from "sonner";
 
 export const userLogin = async ({ email, password }: { email: string; password: string }) => {
     try {
@@ -15,7 +14,15 @@ export const userLogin = async ({ email, password }: { email: string; password: 
         }
         return data;
     } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Login failed:", error.response.data.message);
+        if (error.response.data.message == 'Account is deactivated') {
+            toast.error(`Login failed. This ${error.response.data.message} by admin.`);
+            throw new Error('Account is deactivated.');
+
+        }
+        else {
+            toast.error(`Login failed. ${error.response.data.message}.`);
+        }
         throw error;
     }
 };
@@ -31,14 +38,13 @@ export const isUserLoggedIn = async () => {
     }
 };
 
-export const userSignup = async ({ name, email, mobile, password }: { email: string; password: string, name: string, mobile: string }) => {
+export const userSignup = async ({ name, email, mobile, password, referrerId }: { email: string; password: string, name: string, mobile: string, referrerId: string }) => {
 
     try {
-        const response = await axiosInstance.post('/auth/register', { email, password, name, mobile });
+        const response = await axiosInstance.post('/auth/register', { email, password, name, mobile, referrerId });
         const data = response.data;
         const accessToken = data.data.accessToken; // Corrected destructuring
-        console.log("Login successful:", data);
-        console.log("Access Token:", accessToken);
+
         Cookies.set('accessToken', accessToken, { expires: 7 }); // Store token in cookies for 7 days
         if (accessToken) {
             axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`; // Set for all future requests
@@ -87,5 +93,22 @@ export const updateProfile = async (profileData) => {
     } catch (error) {
         console.error("Profile update failed:", error);
         throw error;
+    }
+}
+export const userLogout = async () => {
+    try {
+        const response = await axiosInstance.post('/auth/logout');
+        console.log("Logout response:", response.data);
+        if (!response.data.success) {
+            throw new Error("Logout failed");
+        }
+        Cookies.remove('accessToken');
+        axiosInstance.defaults.headers.Authorization = ''; // Clear the Authorization header 
+        toast.success("Logged out successfully!");
+        return response.data;
+    } catch (error) {
+        console.error("Logout failed:", error);
+        toast.error("Logout failed. Please try again.");
+        return error;
     }
 }

@@ -15,16 +15,14 @@ const axiosInstance = axios.create({
 const setAuthToken = (token) => {
   if (token) {
     axiosInstance.defaults.headers.Authorization = `Bearer ${token}`;
-    localStorage.setItem('accessToken', token); // Persist token in localStorage
   } else {
     delete axiosInstance.defaults.headers.Authorization;
-    localStorage.removeItem('accessToken');
   }
 };
 
 // Initialize axios with stored token on app load
 const initializeAuth = () => {
-  const storedToken = Cookies.get('accessToken') || localStorage.getItem('accessToken') || null;
+  const storedToken = Cookies.get('accessToken') || null;
   if (storedToken) {
     setAuthToken(storedToken);
   }
