@@ -11,10 +11,13 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { isUserLoggedIn, userLogin, userSignup } from "@/components/services/servicesapis";
+import { useUser } from "@/context";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { userCredentials, setUserCredentials } = useUser();
+
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     name: "",
@@ -28,8 +31,15 @@ const Login = () => {
     const checkUserLoggedIn = async () => {
       const response = await isUserLoggedIn();
       console.log("User logged in status:", response);
-      if (response.success) {
+      if (response.success && response.user.role === 'super_admin' || response.user.role === 'franchise_admin') {
+        navigate('/admin');
+        setUserCredentials(response.user);
+      }
+      else if (response.success && response.user.role !== 'super_admin' || response.user.role !== 'franchise_admin') {
         navigate('/dashboard');
+      }
+      else {
+        navigate('/login');
       }
 
     }

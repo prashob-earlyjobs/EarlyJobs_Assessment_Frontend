@@ -83,6 +83,7 @@ const Dashboard = () => {
           isPhoneVerified: response.user.isPhoneVerified,
           lastLogin: response.user.lastLogin,
           mobile: response.user.mobile,
+          role: response.user.role,
           name: response.user.name,
           profile: {
             skills: response.user.profile.skills || [],

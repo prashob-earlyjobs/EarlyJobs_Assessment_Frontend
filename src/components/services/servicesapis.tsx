@@ -112,3 +112,106 @@ export const userLogout = async () => {
         return error;
     }
 }
+
+
+export const adminLogin = async ({ email, password }: { email: string; password: string }) => {
+    try {
+        const response = await axiosInstance.post('/auth/login', { email, password });
+        const data = response.data;
+        const accessToken = data.data.accessToken; // Corrected destructuring
+        console.log("Login successful:", data);
+        console.log("Access Token:", accessToken);
+        if (accessToken) {
+            axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`; // Set for all future requests
+        }
+        return data;
+    } catch (error) {
+        console.error("Login failed:", error);
+        throw error;
+    }
+};
+
+export const getUsers = async ({ searchQuery, role, page = 1, limit = 10 }) => {
+    console.log("Fetching users with params:", { searchQuery, role, page, limit });
+    try {
+        const response = await axiosInstance.get(`/admin/getUsers?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
+        console.log("Users fetched successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        throw error;
+    }
+};
+
+export const getUsersForFranchise = async ({ id, searchQuery, role, page = 1, limit = 10 }) => {
+    console.log("Fetching users with params:", { searchQuery, role, page, limit });
+    try {
+        const response = await axiosInstance.get(`/admin/getUsersForFranchise/${id}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
+        console.log("Users fetched successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        throw error;
+    }
+
+}
+
+export const setUserStatusAactivity = async (userId, isActive) => {
+    try {
+
+        const response = await axiosInstance.put(`/admin/users/${userId}/status`, { isActive });
+        console.log("User status updated successfully:", response.data);
+        return response.data;
+    }
+    catch (error) {
+        console.error("Failed to update user status:", error);
+        throw error;
+    }
+}
+
+
+export const getAssessmentsfromAdminSearch = async ({ searchQuery, page = 1, limit = 10 }) => {
+
+    // category, searchQuery, type, difficulty,
+    try {
+        const response = await axiosInstance.get(`/assessments?title=${searchQuery}&page=${page}&limit=${limit}`);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        throw error;
+    }
+};
+
+export const getAssessmentByIdForAdmin = async (assessmentId) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/${assessmentId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch assessment by ID:", error);
+        throw error;
+    }
+}
+
+export const addAssessment = async (assessmentData) => {
+    console.log("Adding assessment with data:", assessmentData);
+    try {
+        const response = await axiosInstance.post('/admin/addAssessment', assessmentData);
+        console.log("Assessment added successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to add assessment:", error);
+        throw error;
+    }
+}
+
+export const editAssessment = async (assessmentData, assessmentId) => {
+    console.log("Adding assessment with data:", assessmentData);
+    try {
+        const response = await axiosInstance.put(`/admin/editAssessment/${assessmentId}`, assessmentData);
+        console.log("Assessment added successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to add assessment:", error);
+        throw error;
+    }
+}

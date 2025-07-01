@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 export interface UserCredentials {
+    role: 'candidate' | 'recruiter' | 'franchise' | 'super_admin' | 'franchise_admin';
     authProvider: string;
     avatar: string;
     createdAt: string;

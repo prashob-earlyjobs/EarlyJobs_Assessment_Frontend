@@ -549,7 +549,7 @@ const Profile = () => {
                   <Input
                     id="experience"
                     type="number"
-                    value={profileData.profile.professionalInformation?.experience.toString() || ""}
+                    value={profileData.profile.professionalInformation?.experience || ""}
                     onChange={(e) =>
                       handleInputChange("profile.professionalInformation.experience", e.target.value)
                     }
@@ -574,7 +574,7 @@ const Profile = () => {
                   <Input
                     id="noticePeriod"
                     type="number"
-                    value={profileData.profile.professionalInformation?.noticePeriod.toString() || ""}
+                    value={profileData.profile.professionalInformation?.noticePeriod || ""}
                     onChange={(e) =>
                       handleInputChange("profile.professionalInformation.noticePeriod", e.target.value)
                     }

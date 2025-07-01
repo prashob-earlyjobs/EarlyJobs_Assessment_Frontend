@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { isUserLoggedIn } from "../services/servicesapis";
+import { useAdmin } from "@/context/AdminContext";
 
 const PageLoader: React.FC = () => {
     return (
@@ -18,8 +19,10 @@ interface ProtectedRouteProps {
     children: ReactNode;
 }
 
-const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRouteForAdmin: FC<ProtectedRouteProps> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const { setCurrentUser } = useAdmin();
+
     const location = useLocation();
 
     useEffect(() => {
@@ -28,18 +31,27 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const loggedIn = await isUserLoggedIn();
-                console.log("Checking authentication status...", loggedIn.user.role);
-                if (loggedIn.success && loggedIn.user.role !== 'super_admin' && loggedIn.user.role !== 'franchise_admin') {
-
-                    console.log("Checking authentication status...",);
+                console.log("Checking authentication status...", loggedIn);
+                if (!loggedIn || !loggedIn.success) {
+                    throw new Error("User is not logged in");
+                }
+                if (isMounted && loggedIn.success && loggedIn.user.role === 'super_admin' || loggedIn.user.role === 'franchise_admin') {
+                    setCurrentUser({
+                        id: loggedIn.user._id,
+                        name: loggedIn.user.name,
+                        email: loggedIn.user.email,
+                        role: loggedIn.user.role
+                    });
                     setIsAuthenticated(!!loggedIn); // Convert to boolean
                 }
                 else {
-                    throw new Error("Admin shouldn't access this page");
+                    throw new Error("You shouldn't access this page");
                 }
             } catch (error) {
                 console.error("Auth check failed:", error);
-                setIsAuthenticated(false);
+                if (isMounted) {
+                    setIsAuthenticated(false);
+                }
             }
         };
 
@@ -50,7 +62,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
         return () => {
             isMounted = false;
         };
-    }, [location]); // Only re-run if isAuthenticated is null
+    }, [isAuthenticated]); // Only re-run if isAuthenticated is null
 
     // Handle redirects based on authentication state
     if (isAuthenticated === null) {
@@ -59,10 +71,10 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
 
     if (!isAuthenticated) {
 
-        return <Navigate to="/login" state={{ from: location }} replace />;
+        return <Navigate to="/" state={{ from: location }} replace />;
     }
 
     return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default ProtectedRouteForAdmin;
