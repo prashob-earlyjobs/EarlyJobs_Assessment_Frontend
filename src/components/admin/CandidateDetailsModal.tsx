@@ -33,6 +33,7 @@ interface Candidate {
   averageScore: number;
   profile?: CandidateProfile;
   weaknesses?: string[];
+  franchiserId?: string;
 }
 
 interface CandidateDetailsModalProps {
@@ -76,7 +77,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="text-xl font-semibold">{candidate.name}</h3>
-                <Badge variant="outline">{candidate.franchise}</Badge>
+                <Badge variant="outline">{candidate?.franchiserId}</Badge>
               </div>
               <div className='space-y-1 text-sm text-gray-600 mb-2'>
                 <p>Preferred Job Role: {candidate.profile?.preferredJobRole}</p>

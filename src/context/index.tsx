@@ -13,6 +13,17 @@ export interface UserCredentials {
     mobile: string;
     name: string;
     profile: {
+        gender: string;
+        dateOfBirth: string;
+        address:
+        {
+            street: string;
+            city: string;
+            state: string;
+            country: string;
+            zipCode: string;
+        };
+        preferredJobRole: string;
         skills: string[];
         experience: string[];
         education: string[];
@@ -20,7 +31,10 @@ export interface UserCredentials {
         prefJobLocations: string[];
     };
     updatedAt: string;
+    franchiserId?: string;
+    referrerId?: string;
     _id: string;
+
     // Add more fields as needed
 }
 

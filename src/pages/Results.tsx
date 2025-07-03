@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  ArrowLeft, 
-  Download, 
-  Share2, 
-  Trophy, 
+import {
+  ArrowLeft,
+  Download,
+  Share2,
+  Trophy,
   Target,
   CheckCircle,
   XCircle,
@@ -93,11 +93,11 @@ const Results = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => window.history.back()}
                 className="rounded-2xl"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                Back
               </Button>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">EJ</span>
@@ -173,10 +173,9 @@ const Results = () => {
                         <div className="text-sm text-gray-600">Score</div>
                       </div>
                     </div>
-                    <Badge className={`text-lg px-4 py-2 rounded-2xl ${
-                      results.grade === 'A' ? 'bg-green-600' : 
-                      results.grade === 'B' ? 'bg-blue-600' : 'bg-yellow-600'
-                    }`}>
+                    <Badge className={`text-lg px-4 py-2 rounded-2xl ${results.grade === 'A' ? 'bg-green-600' :
+                        results.grade === 'B' ? 'bg-blue-600' : 'bg-yellow-600'
+                      }`}>
                       Grade {results.grade}
                     </Badge>
                   </div>
@@ -318,8 +317,8 @@ const Results = () => {
                     <p className="text-sm text-gray-600">{job.company}</p>
                   </div>
                 ))}
-                
-                <Button 
+
+                <Button
                   onClick={() => navigate('/jobs')}
                   className="w-full bg-teal-600 hover:bg-teal-700 rounded-2xl mt-4"
                 >
@@ -334,27 +333,27 @@ const Results = () => {
                 <CardTitle>Next Steps</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
+                <Button
                   onClick={handleDownloadReport}
-                  variant="outline" 
+                  variant="outline"
                   className="w-full rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Download Certificate
                 </Button>
-                
-                <Button 
+
+                <Button
                   onClick={() => navigate('/assessments')}
-                  variant="outline" 
+                  variant="outline"
                   className="w-full rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300"
                 >
                   <Award className="h-4 w-4 mr-2" />
                   Take Another Test
                 </Button>
-                
-                <Button 
+
+                <Button
                   onClick={() => navigate('/jobs')}
-                  variant="outline" 
+                  variant="outline"
                   className="w-full rounded-2xl border-gray-200 hover:bg-teal-50 hover:border-teal-300"
                 >
                   <Briefcase className="h-4 w-4 mr-2" />

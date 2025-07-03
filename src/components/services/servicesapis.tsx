@@ -215,3 +215,23 @@ export const editAssessment = async (assessmentData, assessmentId) => {
         throw error;
     }
 }
+
+export const getAssessmentsByUserId = async (userId: string) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getAssessments/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch assessments by user ID:", error);
+        throw error;
+    }
+}
+
+export const getFranchiser = async (franchiserId: string) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getFranchiser/${franchiserId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch franchiser:", error);
+        throw error;
+    }
+}

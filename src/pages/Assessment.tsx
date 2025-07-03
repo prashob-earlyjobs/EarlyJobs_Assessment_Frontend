@@ -73,7 +73,7 @@ const Assessment = () => {
       currency: 'INR',
       name: 'EarlyJobs',
       description: 'Assessment Fee',
-      handler: function (response: any) {
+      handler: function (response: unknown) {
         console.log('Payment successful:', response);
         toast.success('Payment successful! Starting assessment...');
         setPaymentCompleted(true);

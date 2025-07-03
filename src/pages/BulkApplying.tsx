@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  ArrowLeft, 
-  CreditCard, 
-  Users, 
-  Building2, 
-  Clock, 
+import {
+  ArrowLeft,
+  CreditCard,
+  Users,
+  Building2,
+  Clock,
   CheckCircle,
   Star,
   TrendingUp,
@@ -97,13 +97,13 @@ const BulkApplying = () => {
       toast.error("Please select a plan to continue");
       return;
     }
-    
+
     const plan = plans[selectedPlan];
-    navigate(`/bulk-applying/verify/${plan.count}`, { 
-      state: { 
+    navigate(`/bulk-applying/verify/${plan.count}`, {
+      state: {
         plan: plan,
-        planIndex: selectedPlan 
-      } 
+        planIndex: selectedPlan
+      }
     });
   };
 
@@ -113,19 +113,19 @@ const BulkApplying = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/dashboard')}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
               className="rounded-2xl"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to Dashboard
+              Back
             </Button>
             <Separator orientation="vertical" className="h-6" />
-            <img 
-              src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-              alt="EarlyJobs Logo" 
+            <img
+              src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+              alt="EarlyJobs Logo"
               className="h-8 w-auto"
             />
             <h1 className="text-2xl font-bold text-gray-900">Bulk Applying</h1>
@@ -145,7 +145,7 @@ const BulkApplying = () => {
             Supercharge Your Job Hunt
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-            Apply to multiple companies instantly and boost your chances of landing your dream job. 
+            Apply to multiple companies instantly and boost your chances of landing your dream job.
             Our AI-powered system matches your profile to the most relevant opportunities.
           </p>
           <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
@@ -167,13 +167,12 @@ const BulkApplying = () => {
         {/* Pricing Plans */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {plans.map((plan, index) => (
-            <Card 
+            <Card
               key={index}
-              className={`rounded-3xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer relative ${
-                selectedPlan === index 
-                  ? 'border-orange-500 ring-2 ring-orange-200' 
-                  : 'border-gray-200 hover:border-orange-300'
-              }`}
+              className={`rounded-3xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer relative ${selectedPlan === index
+                ? 'border-orange-500 ring-2 ring-orange-200'
+                : 'border-gray-200 hover:border-orange-300'
+                }`}
               onClick={() => handlePlanSelect(index)}
             >
               {plan.popular && (
@@ -184,7 +183,7 @@ const BulkApplying = () => {
                   </Badge>
                 </div>
               )}
-              
+
               <CardHeader className="text-center pb-4">
                 <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r ${plan.color} flex items-center justify-center mb-4`}>
                   <span className="text-2xl font-bold text-white">{plan.count}</span>
@@ -202,7 +201,7 @@ const BulkApplying = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
                   <div key={featureIndex} className="flex items-start space-x-2">
@@ -250,7 +249,7 @@ const BulkApplying = () => {
 
         {/* Action Button */}
         <div className="text-center">
-          <Button 
+          <Button
             onClick={handleProceed}
             disabled={selectedPlan === null}
             size="lg"

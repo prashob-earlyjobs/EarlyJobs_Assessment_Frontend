@@ -299,11 +299,11 @@ const Profile = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => window.history.back()}
                 className="rounded-2xl"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
-                Back to Dashboard
+                Back
               </Button>
               <img
                 src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"

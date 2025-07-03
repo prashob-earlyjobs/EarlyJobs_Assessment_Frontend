@@ -11,6 +11,7 @@ export default {
 	],
 	prefix: "",
 	theme: {
+
 		container: {
 			center: true,
 			padding: '2rem',
@@ -19,6 +20,9 @@ export default {
 			}
 		},
 		extend: {
+			screens: {
+				'xxl': '1104px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

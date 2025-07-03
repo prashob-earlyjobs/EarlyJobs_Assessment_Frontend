@@ -45,6 +45,7 @@ import { toast } from "sonner";
 import Certificate from "@/components/Certificate";
 import { isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
+import Header from "./header";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -215,7 +216,7 @@ Certificate ID: EJ-CERT-2024-001
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      {/* <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -299,7 +300,8 @@ Certificate ID: EJ-CERT-2024-001
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
+      <Header />
 
       {/* Logout Confirmation Dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

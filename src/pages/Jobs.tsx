@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  ArrowLeft, 
-  Search, 
-  Filter, 
-  MapPin, 
-  Clock, 
+import {
+  ArrowLeft,
+  Search,
+  Filter,
+  MapPin,
+  Clock,
   DollarSign,
   Building,
   CheckCircle,
@@ -149,11 +149,11 @@ const Jobs = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesLocation = selectedLocation === "all" || job.location.includes(selectedLocation);
     const matchesJobType = selectedJobType === "all" || job.type === selectedJobType;
-    
+
     let matchesFilter = true;
     if (selectedFilter === "High Match") matchesFilter = job.matchPercentage >= 80;
     if (selectedFilter === "Recently Posted") matchesFilter = job.postedDays <= 3;
@@ -193,15 +193,15 @@ const Jobs = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => window.history.back()}
                 className="rounded-2xl"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                Back
               </Button>
-              <img 
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-                alt="EarlyJobs Logo" 
+              <img
+                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                alt="EarlyJobs Logo"
                 className="h-10 w-auto"
               />
               <div>
@@ -307,7 +307,7 @@ const Jobs = () => {
                   </div>
                 </div>
               )}
-              
+
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start space-x-4">
@@ -317,25 +317,24 @@ const Jobs = () => {
                         {job.company.substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
-                        <Badge className={`rounded-2xl px-3 py-1 text-xs font-medium ${
-                          job.matchPercentage >= 90 ? 'bg-green-600' :
-                          job.matchPercentage >= 80 ? 'bg-blue-600' :
-                          job.matchPercentage >= 70 ? 'bg-yellow-600' : 'bg-gray-600'
-                        }`}>
+                        <Badge className={`rounded-2xl px-3 py-1 text-xs font-medium ${job.matchPercentage >= 90 ? 'bg-green-600' :
+                            job.matchPercentage >= 80 ? 'bg-blue-600' :
+                              job.matchPercentage >= 70 ? 'bg-yellow-600' : 'bg-gray-600'
+                          }`}>
                           {job.matchPercentage}% match
                         </Badge>
                         {getStatusBadge(job.status)}
                       </div>
-                      
+
                       <div className="flex items-center space-x-1 mb-2">
                         <Building className="h-4 w-4 text-gray-500" />
                         <span className="text-gray-700 font-medium">{job.company}</span>
                       </div>
-                      
+
                       <div className="flex items-center space-x-6 text-sm text-gray-600 mb-3">
                         <div className="flex items-center space-x-1">
                           <MapPin className="h-4 w-4" />
@@ -350,9 +349,9 @@ const Jobs = () => {
                           <span>{job.salary}</span>
                         </div>
                       </div>
-                      
+
                       <p className="text-gray-700 mb-4 leading-relaxed">{job.description}</p>
-                      
+
                       <div className="flex items-center space-x-4 mb-4">
                         <div>
                           <span className="text-sm text-gray-500">Required Skills:</span>
@@ -406,7 +405,7 @@ const Jobs = () => {
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </Button>
-                    
+
                     <Button variant="outline" className="rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300">
                       Save Job
                     </Button>
@@ -415,14 +414,13 @@ const Jobs = () => {
                   <Button
                     onClick={() => handleApply(job.id)}
                     disabled={job.status === "applied"}
-                    className={`rounded-2xl px-6 shadow-lg ${
-                      job.status === "applied" 
-                        ? "bg-gray-400 cursor-not-allowed" 
+                    className={`rounded-2xl px-6 shadow-lg ${job.status === "applied"
+                        ? "bg-gray-400 cursor-not-allowed"
                         : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                      }`}
                   >
-                    {job.status === "applied" ? "Applied" : 
-                     job.status === "interviewed" ? "View Status" : "Apply Now"}
+                    {job.status === "applied" ? "Applied" :
+                      job.status === "interviewed" ? "View Status" : "Apply Now"}
                   </Button>
                 </div>
               </CardContent>
@@ -438,7 +436,7 @@ const Jobs = () => {
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
             <p className="text-gray-600 mb-6">Try adjusting your search criteria or explore all available opportunities.</p>
-            <Button 
+            <Button
               onClick={() => {
                 setSearchQuery("");
                 setSelectedLocation("all");
