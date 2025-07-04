@@ -5,16 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 import {
   Dialog,
   DialogContent,
@@ -66,25 +57,7 @@ const Dashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
 
 
-  const handleLogout = async () => {
-    try {
-      const response = await userLogout();
-      if (!response.success) {
-        throw new Error("Logout failed");
-      }
-      toast.success("Logged out successfully!");
-      setUserCredentials(null); // Clear user credentials
-      navigate('/login');
-    }
 
-
-    catch (error) {
-
-      toast.error("Logout failed. Please try again.");
-    }
-    // toast.success("Logged out successfully!");
-    // navigate('/');
-  };
 
   const handleBulkApplyBrowse = () => {
     navigate('/bulk-applying');
@@ -258,25 +231,10 @@ Certificate ID: EJ-CERT-2024-001
           </div>
         </div>
       </header> */}
-      <Header showLogoutDialog={showLogoutDialog} setShowLogoutDialog={setShowLogoutDialog} />
+      <Header />
 
       {/* Logout Confirmation Dialog */}
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to logout? You will need to sign in again to access your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout} className="rounded-2xl bg-red-600 hover:bg-red-700">
-              Logout
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
 
       <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

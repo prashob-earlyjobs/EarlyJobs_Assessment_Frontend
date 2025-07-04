@@ -3,7 +3,16 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
     Popover,
     PopoverContent,
@@ -25,7 +34,7 @@ const notifications = [
     { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
 ];
 
-const Header = ({ showLogoutDialog, setShowLogoutDialog }) => {
+const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [userDetails, setUserDetails] = useState({
@@ -39,6 +48,7 @@ const Header = ({ showLogoutDialog, setShowLogoutDialog }) => {
     });
 
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
     const { userCredentials, setUserCredentials } = useUser();
 
 
@@ -100,6 +110,25 @@ const Header = ({ showLogoutDialog, setShowLogoutDialog }) => {
         };
         fetchUserData();
     }, []);
+    const handleLogout = async () => {
+        try {
+            const response = await userLogout();
+            if (!response.success) {
+                throw new Error("Logout failed");
+            }
+            toast.success("Logged out successfully!");
+            setUserCredentials(null); // Clear user credentials
+            navigate('/login');
+        }
+
+
+        catch (error) {
+
+            toast.error("Logout failed. Please try again.");
+        }
+        // toast.success("Logged out successfully!");
+        // navigate('/');
+    };
 
     return (
         <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -186,6 +215,22 @@ const Header = ({ showLogoutDialog, setShowLogoutDialog }) => {
                     </div>
                 </div>
             </div>
+            <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogContent className="rounded-3xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to logout? You will need to sign in again to access your account.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} className="rounded-2xl bg-red-600 hover:bg-red-700">
+                            Logout
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </header>
     )
 };
