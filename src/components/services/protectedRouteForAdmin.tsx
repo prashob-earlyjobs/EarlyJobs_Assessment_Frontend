@@ -31,7 +31,6 @@ const ProtectedRouteForAdmin: FC<ProtectedRouteProps> = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const loggedIn = await isUserLoggedIn();
-                console.log("Checking authentication status...", loggedIn);
                 if (!loggedIn || !loggedIn.success) {
                     throw new Error("User is not logged in");
                 }
@@ -48,7 +47,6 @@ const ProtectedRouteForAdmin: FC<ProtectedRouteProps> = ({ children }) => {
                     throw new Error("You shouldn't access this page");
                 }
             } catch (error) {
-                console.error("Auth check failed:", error);
                 if (isMounted) {
                     setIsAuthenticated(false);
                 }

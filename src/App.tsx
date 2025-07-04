@@ -29,6 +29,9 @@ import FranchisesPage from "./pages/admin/FranchisesPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import ProtectedRouteForAdmin from "./components/services/protectedRouteForAdmin";
 import { AdminProvider } from "./context/AdminContext";
+import { UserProvider } from "./context/index";
+import Transactions from "./pages/transactions";
+import TransactionsForAdmin from "./pages/admin/transactions";
 
 const queryClient = new QueryClient();
 
@@ -38,113 +41,125 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AdminProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+        <UserProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/onboarding" element={<Onboarding />} />
 
-            {/* Protected Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/assessments"
-              element={
-                <ProtectedRoute>
-                  <Assessments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/assessment/:id"
-              element={
-                <ProtectedRoute>
-                  <Assessment />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/video-question/:id"
-              element={
-                <ProtectedRoute>
-                  <VideoQuestion />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/results/:id"
-              element={
-                <ProtectedRoute>
-                  <Results />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/jobs"
-              element={
-                <ProtectedRoute>
-                  <Jobs />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bulk-applying"
-              element={
-                <ProtectedRoute>
-                  <BulkApplying />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bulk-applying/verify/:count"
-              element={
-                <ProtectedRoute>
-                  <BulkApplyingVerify />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bulk-applying/payment/:count"
-              element={
-                <ProtectedRoute>
-                  <BulkApplyingPayment />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bulk-applying/success"
-              element={
-                <ProtectedRoute>
-                  <BulkApplyingSuccess />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/admin" element={<ProtectedRouteForAdmin> <AdminDashboard /></ProtectedRouteForAdmin>} />
-            <Route path="/admin/users" element={<ProtectedRouteForAdmin> <UsersPage /></ProtectedRouteForAdmin>} />
-            <Route path="/admin/candidates" element={<ProtectedRouteForAdmin> <CandidatesPage /></ProtectedRouteForAdmin>} />
-            <Route path="/admin/assessments" element={<ProtectedRouteForAdmin> <AssessmentsPage /></ProtectedRouteForAdmin>} />
-            <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
-            <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
+              {/* Protected Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assessments"
+                element={
+                  <ProtectedRoute>
+                    <Assessments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assessment/:id"
+                element={
+                  <ProtectedRoute>
+                    <Assessment />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/video-question/:id"
+                element={
+                  <ProtectedRoute>
+                    <VideoQuestion />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/results/:id"
+                element={
+                  <ProtectedRoute>
+                    <Results />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* 404 Page */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+              <Route
+                path="/jobs"
+                element={
+                  <ProtectedRoute>
+                    <Jobs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-applying"
+                element={
+                  <ProtectedRoute>
+                    <BulkApplying />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-applying/verify/:count"
+                element={
+                  <ProtectedRoute>
+                    <BulkApplyingVerify />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-applying/payment/:count"
+                element={
+                  <ProtectedRoute>
+                    <BulkApplyingPayment />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-applying/success"
+                element={
+                  <ProtectedRoute>
+                    <BulkApplyingSuccess />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/admin" element={<ProtectedRouteForAdmin> <AdminDashboard /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/users" element={<ProtectedRouteForAdmin> <UsersPage /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/candidates" element={<ProtectedRouteForAdmin> <CandidatesPage /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/assessments" element={<ProtectedRouteForAdmin> <AssessmentsPage /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
+              <Route path="/admin/transactions" element={<ProtectedRouteForAdmin> <TransactionsForAdmin /></ProtectedRouteForAdmin>} />
+
+              {/* 404 Page */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </UserProvider>
       </AdminProvider>
     </TooltipProvider>
   </QueryClientProvider>

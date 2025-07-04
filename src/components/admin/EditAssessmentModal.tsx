@@ -71,7 +71,6 @@ const EditAssessmentModal: React.FC<EditAssessmentModalProps> = ({
     const [tagsInput, setTagsInput] = useState('');
 
     useEffect(() => {
-        console.log('EditAssessmentModal initialData:', initialData);
         if (initialData) {
             setFormData({
                 id: initialData.id,

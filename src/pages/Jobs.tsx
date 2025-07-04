@@ -200,7 +200,7 @@ const Jobs = () => {
                 Back
               </Button>
               <img
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                src="/lovable-uploads/logo.png"
                 alt="EarlyJobs Logo"
                 className="h-10 w-auto"
               />
@@ -322,8 +322,8 @@ const Jobs = () => {
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
                         <Badge className={`rounded-2xl px-3 py-1 text-xs font-medium ${job.matchPercentage >= 90 ? 'bg-green-600' :
-                            job.matchPercentage >= 80 ? 'bg-blue-600' :
-                              job.matchPercentage >= 70 ? 'bg-yellow-600' : 'bg-gray-600'
+                          job.matchPercentage >= 80 ? 'bg-blue-600' :
+                            job.matchPercentage >= 70 ? 'bg-yellow-600' : 'bg-gray-600'
                           }`}>
                           {job.matchPercentage}% match
                         </Badge>
@@ -415,8 +415,8 @@ const Jobs = () => {
                     onClick={() => handleApply(job.id)}
                     disabled={job.status === "applied"}
                     className={`rounded-2xl px-6 shadow-lg ${job.status === "applied"
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
                       }`}
                   >
                     {job.status === "applied" ? "Applied" :

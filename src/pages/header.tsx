@@ -43,10 +43,7 @@ const Header = () => {
     const { userCredentials, setUserCredentials } = useUser();
 
 
-    useEffect(() => {
 
-        console.log("Location changed:", location);
-    }, [location])
     const handleProfileClick = () => {
         navigate('/profile');
     };
@@ -62,43 +59,42 @@ const Header = () => {
                     navigate('/login');
                     return;
                 }
-                setUserCredentials({
-                    authProvider: response.user.authProvider,
-                    avatar: response.user.avatar,
-                    createdAt: response.user.createdAt,
-                    email: response.user.email,
-                    isActive: response.user.isActive,
-                    isEmailVerified: response.user.isEmailVerified,
-                    isPhoneVerified: response.user.isPhoneVerified,
-                    lastLogin: response.user.lastLogin,
-                    mobile: response.user.mobile,
-                    role: response.user.role,
-                    name: response.user.name,
-                    profile: {
-                        gender: response.user.profile.gender || '',
-                        dateOfBirth: response.user.profile.dateOfBirth || '',
-                        address: {
-                            street: response.user.profile.address?.street || '',
-                            city: response.user.profile.address?.city || '',
-                            state: response.user.profile.address?.state || '',
-                            country: response.user.profile.address?.country || '',
-                            zipCode: response.user.profile.address?.zipCode || '',
-                        },
-                        preferredJobRole: response.user.profile.preferredJobRole || '',
-                        skills: response.user.profile.skills || [],
-                        experience: response.user.profile.experience || [],
-                        education: response.user.profile.education || [],
-                        bio: response.user.profile.bio || '',
-                        prefJobLocations: response.user.profile.prefJobLocations || [],
-                    },
-                    updatedAt: response.user.updatedAt,
-                    _id: response.user._id,
-                });
-                console.log("User data fetched successfully:", response);
+                // setUserCredentials({
+                //     authProvider: response.user.authProvider,
+                //     avatar: response.user.avatar,
+                //     createdAt: response.user.createdAt,
+                //     email: response.user.email,
+                //     isActive: response.user.isActive,
+                //     isEmailVerified: response.user.isEmailVerified,
+                //     isPhoneVerified: response.user.isPhoneVerified,
+                //     lastLogin: response.user.lastLogin,
+                //     mobile: response.user.mobile,
+                //     role: response.user.role,
+                //     name: response.user.name,
+                //     profile: {
+                //         gender: response.user.profile.gender || '',
+                //         dateOfBirth: response.user.profile.dateOfBirth || '',
+                //         address: {
+                //             street: response.user.profile.address?.street || '',
+                //             city: response.user.profile.address?.city || '',
+                //             state: response.user.profile.address?.state || '',
+                //             country: response.user.profile.address?.country || '',
+                //             zipCode: response.user.profile.address?.zipCode || '',
+                //         },
+                //         preferredJobRole: response.user.profile.preferredJobRole || '',
+                //         skills: response.user.profile.skills || [],
+                //         experience: response.user.profile.experience || [],
+                //         education: response.user.profile.education || [],
+                //         bio: response.user.profile.bio || '',
+                //         prefJobLocations: response.user.profile.prefJobLocations || [],
+                //     },
+                //     updatedAt: response.user.updatedAt,
+                //     _id: response.user._id,
+                // });
                 setUserDetails(response.user);
             } catch (error) {
                 toast.error("Failed to fetch user data. Please try again later.");
-                console.error("Error fetching user data:", error);
+
             }
 
 
@@ -120,9 +116,10 @@ const Header = () => {
                         }
 
                         <img
-                            src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                            src="/lovable-uploads/logo.png"
+                            onClick={() => navigate('/dashboard')}
                             alt="EarlyJobs Logo"
-                            className="h-12 w-auto"
+                            className="h-12 w-auto cursor-pointer"
                         />
                     </div>
 
@@ -169,22 +166,13 @@ const Header = () => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={handleProfileClick}
-                            className="rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
-                        >
-                            <User className="h-5 w-5" />
-                        </Button>
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => setShowLogoutDialog(true)}
                             className="rounded-2xl p-3 hover:bg-red-50 hover:text-red-600 transition-colors"
                         >
                             <LogOut className="h-5 w-5" />
                         </Button>
 
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={handleProfileClick}>
                             <Avatar className="h-10 w-10">
                                 <AvatarImage src="/placeholder-avatar.jpg" />
                                 <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
