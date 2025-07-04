@@ -256,7 +256,6 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    console.log("Saving profile data:", profileData);
     try {
       const response = await updateProfile(profileData);
       if (!response.success) {
@@ -306,7 +305,7 @@ const Profile = () => {
                 Back
               </Button>
               <img
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                src="/lovable-uploads/logo.png"
                 alt="EarlyJobs Logo"
                 className="h-10 w-auto"
               />

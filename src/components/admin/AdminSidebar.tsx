@@ -17,7 +17,8 @@ import {
   Users,
   User,
   Calendar,
-  Settings
+  Settings,
+  Repeat
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
@@ -53,6 +54,12 @@ const menuItems = [
     permission: 'manage_franchises'
   },
   {
+    title: 'Transactions',
+    url: '/admin/transactions',
+    icon: Repeat,
+    permission: 'candidate_transactions'
+  },
+  {
     title: 'Settings',
     url: '/admin/settings',
     icon: Settings,
@@ -79,12 +86,12 @@ export const AdminSidebar: React.FC = () => {
   return (
     <Sidebar className={isCollapsed ? "w-16" : "w-64"} collapsible="icon">
       <SidebarContent className="bg-white border-r">
-        <div className="p-6">
-          <div className="flex items-center gap-3">
+        <div className={`p-6 ${isCollapsed ? 'p-[8px] pt-[18px]' : ''}`}>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''} gap-3`} >
             <img
               src="/lovable-uploads/3a0cf2fe-94a3-44e3-bea3-33a03e97cc31.png"
               alt="EarlyJobs"
-              className={`${isCollapsed ? 'w-8 h-8' : 'w-10 h-10'} object-contain`}
+              className={`${isCollapsed ? 'w-[3rem] h-8' : 'w-10 h-10'} object-contain`}
             />
             {!isCollapsed && (
               <div>
@@ -98,7 +105,7 @@ export const AdminSidebar: React.FC = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className={`${isCollapsed ? 'items-center' : ''}`}>
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>

@@ -30,12 +30,12 @@ const Certificate: React.FC<CertificateProps> = ({
         <div className="absolute top-4 right-4 w-8 h-8 border-r-4 border-t-4 border-orange-500"></div>
         <div className="absolute bottom-4 left-4 w-8 h-8 border-l-4 border-b-4 border-orange-500"></div>
         <div className="absolute bottom-4 right-4 w-8 h-8 border-r-4 border-b-4 border-orange-500"></div>
-        
+
         {/* Header */}
         <div className="text-center mb-8">
-          <img 
-            src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-            alt="EarlyJobs Logo" 
+          <img
+            src="/lovable-uploads/logo.png"
+            alt="EarlyJobs Logo"
             className="h-16 w-auto mx-auto mb-4"
           />
           <h1 className="text-4xl font-bold text-gray-800 mb-2">CERTIFICATE OF ACHIEVEMENT</h1>
@@ -79,7 +79,7 @@ const Certificate: React.FC<CertificateProps> = ({
             <p className="text-sm text-gray-600">Authorized Signature</p>
             <p className="text-xs text-gray-500">EarlyJobs Certification Authority</p>
           </div>
-          
+
           <div className="text-center">
             <div className="flex items-center space-x-2 text-gray-600 mb-4">
               <Calendar className="h-4 w-4" />

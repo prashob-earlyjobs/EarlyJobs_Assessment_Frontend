@@ -30,12 +30,12 @@ const AdminDashboard: React.FC = () => {
     { id: 4, type: 'assessment', message: 'Sarah Smith scored 95% in Java Assessment', time: '6 hours ago' },
   ];
 
-  const handleAddAssessment = (assessment: any) => {
+  const handleAddAssessment = (assessment) => {
     console.log('New assessment created:', assessment);
     // In real app, this would make an API call
   };
 
-  const handleAddFranchise = (franchise: any) => {
+  const handleAddFranchise = (franchise) => {
     console.log('New franchise added:', franchise);
     // In real app, this would make an API call
   };
@@ -59,10 +59,9 @@ const AdminDashboard: React.FC = () => {
               <div className="space-y-4">
                 {recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === 'assessment' ? 'bg-blue-500' :
-                      activity.type === 'user' ? 'bg-green-500' : 'bg-purple-500'
-                    }`} />
+                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'assessment' ? 'bg-blue-500' :
+                        activity.type === 'user' ? 'bg-green-500' : 'bg-purple-500'
+                      }`} />
                     <div className="flex-1">
                       <p className="text-sm text-gray-900">{activity.message}</p>
                       <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
@@ -79,28 +78,28 @@ const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                <button 
+                <button
                   onClick={() => setShowAddAssessment(true)}
                   className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
                 >
                   <div className="font-medium text-gray-900">Add Assessment</div>
                   <div className="text-sm text-gray-500 mt-1">Create new assessment</div>
                 </button>
-                <button 
+                <button
                   onClick={() => navigate('/admin/users')}
                   className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
                 >
                   <div className="font-medium text-gray-900">Add User</div>
                   <div className="text-sm text-gray-500 mt-1">Register new user</div>
                 </button>
-                <button 
+                <button
                   onClick={() => navigate('/admin')}
                   className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
                 >
                   <div className="font-medium text-gray-900">View Reports</div>
                   <div className="text-sm text-gray-500 mt-1">Analytics & reports</div>
                 </button>
-                <button 
+                <button
                   onClick={() => setShowAddFranchise(true)}
                   className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
                 >

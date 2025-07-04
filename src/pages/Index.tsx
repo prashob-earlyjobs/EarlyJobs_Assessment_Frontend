@@ -11,14 +11,14 @@ const Index = () => {
       {/* Header */}
       <header className="flex items-center justify-between p-6 lg:px-12">
         <div className="flex items-center space-x-2">
-          <img 
-            src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-            alt="EarlyJobs Logo" 
+          <img
+            src="/lovable-uploads/logo.png"
+            alt="EarlyJobs Logo"
             className="h-12 w-auto"
           />
         </div>
-        <Button 
-          onClick={() => navigate('/login')} 
+        <Button
+          onClick={() => navigate('/login')}
           className="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           Get Started
@@ -33,20 +33,20 @@ const Index = () => {
             <span className="bg-gradient-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent"> Smart Assessments</span>
           </h1>
           <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-            Take skill assessments, build your digital passport, and connect with top employers. 
+            Take skill assessments, build your digital passport, and connect with top employers.
             Your next career opportunity is just one test away.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button 
-              onClick={() => navigate('/login')} 
+            <Button
+              onClick={() => navigate('/login')}
               size="lg"
               className="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Start Your Journey <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="lg"
               className="border-2 border-orange-200 text-orange-600 hover:bg-orange-50 rounded-2xl px-8 py-4 text-lg transition-all duration-300"
             >

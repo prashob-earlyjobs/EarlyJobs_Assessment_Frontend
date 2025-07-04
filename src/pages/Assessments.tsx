@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { getAssessmentsfromSearch } from "@/components/services/servicesapis";
 import Header from "./header";
+import { toast } from "sonner";
 
 const LIMIT = 10;
 
@@ -68,12 +69,10 @@ const Assessments = () => {
     try {
       const response = await getAssessmentsfromSearch(params);
       const fetched = response.data.assessments;
-      console.log("Fetched assessments:", fetched);
       setAssessments(prev => [...prev, ...fetched]);
       setHasMore(fetched.length === LIMIT);
-      console.log("Has more assessments:", hasMore, assessments);
     } catch (err) {
-      console.error("Failed to fetch assessments:", err);
+      toast.error("Failed to fetch assessments:");
     } finally {
       setLoading(false);
     }
@@ -285,7 +284,7 @@ const Assessments = () => {
                         <Zap className="h-5 w-5 text-blue-600" />
                         <span className="text-sm font-medium text-gray-700">{assessment.offer?.title}</span>
                       </div>
-                      {assessment.offer.value > 0 && (
+                      {assessment?.offer?.value > 0 && (
                         <Badge className="bg-green-100 text-green-700 border-0 rounded-full px-2 py-1 text-xs font-medium">
                           {
                             assessment.offer.type === "percentage"
@@ -319,6 +318,11 @@ const Assessments = () => {
                         <span>Certificate</span>
                       </div>
                     </div>
+                    {assessment.offer?.validUntil && (
+                      <div className="text-xs mt-2 text-gray-400">
+                        <span className="font-medium text-gray-700">Valid until: </span>{new Date(assessment.offer.validUntil).toLocaleDateString()}
+                      </div>
+                    )}
                   </div>
                   <Button
                     onClick={() => navigate(`/assessment/${assessment._id}`)}

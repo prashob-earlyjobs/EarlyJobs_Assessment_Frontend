@@ -7,21 +7,18 @@ export const userLogin = async ({ email, password }: { email: string; password: 
         const response = await axiosInstance.post('/auth/login', { email, password });
         const data = response.data;
         const accessToken = data.data.accessToken; // Corrected destructuring
-        console.log("Login successful:", data);
-        console.log("Access Token:", accessToken);
         if (accessToken) {
             axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`; // Set for all future requests
         }
         return data;
     } catch (error) {
-        console.error("Login failed:", error.response.data.message);
-        if (error.response.data.message == 'Account is deactivated') {
-            toast.error(`Login failed. This ${error.response.data.message} by admin.`);
+        if (error?.response?.data?.message == 'Account is deactivated') {
+            toast.error(`Login failed. This ${error?.response?.data?.message} by admin.`);
             throw new Error('Account is deactivated.');
 
         }
         else {
-            toast.error(`Login failed. ${error.response.data.message}.`);
+            toast.error(`Login failed. ${error?.response?.data?.message}.`);
         }
         throw error;
     }
@@ -30,11 +27,11 @@ export const userLogin = async ({ email, password }: { email: string; password: 
 export const isUserLoggedIn = async () => {
     try {
         const response = await axiosInstance.get('/auth/is-logged-in');
-        console.log("Check login status response:", response.data);
+
         return response.data;
+
     } catch (error) {
-        console.error("Check login status failed:", error);
-        throw error;
+        return error;
     }
 };
 
@@ -51,8 +48,9 @@ export const userSignup = async ({ name, email, mobile, password, referrerId }: 
         }
         return data;
     } catch (error) {
-        console.error("Login failed:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 };
 
@@ -61,8 +59,9 @@ export const completeProfile = async (profileData) => {
         const response = await axiosInstance.put('/auth/complete-profile', profileData);
         return response.data;
     } catch (error) {
-        console.error("Profile completion failed:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 export const getAssessmentsfromSearch = async ({ category, searchQuery, type, difficulty, page = 1, limit = 10 }) => {
@@ -70,8 +69,9 @@ export const getAssessmentsfromSearch = async ({ category, searchQuery, type, di
         const response = await axiosInstance.get(`/assessments?category=${category}&title=${searchQuery}&type=${type}&difficulty=${difficulty}&page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 };
 
@@ -80,25 +80,25 @@ export const getAssessmentById = async (assessmentId) => {
         const response = await axiosInstance.get(`/assessments/${assessmentId}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch assessment by ID:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
 export const updateProfile = async (profileData) => {
-    console.log("got profile data in updateProfile:", profileData);
     try {
         const response = await axiosInstance.put('/auth/update-profile', profileData);
         return response.data;
     } catch (error) {
-        console.error("Profile update failed:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 export const userLogout = async () => {
     try {
         const response = await axiosInstance.post('/auth/logout');
-        console.log("Logout response:", response.data);
         if (!response.data.success) {
             throw new Error("Logout failed");
         }
@@ -107,8 +107,9 @@ export const userLogout = async () => {
         toast.success("Logged out successfully!");
         return response.data;
     } catch (error) {
-        console.error("Logout failed:", error);
         toast.error("Logout failed. Please try again.");
+        toast.error(`${error?.response?.data?.message}.`);
+
         return error;
     }
 }
@@ -119,39 +120,36 @@ export const adminLogin = async ({ email, password }: { email: string; password:
         const response = await axiosInstance.post('/auth/login', { email, password });
         const data = response.data;
         const accessToken = data.data.accessToken; // Corrected destructuring
-        console.log("Login successful:", data);
-        console.log("Access Token:", accessToken);
         if (accessToken) {
             axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`; // Set for all future requests
         }
         return data;
     } catch (error) {
-        console.error("Login failed:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 };
 
 export const getUsers = async ({ searchQuery, role, page = 1, limit = 10 }) => {
-    console.log("Fetching users with params:", { searchQuery, role, page, limit });
     try {
         const response = await axiosInstance.get(`/admin/getUsers?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
-        console.log("Users fetched successfully:", response.data);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 };
 
 export const getUsersForFranchise = async ({ id, searchQuery, role, page = 1, limit = 10 }) => {
-    console.log("Fetching users with params:", { searchQuery, role, page, limit });
     try {
         const response = await axiosInstance.get(`/admin/getUsersForFranchise/${id}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
-        console.log("Users fetched successfully:", response.data);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 
 }
@@ -160,12 +158,12 @@ export const setUserStatusAactivity = async (userId, isActive) => {
     try {
 
         const response = await axiosInstance.put(`/admin/users/${userId}/status`, { isActive });
-        console.log("User status updated successfully:", response.data);
         return response.data;
     }
     catch (error) {
-        console.error("Failed to update user status:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
@@ -177,8 +175,9 @@ export const getAssessmentsfromAdminSearch = async ({ searchQuery, page = 1, lim
         const response = await axiosInstance.get(`/assessments?title=${searchQuery}&page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 };
 
@@ -187,32 +186,31 @@ export const getAssessmentByIdForAdmin = async (assessmentId) => {
         const response = await axiosInstance.get(`/assessments/${assessmentId}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch assessment by ID:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
 export const addAssessment = async (assessmentData) => {
-    console.log("Adding assessment with data:", assessmentData);
     try {
         const response = await axiosInstance.post('/admin/addAssessment', assessmentData);
-        console.log("Assessment added successfully:", response.data);
         return response.data;
     } catch (error) {
-        console.error("Failed to add assessment:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
 export const editAssessment = async (assessmentData, assessmentId) => {
-    console.log("Adding assessment with data:", assessmentData);
     try {
         const response = await axiosInstance.put(`/admin/editAssessment/${assessmentId}`, assessmentData);
-        console.log("Assessment added successfully:", response.data);
         return response.data;
     } catch (error) {
-        console.error("Failed to add assessment:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
@@ -221,8 +219,9 @@ export const getAssessmentsByUserId = async (userId: string) => {
         const response = await axiosInstance.get(`/admin/getAssessments/${userId}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch assessments by user ID:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
 
@@ -231,7 +230,54 @@ export const getFranchiser = async (franchiserId: string) => {
         const response = await axiosInstance.get(`/admin/getFranchiser/${franchiserId}`);
         return response.data;
     } catch (error) {
-        console.error("Failed to fetch franchiser:", error);
-        throw error;
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
     }
 }
+
+export const getOrderIdForPayment = async (paymentdetails) => {
+    try {
+        const response = await axiosInstance.post(`/getOrderIdForPayment/create-order`, paymentdetails);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
+    }
+
+}
+
+export const addCandidateTransaction = async (userId, assessmentId, paymentdetails) => {
+    try {
+        const response = await axiosInstance.post(`/transactions/${userId}/${assessmentId}`, paymentdetails);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
+    }
+}
+
+export const getTransactions = async (userId: string) => {
+    try {
+        const response = await axiosInstance.get(`/transactions/${userId}`);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
+    }
+}
+export const getTransactionsForAdmin = async (page = 1, limit = 10) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getTransactions`, {
+            params: { page, limit },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMessage = error?.response?.data?.message || 'Failed to fetch transactions';
+        toast.error(`${errorMessage}.`);
+        return { success: false, message: errorMessage, error };
+    }
+};

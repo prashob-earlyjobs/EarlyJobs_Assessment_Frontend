@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export interface UserCredentials {
     role: 'candidate' | 'recruiter' | 'franchise' | 'super_admin' | 'franchise_admin';
@@ -15,8 +15,7 @@ export interface UserCredentials {
     profile: {
         gender: string;
         dateOfBirth: string;
-        address:
-        {
+        address: {
             street: string;
             city: string;
             state: string;
@@ -31,11 +30,9 @@ export interface UserCredentials {
         prefJobLocations: string[];
     };
     updatedAt: string;
-    franchiserId?: string;
-    referrerId?: string;
+    franchiserId: string | null;
+    referrerId: string | null;
     _id: string;
-
-    // Add more fields as needed
 }
 
 interface UserContextType {
@@ -48,8 +45,11 @@ const UserContext = createContext<UserContextType>({
     setUserCredentials: () => { },
 });
 
-export const UserProvider = ({ children }) => {
-    const [userCredentials, setUserCredentials] = useState(null);
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+    const [userCredentials, setUserCredentials] = useState<UserCredentials | null>(null);
+
+
+
 
     return (
         <UserContext.Provider value={{ userCredentials, setUserCredentials }}>

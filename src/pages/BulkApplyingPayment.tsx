@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  ArrowLeft, 
-  CreditCard, 
-  Shield, 
+import {
+  ArrowLeft,
+  CreditCard,
+  Shield,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -36,19 +36,19 @@ const BulkApplyingPayment = () => {
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    
+
     try {
       // Simulate Razorpay payment integration
       toast.info("Redirecting to payment gateway...");
-      
+
       // In a real implementation, you would:
       // 1. Create order on your backend
       // 2. Initialize Razorpay with order details
       // 3. Handle payment success/failure
-      
+
       // Simulated payment process
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Mock Razorpay options
       const options = {
         key: "rzp_test_1234567890", // Replace with your Razorpay key
@@ -56,19 +56,18 @@ const BulkApplyingPayment = () => {
         currency: "INR",
         name: "EarlyJobs",
         description: `Bulk Application - ${plan.count} Jobs`,
-        image: "/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png",
-        handler: function(response: any) {
-          console.log("Payment successful:",response);
+        image: "/lovable-uploads/logo.png",
+        handler: function (response: { razorpay_payment_id?: string;[key: string]: unknown }) {
           toast.success("Payment successful! Processing your applications...");
-          
+
           // Navigate to success page
           setTimeout(() => {
-            navigate('/bulk-applying/success', { 
-              state: { 
+            navigate('/bulk-applying/success', {
+              state: {
                 plan: plan,
                 applicationData: applicationData,
                 paymentId: response.razorpay_payment_id || 'mock_payment_123'
-              } 
+              }
             });
           }, 1000);
         },
@@ -86,17 +85,17 @@ const BulkApplyingPayment = () => {
       // For demo purposes, we'll simulate success
       toast.success("Payment successful! Processing your applications...");
       setTimeout(() => {
-        navigate('/bulk-applying/success', { 
-          state: { 
+        navigate('/bulk-applying/success', {
+          state: {
             plan: plan,
             applicationData: applicationData,
             paymentId: 'demo_payment_123'
-          } 
+          }
         });
       }, 1500);
-      
+
     } catch (error) {
-      console.error("Payment error:", error);
+
       toast.error("Payment failed. Please try again.");
     } finally {
       setIsProcessing(false);
@@ -113,9 +112,9 @@ const BulkApplyingPayment = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate(`/bulk-applying/verify/${count}`, { state: { plan } })}
               className="rounded-2xl"
               disabled={isProcessing}
@@ -124,9 +123,9 @@ const BulkApplyingPayment = () => {
               Back to Verification
             </Button>
             <Separator orientation="vertical" className="h-6" />
-            <img 
-              src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-              alt="EarlyJobs Logo" 
+            <img
+              src="/lovable-uploads/logo.png"
+              alt="EarlyJobs Logo"
               className="h-8 w-auto"
             />
             <h1 className="text-xl font-bold text-gray-900">Secure Payment</h1>
@@ -175,12 +174,11 @@ const BulkApplyingPayment = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div 
-                  className={`border-2 rounded-2xl p-4 cursor-pointer transition-all ${
-                    selectedPaymentMethod === 'razorpay' 
-                      ? 'border-orange-500 bg-orange-50' 
-                      : 'border-gray-200 hover:border-orange-300'
-                  }`}
+                <div
+                  className={`border-2 rounded-2xl p-4 cursor-pointer transition-all ${selectedPaymentMethod === 'razorpay'
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-200 hover:border-orange-300'
+                    }`}
                   onClick={() => setSelectedPaymentMethod('razorpay')}
                 >
                   <div className="flex items-center space-x-3">
@@ -218,7 +216,7 @@ const BulkApplyingPayment = () => {
                   <div>
                     <h3 className="font-semibold text-green-900 mb-2">100% Secure Payment</h3>
                     <p className="text-sm text-green-700 mb-3">
-                      Your payment information is encrypted using industry-standard SSL technology. 
+                      Your payment information is encrypted using industry-standard SSL technology.
                       We don't store your payment details on our servers.
                     </p>
                   </div>
@@ -290,7 +288,7 @@ const BulkApplyingPayment = () => {
               </CardContent>
             </Card>
 
-            <Button 
+            <Button
               onClick={handlePayment}
               disabled={isProcessing}
               size="lg"

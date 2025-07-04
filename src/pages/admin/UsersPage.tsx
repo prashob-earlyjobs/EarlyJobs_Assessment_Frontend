@@ -26,7 +26,6 @@ const UsersPage: React.FC = () => {
   ]);
 
   const handleEditUser = (user: User) => {
-    console.log('Edit user:', user);
     // In real app, open edit modal or navigate to edit page
     toast({
       title: "Edit User",
@@ -35,7 +34,6 @@ const UsersPage: React.FC = () => {
   };
 
   const handleToggleUserStatus = async (userId: string, role: string, newStatus: boolean) => {
-    console.log("users", userId, newStatus);
     if (role === 'super_admin' || role === 'franchise_admin') {
       return toast({
         title: "Error",
@@ -48,7 +46,6 @@ const UsersPage: React.FC = () => {
       if (!response.success) {
         throw new Error(response.message);
       }
-      console.log("User status updated successfully:", response.data);
 
       setUsers(prevUsers =>
         prevUsers.map(user =>
@@ -58,11 +55,11 @@ const UsersPage: React.FC = () => {
 
     }
     catch (error) {
-      console.error("Error toggling user status:", error);
       toast({
         title: "Error",
-        description: "Failed to toggle user status",
+        description: "An error occurred. Please try again later"
       });
+
       return;
     }
 

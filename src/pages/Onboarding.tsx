@@ -235,7 +235,6 @@ const Onboarding = () => {
         }
       } catch (e) {
         toast.error("An error occurred. Please try again later.");
-        console.error(e);
       }
     }
   };

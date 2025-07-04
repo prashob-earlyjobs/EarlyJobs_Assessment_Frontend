@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { isUserLoggedIn } from "../services/servicesapis";
+import { useUser } from "@/context";
 
 const PageLoader: React.FC = () => {
     return (
@@ -20,6 +21,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const { userCredentials, setUserCredentials } = useUser();
     const location = useLocation();
 
     useEffect(() => {
@@ -28,17 +30,15 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const loggedIn = await isUserLoggedIn();
-                console.log("Checking authentication status...", loggedIn.user.role);
                 if (loggedIn.success && loggedIn.user.role !== 'super_admin' && loggedIn.user.role !== 'franchise_admin') {
 
-                    console.log("Checking authentication status...",);
                     setIsAuthenticated(!!loggedIn); // Convert to boolean
+                    setUserCredentials(loggedIn.user);
                 }
                 else {
                     throw new Error("Admin shouldn't access this page");
                 }
             } catch (error) {
-                console.error("Auth check failed:", error);
                 setIsAuthenticated(false);
             }
         };
