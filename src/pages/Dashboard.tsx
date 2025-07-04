@@ -258,7 +258,7 @@ Certificate ID: EJ-CERT-2024-001
           </div>
         </div>
       </header> */}
-      <Header />
+      <Header showLogoutDialog={showLogoutDialog} setShowLogoutDialog={setShowLogoutDialog} />
 
       {/* Logout Confirmation Dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

@@ -25,7 +25,7 @@ const notifications = [
     { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
 ];
 
-const Header = () => {
+const Header = ({ showLogoutDialog, setShowLogoutDialog }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [userDetails, setUserDetails] = useState({
@@ -39,7 +39,6 @@ const Header = () => {
     });
 
     const [showNotifications, setShowNotifications] = useState(false);
-    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
     const { userCredentials, setUserCredentials } = useUser();
 
 
