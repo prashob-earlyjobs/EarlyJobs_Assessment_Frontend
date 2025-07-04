@@ -5,29 +5,50 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, CreditCard } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { getTransactionsForAdmin } from "@/components/services/servicesapis";
+import { getTransactionsForSprAdmin, getTransactionsForFranchisenAdmin } from "@/components/services/servicesapis";
+import { useAdmin } from "@/context/AdminContext";
 
 const LIMIT = 10;
 
 const TransactionsForAdmin = () => {
     const navigate = useNavigate();
+
     const [transactions, setTransactions] = useState([]);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
+    const { currentUser, setCurrentUser } = useAdmin();
+    const [totalCommission, setTotalCommission] = useState(0);
 
     const fetchTransactions = async () => {
         setLoading(true);
-        try {
-            const response = await getTransactionsForAdmin(page, LIMIT);
-            if (response.success) {
-                setTransactions(response.data.transactions);
-                setTotal(response.data.pagination.total);
+        if (currentUser.role === 'super_admin') {
+            try {
+                const response = await getTransactionsForSprAdmin(page, LIMIT);
+                if (response.success) {
+                    setTransactions(response.data.transactions);
+                    setTotal(response.data.pagination.total);
+                    // Note: Super admin API currently lacks totalCommission; consider adding it if needed
+                    setTotalCommission(0); // Placeholder for super admin
+                }
+            } catch (error) {
+                console.error("Failed to fetch transactions:", error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Failed to fetch transactions:", error);
-        } finally {
-            setLoading(false);
+        } else {
+            try {
+                const response = await getTransactionsForFranchisenAdmin(page, LIMIT);
+                if (response.success) {
+                    setTransactions(response.data.transactions);
+                    setTotal(response.data.pagination.total);
+                    setTotalCommission(response.data.earnings.totalCommission || 0);
+                }
+            } catch (error) {
+                console.error("Failed to fetch transactions:", error);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -63,6 +84,13 @@ const TransactionsForAdmin = () => {
                             View and manage all transaction records.
                         </p>
                     </div>
+                    {currentUser.role !== 'super_admin' && (
+                        <div className="mt-6 p-6 bg-white rounded-2xl shadow-md mb-2">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-1">Earnings Summary</h3>
+                            <p className="text-gray-700">Total Commission: <span className="font-semibold"> ₹{totalCommission}</span></p>
+                        </div>
+
+                    )}
                     <Card className="rounded-3xl border-0 shadow-lg">
                         <CardHeader>
                             <CardTitle className="text-2xl">Transaction History</CardTitle>
@@ -81,8 +109,11 @@ const TransactionsForAdmin = () => {
                                                     <th className="px-4 py-3">Candidate Name</th>
                                                     <th className="px-4 py-3">Assessment Title</th>
                                                     <th className="px-4 py-3">Amount</th>
-                                                    <th className="px-4 py-3">Franchise Name</th>
-                                                    <th className="px-4 py-3 rounded-tr-2xl">Franchise Commission</th>
+                                                    {
+                                                        currentUser.role === 'super_admin' &&
+                                                        <th className="px-4 py-3">Franchise Name</th>
+                                                    }
+                                                    <th className="px-4 py-3 rounded-tr-2xl">{currentUser.role !== 'super_admin' ? 'Your Commission' : 'Franchise Commission'}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -98,7 +129,10 @@ const TransactionsForAdmin = () => {
                                                         <td className="px-4 py-3">{transaction.candidateName || "Unknown"}</td>
                                                         <td className="px-4 py-3">{transaction.assessmentTitle || "Unknown"}</td>
                                                         <td className="px-4 py-3">₹{transaction.transactionAmount}</td>
-                                                        <td className="px-4 py-3">{transaction.franchiseName || "Unknown"}</td>
+                                                        {
+                                                            currentUser.role === 'super_admin' &&
+                                                            <td className="px-4 py-3">{transaction.franchiseName || "Unknown"}</td>
+                                                        }
                                                         <td className="px-4 py-3">₹{transaction.franchiseCommission}</td>
                                                     </tr>
                                                 ))}
@@ -124,6 +158,7 @@ const TransactionsForAdmin = () => {
                                             Next
                                         </Button>
                                     </div>
+
                                 </>
                             ) : (
                                 <div className="text-center py-16">

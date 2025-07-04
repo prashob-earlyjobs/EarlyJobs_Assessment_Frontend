@@ -37,6 +37,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     const permissions = {
       'super_admin': [
         'view_all_users',
+        'view_candidates',
         'manage_users',
         'manage_assessments',
         'manage_franchises',
@@ -45,7 +46,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         'candidate_transactions'
       ],
       'franchise_admin': [
-        'view_all_users',
+        'view_candidates',
         'view_franchise_users',
         'manage_assessments',
         'manage_franchise_candidates',

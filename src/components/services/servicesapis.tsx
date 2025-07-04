@@ -269,7 +269,7 @@ export const getTransactions = async (userId: string) => {
         return error;
     }
 }
-export const getTransactionsForAdmin = async (page = 1, limit = 10) => {
+export const getTransactionsForSprAdmin = async (page = 1, limit = 10) => {
     try {
         const response = await axiosInstance.get(`/admin/getTransactions`, {
             params: { page, limit },
@@ -281,3 +281,17 @@ export const getTransactionsForAdmin = async (page = 1, limit = 10) => {
         return { success: false, message: errorMessage, error };
     }
 };
+
+export const getTransactionsForFranchisenAdmin = async (page = 1, limit = 10) => {
+    try {
+        const response = await axiosInstance.get(`/admin/franchise/getTransactions/`, {
+            params: { page, limit },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMessage = error?.response?.data?.message || 'Failed to fetch transactions';
+        toast.error(`${errorMessage}.`);
+        return { success: false, message: errorMessage, error };
+    }
+};
+

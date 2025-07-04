@@ -15,7 +15,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
           <AdminHeader />
-          <main className="flex-1 p-6">
+          <main className="flex-1">
             {children}
           </main>
         </div>
