@@ -9,7 +9,7 @@ import { Building2, Users, Calendar, MapPin, Phone, Mail, Plus } from 'lucide-re
 
 const FranchisesPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   // Mock data for franchises
   const [mockFranchises, setMockFranchises] = useState([
     {
@@ -47,17 +47,16 @@ const FranchisesPage: React.FC = () => {
     }
   ]);
 
-  const handleAddFranchise = (newFranchise: any) => {
+  const handleAddFranchise = (newFranchise) => {
     setMockFranchises([...mockFranchises, newFranchise]);
-    console.log('New franchise added:', newFranchise);
   };
 
-  const handleViewDetails = (franchise: any) => {
+  const handleViewDetails = (franchise) => {
     console.log('View franchise details:', franchise);
     // In real app, would open details modal or navigate to details page
   };
 
-  const handleManageUsers = (franchise: any) => {
+  const handleManageUsers = (franchise) => {
     console.log('Manage users for franchise:', franchise);
     // In real app, would navigate to franchise users page
   };
@@ -129,17 +128,17 @@ const FranchisesPage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => handleViewDetails(franchise)}
                   >
                     View Details
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => handleManageUsers(franchise)}
                   >

@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Cookies from 'js-cookie';
+import { toast } from 'sonner';
 
 const url = import.meta.env.VITE_APP_BACKEND;
 
@@ -34,7 +35,7 @@ export async function logout() {
   try {
     await axios.post(`${url}/auth/logout`, {}, { withCredentials: true });
   } catch (error) {
-    console.error('Logout failed:', error);
+    toast.error('Logout failed:');
   } finally {
     setAuthToken(null); // Clear token before redirect
     window.location.href = '/login';
@@ -50,11 +51,11 @@ export async function refreshAccessToken(): Promise<string> {
       throw new Error('No access token returned');
     }
 
-    console.log('✅ New Access Token:', accessToken);
     setAuthToken(accessToken); // Update token in headers and storage
+
     return accessToken;
   } catch (error) {
-    console.error('❌ Failed to refresh access token:', error);
+    toast.error('❌ Failed to refresh access token:');
     throw error;
   }
 }
@@ -67,18 +68,21 @@ axiosInstance.interceptors.response.use(
 
     if (error.response) {
       const { status, data } = error.response;
-      console.error('🚨 API Error:', { status, message: data?.message });
+      const message = typeof data === 'object' && data !== null && 'message' in data ? (data as { message: string }).message : undefined;
 
       const pathname = window.location.pathname;
 
       // Case 1: Token is missing or refresh is invalid
+      const dataMessage =
+        typeof data === 'object' && data !== null && 'message' in data
+          ? (data as { message: string }).message
+          : undefined;
       if (
-        data?.message === 'Access denied. No token provided.' ||
-        data?.message === 'Invalid refresh token'
+        dataMessage === 'Access denied. No token provided.' ||
+        dataMessage === 'Invalid refresh token'
       ) {
-        console.warn('🚫 Invalid or missing token');
         if (!pathname.includes('/login')) { // Avoid logout on login page
-          console.warn('Logging out due to invalid/missing token...');
+          toast.error('Logging out invalid/missing token...');
           await logout();
         }
         return Promise.reject(error);
@@ -87,11 +91,10 @@ axiosInstance.interceptors.response.use(
       // Case 2: Access Token expired, try to refresh once
       if (
         status === 401 &&
-        data?.message === 'Access Token Expired' &&
+        (data as { message: string }).message === 'Token is not valid.' &&
         !originalRequest._retry
       ) {
         originalRequest._retry = true;
-        console.log('🔄 Access token expired. Attempting refresh...');
 
         try {
           const newToken = await refreshAccessToken();
@@ -103,7 +106,7 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(originalRequest);
           }
         } catch (refreshError) {
-          console.error('🔁 Token refresh failed:', refreshError);
+          toast.error('🔁 Token refresh failed:');
           if (!pathname.includes('/login')) {
             await logout();
           }

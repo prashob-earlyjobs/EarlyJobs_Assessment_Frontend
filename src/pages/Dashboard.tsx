@@ -38,6 +38,7 @@ import {
   Users,
   LogOut,
   CreditCard,
+  Repeat,
   User,
   Download
 } from "lucide-react";
@@ -63,51 +64,7 @@ const Dashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  useEffect(() => {
-    // Simulate fetching user data
-    const fetchUserData = async () => {
-      try {
 
-        const response = await isUserLoggedIn();
-        if (!response.success) {
-          toast.error("You need to log in first!");
-          navigate('/login');
-          return;
-        }
-        setUserCredentials({
-          authProvider: response.user.authProvider,
-          avatar: response.user.avatar,
-          createdAt: response.user.createdAt,
-          email: response.user.email,
-          isActive: response.user.isActive,
-          isEmailVerified: response.user.isEmailVerified,
-          isPhoneVerified: response.user.isPhoneVerified,
-          lastLogin: response.user.lastLogin,
-          mobile: response.user.mobile,
-          role: response.user.role,
-          name: response.user.name,
-          profile: {
-            skills: response.user.profile.skills || [],
-            experience: response.user.profile.experience || [],
-            education: response.user.profile.education || [],
-            bio: response.user.profile.bio || '',
-            prefJobLocations: response.user.profile.prefJobLocations || [],
-          },
-          updatedAt: response.user.updatedAt,
-          _id: response.user._id,
-        });
-        console.log("User data fetched successfully:", response);
-        setUserDetails(response.user);
-      } catch (error) {
-        toast.error("Failed to fetch user data. Please try again later.");
-        console.error("Error fetching user data:", error);
-      }
-
-      // In a real application, you would fetch user data from an API
-      // For now, we will just simulate a delay
-    };
-    fetchUserData();
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -122,7 +79,7 @@ const Dashboard = () => {
 
 
     catch (error) {
-      console.error("Logout failed:", error);
+
       toast.error("Logout failed. Please try again.");
     }
     // toast.success("Logged out successfully!");
@@ -221,7 +178,7 @@ Certificate ID: EJ-CERT-2024-001
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <img
-                src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png"
+                src="/lovable-uploads/logo.png"
                 alt="EarlyJobs Logo"
                 className="h-12 w-auto"
               />
@@ -476,9 +433,10 @@ Certificate ID: EJ-CERT-2024-001
                   <Button
                     variant="outline"
                     className="h-16 rounded-2xl border-gray-200 hover:bg-orange-50 hover:border-orange-300 flex flex-col space-y-1"
+                    onClick={() => navigate('/transactions')}
                   >
-                    <BookOpen className="h-5 w-5 text-orange-600" />
-                    <span className="text-sm">Continue Test</span>
+                    <Repeat className="h-5 w-5 text-orange-600" />
+                    <span className="text-sm">Your Transactions</span>
                   </Button>
                   <Button
                     variant="outline"

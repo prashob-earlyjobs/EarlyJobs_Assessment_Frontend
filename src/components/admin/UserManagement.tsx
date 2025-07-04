@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Search, Edit } from 'lucide-react';
 import { User } from '@/types/admin';
 import { getUsers } from '../services/servicesapis';
+import { toast } from 'sonner';
 
 interface UserManagementProps {
   users: User[];
@@ -38,9 +39,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           throw new Error(response.message);
         }
         setUsers(response.data.users);
-        console.log("Users fetched successfully:", users);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        toast.error("Failed to fetch users:");
         return;
       }
     }

@@ -18,7 +18,53 @@ import {
   Shield
 } from "lucide-react";
 import { toast } from "sonner";
-import { getAssessmentById } from "@/components/services/servicesapis";
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment } from "@/components/services/servicesapis";
+import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
+import { useUser } from "@/context";
+
+export interface IOffer {
+  title: string;
+  type: "percentage" | "flat";
+  value: number;
+  validUntil: Date;
+}
+
+export interface IPricing {
+  basePrice: number;
+  discountedPrice: number;
+}
+
+// Define according to your actual question schema structure
+export interface IQuestion {
+  questionText: string;
+  options?: string[];
+  answer?: string | number;
+  // Add other fields as needed
+}
+
+export interface AssessmentType {
+  _id?: string;
+  title: string;
+  description?: string;
+  type: "mcq" | "coding" | "video" | "mixed";
+  category: "technical" | "aptitude" | "personality" | "communication";
+  timeLimit: number;
+  questions: IQuestion[];
+  pricing: IPricing;
+  offer: IOffer;
+  isPremium?: boolean;
+  passingScore?: number;
+  isActive?: boolean;
+  createdBy?: string;
+  tags?: string[];
+  difficulty?: "Beginner" | "Intermediate" | "Advanced";
+  attempts?: number;
+  averagePrice?: number;
+  completionRate?: number;
+  createdDate?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 const Assessment = () => {
   const navigate = useNavigate();
@@ -29,73 +75,118 @@ const Assessment = () => {
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(true);
-  type AssessmentType = {
-    title: string;
-    timeLimit: number;
-    questions: [];
-    type: string;
-    // Add other fields as needed
-  };
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // New loading state
+  const { userCredentials } = useUser();
 
   const [assessmentData, setAssessmentData] = useState<AssessmentType>({
     title: "",
+    type: "mcq",
+    category: "technical",
     timeLimit: 0,
     questions: [],
-    type: "",
+    pricing: { basePrice: 0, discountedPrice: 0 },
+    offer: { title: "", type: "flat", value: 0, validUntil: new Date() }
   });
-  console.log("Assessment ID:", id);
+
+  const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
 
   useEffect(() => {
-    const fetchAssessment = async () => {
+
+    const fetchData = async () => {
+      setIsLoading(true); // Start loading
       try {
         const response = await getAssessmentById(id);
         if (!response.success) throw new Error(response.message || "Failed to fetch assessment data");
-        console.log("Fetched assessment data:", response.data);
+        const currentDate = new Date("2025-07-03T12:15:00Z"); // 05:45 PM IST converted to UTC
+        const offerValid = new Date(response.data.assessment.offer.validUntil) >= currentDate;
+        if (response.data.assessment.offer && !offerValid) {
+          response.data.assessment.pricing.discountedPrice = response.data.assessment.pricing.basePrice;
+        }
         setAssessmentData(response.data.assessment);
 
-      }
-      catch (error) {
-        console.error("Failed to fetch assessment data:", error);
-        toast.error("Failed to load assessment data. Please try again later.");
-        // navigate('/assessments');
-      }
-
-    }
-    fetchAssessment()
-  }, [id]);
-  const assessmentFee = 299; // ₹299 for assessment
-
-  const handlePayment = async () => {
-    // Simulate Razorpay payment
-    const options = {
-      key: 'rzp_test_xxxxxxxxxx', // This would be your Razorpay test key
-      amount: assessmentFee * 100, // Amount in paise
-      currency: 'INR',
-      name: 'EarlyJobs',
-      description: 'Assessment Fee',
-      handler: function (response: unknown) {
-        console.log('Payment successful:', response);
-        toast.success('Payment successful! Starting assessment...');
-        setPaymentCompleted(true);
-        setShowPayment(false);
-      },
-      prefill: {
-        name: 'Alex Johnson',
-        email: 'alex@example.com',
-        contact: '9876543210'
-      },
-      theme: {
-        color: '#ea580c'
+        if (response.data.assessment.pricing.discountedPrice > 0) {
+          const orderResponse = await getOrderIdForPayment({
+            amount: response.data.assessment.pricing.discountedPrice * 100, // Amount in paise
+            currency: "INR",
+            receipt: `receipt_${id}`,
+          });
+          setOrderId(orderResponse.id);
+        }
+      } catch (error) {
+        toast.error("Failed to load data. Please try again later.");
+      } finally {
+        setIsLoading(false); // End loading
       }
     };
 
-    // In a real implementation, you would load Razorpay script and create payment
-    // For now, we'll simulate successful payment
-    setTimeout(() => {
-      toast.success('Payment successful! Starting assessment...');
-      setPaymentCompleted(true);
-      setShowPayment(false);
-    }, 1000);
+    fetchData();
+  }, [id, userCredentials]);
+
+  // Dynamically set assessment fee based on offer validity
+  const assessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
+    ? assessmentData.pricing.discountedPrice
+    : assessmentData.pricing.basePrice;
+
+  const addCandidateTransactionDetails = async (paymentId: string) => {
+    const details = {
+      transactionId: paymentId || orderId, // Use paymentId from Razorpay or fallback to orderId
+      transactionAmount: assessmentFee,
+      transactionStatus: 'success', // Assuming success on payment completion
+      pricing: {
+        basePrice: assessmentData.pricing.basePrice,
+        discountedPrice: assessmentData.pricing.discountedPrice
+      },
+      referrerId: userCredentials.referrerId || null, // Optional field for referral tracking
+      franchiserId: userCredentials.franchiserId || null,
+      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z"),
+      isPremium: assessmentData.isPremium || false
+    };
+
+    try {
+      const response = await addCandidateTransaction(userCredentials._id, id, details);
+    } catch (error) {
+      toast.error("Failed to add candidate transaction. Please try again.");
+    }
+  };
+
+  const handlePayment = () => {
+    if (!Razorpay || !orderId) {
+      toast.error("Payment initialization failed. Please try again.");
+      return;
+    }
+
+    const options: RazorpayOrderOptions = {
+      key: import.meta.env.VITE_APP_RAZORPAY_KEY || "YOUR_RAZORPAY_KEY",
+      amount: assessmentFee * 100,
+      currency: "INR",
+      name: "EarlyJobs",
+      description: `Assessment Fee for ${assessmentData.title}`,
+      order_id: orderId || "",
+      handler: (response) => {
+        toast.success("Payment successful! Starting assessment...");
+        setPaymentCompleted(true);
+        setShowPayment(false);
+        addCandidateTransactionDetails(response.razorpay_payment_id);
+      },
+      prefill: {
+        name: "Alex Johnson",
+        email: "alex@example.com",
+        contact: "9876543210",
+      },
+      theme: {
+        color: "#ea580c",
+      },
+      modal: {
+        confirm_close: true, // Prompt user before closing payment modal
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.on("payment.failed", (error) => {
+      toast.error(`Payment failed: ${error.error.description}`);
+    });
+    razorpayInstance.open();
   };
 
   const questions = [
@@ -237,7 +328,19 @@ const Assessment = () => {
     navigate(`/results/${id}`);
   };
 
-  // Show payment screen first
+  if (showPayment && isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
+          <CardContent className="text-center py-10">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading payment details...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (showPayment) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -251,16 +354,15 @@ const Assessment = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-gray-50 rounded-2xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData?.title}</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Duration:</span>
-                  <span>{assessmentData.timeLimit} minutes</span>
+                  <span>{assessmentData?.timeLimit} minutes</span>
                 </div>
-
                 <div className="flex justify-between">
                   <span>Questions:</span>
-                  <span>{assessmentData.questions?.length}</span>
+                  <span>{assessmentData?.questions?.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Attempts:</span>
@@ -268,7 +370,7 @@ const Assessment = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Assessment Type:</span>
-                  <span>{assessmentData.type}</span>
+                  <span>{assessmentData?.type}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
                   <span>Assessment Fee:</span>
@@ -276,7 +378,6 @@ const Assessment = () => {
                 </div>
               </div>
             </div>
-
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
               <div className="flex items-center space-x-2 text-green-700">
                 <Shield className="h-5 w-5" />
@@ -285,19 +386,25 @@ const Assessment = () => {
               <p className="text-sm text-green-600 mt-1">
                 Your payment is processed securely through Razorpay
               </p>
+              {assessmentData.offer && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Offer valid until: {new Date(assessmentData.offer.validUntil).toLocaleDateString()}
+                </p>
+              )}
             </div>
-
             <Button
               onClick={handlePayment}
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+              disabled={!orderId}
             >
-              Pay ₹{assessmentFee} & Start Assessment
+              {!orderId ? "Processing..." : `Pay ₹${assessmentFee} & Start Assessment`}
             </Button>
-
+            {razorpayError && <p className="text-red-500 text-center mt-2">Error loading payment: {razorpayError}</p>}
+            {!orderId && <p className="text-red-500 text-center mt-2">Initializing payment...</p>}
             <Button
               variant="outline"
               onClick={() => navigate('/assessments')}
-              className="w-full h-12 rounded-2xl border-gray-200"
+              className="w-full h-12 rounded-2xl border-gray-200 mt-2"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Assessments
@@ -332,15 +439,12 @@ const Assessment = () => {
                 <p className="text-sm text-gray-600">Question {currentQuestion} of {totalQuestions}</p>
               </div>
             </div>
-
             <div className="flex items-center space-x-6">
               {/* Timer */}
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-                }`}>
+              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                 <Clock className="h-5 w-5" />
                 <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
               </div>
-
               {/* Progress */}
               <div className="flex items-center space-x-2 min-w-[120px]">
                 <span className="text-sm text-gray-600">Progress:</span>
@@ -353,7 +457,6 @@ const Assessment = () => {
           </div>
         </div>
       </header>
-
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Question Navigation Sidebar */}
@@ -369,7 +472,6 @@ const Assessment = () => {
                     const isCurrentQuestion = questionNumber === currentQuestion;
                     const isQuestionAnswered = answers[questionNumber] !== undefined;
                     const isQuestionFlagged = flaggedQuestions.has(questionNumber);
-
                     return (
                       <button
                         key={questionNumber}
@@ -392,7 +494,6 @@ const Assessment = () => {
                     );
                   })}
                 </div>
-
                 <div className="mt-6 space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Answered:</span>
@@ -407,7 +508,6 @@ const Assessment = () => {
                     <span className="font-medium text-orange-600">{flaggedQuestions.size}</span>
                   </div>
                 </div>
-
                 <div className="mt-6 pt-4 border-t">
                   <div className="flex items-center space-x-2 text-xs text-gray-500 mb-3">
                     <div className="flex items-center space-x-1">
@@ -427,7 +527,6 @@ const Assessment = () => {
               </CardContent>
             </Card>
           </div>
-
           {/* Question Content */}
           <div className="lg:col-span-3">
             <Card className="rounded-3xl border-0 shadow-lg">
@@ -450,7 +549,6 @@ const Assessment = () => {
                       </Badge>
                     )}
                   </div>
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -462,13 +560,11 @@ const Assessment = () => {
                   </Button>
                 </div>
               </CardHeader>
-
               <CardContent className="space-y-8">
                 <div>
                   <h2 className="text-2xl font-semibold text-gray-900 leading-relaxed mb-6">
                     {currentQuestionData.question}
                   </h2>
-
                   <RadioGroup
                     value={answers[currentQuestion] || ""}
                     onValueChange={handleAnswerChange}
@@ -491,7 +587,6 @@ const Assessment = () => {
                     ))}
                   </RadioGroup>
                 </div>
-
                 {/* Auto-save indicator */}
                 {isAnswered && (
                   <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 p-3 rounded-2xl">
@@ -499,7 +594,6 @@ const Assessment = () => {
                     <span>Your answer has been saved automatically</span>
                   </div>
                 )}
-
                 {/* Navigation Buttons */}
                 <div className="flex items-center justify-between pt-6 border-t">
                   <Button
@@ -511,7 +605,6 @@ const Assessment = () => {
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Previous
                   </Button>
-
                   <div className="flex items-center space-x-4">
                     {currentQuestion === totalQuestions ? (
                       <Button
@@ -533,7 +626,6 @@ const Assessment = () => {
                 </div>
               </CardContent>
             </Card>
-
             {/* Warning for unanswered questions */}
             {currentQuestion === totalQuestions && Object.keys(answers).length < totalQuestions && (
               <Card className="rounded-3xl border-0 shadow-lg mt-6 bg-orange-50 border-orange-200">

@@ -9,13 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  ArrowLeft, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  FileText, 
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  FileText,
   CheckCircle,
   AlertCircle,
   CreditCard,
@@ -31,7 +31,7 @@ const BulkApplyingVerify = () => {
 
   const [formData, setFormData] = useState({
     fullName: "Alex Johnson",
-    email: "alex.johnson@email.com", 
+    email: "alex.johnson@email.com",
     phone: "+91 9876543210",
     experience: "3",
     currentLocation: "Mumbai, India",
@@ -81,11 +81,11 @@ const BulkApplyingVerify = () => {
       return;
     }
 
-    navigate(`/bulk-applying/payment/${count}`, { 
-      state: { 
+    navigate(`/bulk-applying/payment/${count}`, {
+      state: {
         plan: plan,
         applicationData: formData
-      } 
+      }
     });
   };
 
@@ -99,9 +99,9 @@ const BulkApplyingVerify = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/bulk-applying')}
               className="rounded-2xl"
             >
@@ -109,9 +109,9 @@ const BulkApplyingVerify = () => {
               Back to Plans
             </Button>
             <Separator orientation="vertical" className="h-6" />
-            <img 
-              src="/lovable-uploads/45b45f3e-da1e-46ed-a885-57e992853fdf.png" 
-              alt="EarlyJobs Logo" 
+            <img
+              src="/lovable-uploads/logo.png"
+              alt="EarlyJobs Logo"
               className="h-8 w-auto"
             />
             <h1 className="text-xl font-bold text-gray-900">Verify Application Details</h1>
@@ -359,7 +359,7 @@ const BulkApplyingVerify = () => {
               </CardContent>
             </Card>
 
-            <Button 
+            <Button
               onClick={handleProceedToPayment}
               size="lg"
               className="w-full h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 text-white font-semibold"

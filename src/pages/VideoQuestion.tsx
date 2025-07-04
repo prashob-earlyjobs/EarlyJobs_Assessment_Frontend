@@ -4,9 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  Video, 
+import {
+  ArrowLeft,
+  Video,
   VideoOff,
   Mic,
   MicOff,
@@ -76,14 +76,14 @@ const VideoQuestion = () => {
       });
       setStream(mediaStream);
       setHasPermission(true);
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-      
+
       toast.success("Camera and microphone access granted!");
     } catch (error) {
-      console.error("Error accessing media devices:", error);
+      toast.error("An error occurred. Please try again later.");
       setHasPermission(false);
       toast.error("Camera and microphone access required for this assessment.");
     }
@@ -120,14 +120,14 @@ const VideoQuestion = () => {
     try {
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      
+
       mediaRecorder.start();
       setIsRecording(true);
       setTimeRemaining(question.timeLimit);
-      
+
       toast.success("Recording started!");
     } catch (error) {
-      console.error("Error starting recording:", error);
+      toast.error("An error occurred. Please try again later.");
       toast.error("Failed to start recording");
     }
   };
@@ -154,7 +154,7 @@ const VideoQuestion = () => {
       toast.error("Please record your response before submitting.");
       return;
     }
-    
+
     toast.success("Video response submitted successfully!");
     navigate(`/results/${id}`);
   };
@@ -224,9 +224,8 @@ const VideoQuestion = () => {
 
             <div className="flex items-center space-x-4">
               {/* Timer */}
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${
-                timeRemaining < 30 && isRecording ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
-              }`}>
+              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${timeRemaining < 30 && isRecording ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                }`}>
                 <Clock className="h-5 w-5" />
                 <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
               </div>
@@ -255,7 +254,7 @@ const VideoQuestion = () => {
                 <p className="text-gray-900 leading-relaxed">
                   {question.question}
                 </p>
-                
+
                 <div className="p-4 bg-blue-50 rounded-2xl">
                   <h4 className="font-medium text-blue-900 mb-2">Tips for Success:</h4>
                   <ul className="space-y-1 text-sm text-blue-800">
@@ -322,7 +321,7 @@ const VideoQuestion = () => {
                         playsInline
                         className="w-full h-full object-cover"
                       />
-                      
+
                       {!isCameraOn && (
                         <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                           <div className="text-center text-white">
@@ -417,7 +416,7 @@ const VideoQuestion = () => {
                             <RotateCcw className="h-5 w-5 mr-2" />
                             Record Again
                           </Button>
-                          
+
                           <Button
                             onClick={handleSubmit}
                             size="lg"

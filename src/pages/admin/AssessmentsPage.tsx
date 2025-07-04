@@ -73,7 +73,7 @@ const AssessmentsPage: React.FC = () => {
         });
         setHasMore(fetched.length === LIMIT);
       } catch (err) {
-        console.error('Failed to fetch assessments:', err);
+        toast.error("An error occurred. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -99,13 +99,11 @@ const AssessmentsPage: React.FC = () => {
   };
 
   const handleAddAssessment = async (newAssessment) => {
-    console.log('New assessment added:', newAssessment);
     try {
       const response = await addAssessment(newAssessment);
       if (!response.success) {
         throw new Error(response.message);
       }
-      console.log('Assessment added successfully:', response.data);
       toast.success('Assessment added successfully!');
 
     }
@@ -124,7 +122,6 @@ const AssessmentsPage: React.FC = () => {
   };
 
   const handleUpdateAssessment = async (updatedAssessment: Assessment) => {
-    console.log('Updating assessment:', updatedAssessment, selectedAssessment._id);
     if (!selectedAssessment._id) return toast.error('This assessment does not exist.');
     try {
       const response = await editAssessment(
@@ -152,7 +149,6 @@ const AssessmentsPage: React.FC = () => {
   };
 
   const handleViewAnalytics = (assessment: Assessment) => {
-    console.log('View analytics for:', assessment);
   };
 
   return (

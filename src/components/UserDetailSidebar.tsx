@@ -1,212 +1,3 @@
-
-// import React, { useEffect } from 'react';
-// import { X, Mail, Phone, MapPin, Calendar, Shield, ShieldOff, Key, UserCog, MessageSquare } from 'lucide-react';
-// import { Button } from './ui/button';
-// import { Badge } from './ui/badge';
-// import { Avatar, AvatarFallback } from './ui/avatar';
-// import { Separator } from './ui/separator';
-// import { UserCredentials } from '../context/index';
-// import { motion, AnimatePresence } from "framer-motion";
-// import { getAssessmentsByUserId } from './services/servicesapis';
-
-// interface UserDetailSidebarProps {
-//   user: UserCredentials | null;
-//   onClose: () => void;
-// }
-
-// const sidebarVariants = {
-//   hidden: { x: '100%', opacity: 0 },
-//   visible: { x: 0, opacity: 1 },
-//   exit: { x: '100%', opacity: 0 }
-// };
-
-// const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) => {
-//   useEffect(() => {
-//     const getAssessmentsAndRes = async () => {
-//       try {
-//         const response = await getAssessmentsByUserId(user._id);
-//         if (!response.success) throw new Error(response.message);
-//         console.log('Assessments and results:', response);
-//         // Fetch assessments and results here
-//       } catch (error) {
-//         console.error('Error fetching assessments and results:', error);
-//       }
-//     };
-
-//     getAssessmentsAndRes();
-//   }, []);
-
-//   if (!user) return null;
-
-//   const getRoleBadgeColor = (role: string) => {
-//     switch (role) {
-//       case 'HR':
-//         return 'bg-blue-100 text-blue-800 border-blue-200';
-//       case 'SHM':
-//         return 'bg-purple-100 text-purple-800 border-purple-200';
-//       case 'BDE':
-//         return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-//       default:
-//         return 'bg-gray-100 text-gray-800 border-gray-200';
-//     }
-//   };
-
-//   const getStatusBadgeColor = (status: boolean) => {
-//     return status
-//       ? 'bg-green-100 text-green-800 border-green-200'
-//       : 'bg-red-100 text-red-800 border-red-200';
-//   };
-
-//   return (
-//     <AnimatePresence mode='wait'>
-//       <>
-//         <motion.div
-//           key="backdrop"
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 0.5 }}
-//           exit={{ opacity: 0 }}
-//           transition={{ duration: 0.3 }}
-//           className="fixed inset-0 bg-black z-40"
-//           onClick={onClose}
-//           style={{ marginTop: "0px" }}
-
-//         />
-//         <motion.div
-//           key={user._id}
-//           variants={sidebarVariants}
-//           initial="hidden"
-//           animate="visible"
-//           exit="exit"
-//           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-//           className="fixed top-0 right-0 h-full w-[50%] bg-white border-l border-border z-50 shadow-xl"
-//           style={{ marginTop: "0px" }}
-//         >
-//           <div className="flex flex-col h-full">
-//             {/* Header */}
-//             <div className="flex items-center justify-between p-6 border-b border-border">
-//               <h2 className="text-lg font-semibold text-foreground">Candidate Details</h2>
-//               <Button variant="ghost" size="sm" onClick={onClose} className="w-8 h-8 p-0">
-//                 <X className="w-4 h-4" />
-//               </Button>
-//             </div>
-
-//             {/* Content */}
-//             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-//               {/* User Profile */}
-//               <div className="flex items-center gap-4">
-//                 <Avatar className="w-16 h-16">
-//                   <AvatarFallback className="text-lg">
-//                     {user.name.slice(0, 2).toUpperCase()}
-//                   </AvatarFallback>
-//                 </Avatar>
-//                 <div>
-//                   <h3 className="text-xl font-semibold text-foreground">{user.name}</h3>
-//                   <div className="flex items-center gap-2 mt-1">
-//                     <Badge className={getRoleBadgeColor(user.role)}>
-//                       {user.role}
-//                     </Badge>
-//                     <Badge className={getStatusBadgeColor(user.isActive)}>
-//                       {user.isActive ? 'Active' : 'Inactive'}
-//                     </Badge>
-//                   </div>
-//                 </div>
-//               </div>
-//               <div>
-//                 <h4 className="text-sm font-medium text-foreground mb-3">Contact Information</h4>
-//                 <div className="space-y-3">
-//                   <div className="flex items-center gap-3">
-//                     <Mail className="w-4 h-4 text-muted-foreground" />
-//                     <div>
-//                       <p className="text-sm text-foreground">{user.email}</p>
-//                       <p className="text-xs text-muted-foreground">Email Address</p>
-//                     </div>
-//                   </div>
-//                   <div className="flex items-center gap-3">
-//                     <Phone className="w-4 h-4 text-muted-foreground" />
-//                     <div>
-//                       <p className="text-sm text-foreground">{user.mobile}</p>
-//                       <p className="text-xs text-muted-foreground">Phone Number</p>
-//                     </div>
-//                   </div>
-//                   <div className="flex items-center gap-3">
-//                     <MapPin className="w-4 h-4 text-muted-foreground" />
-//                   </div>
-//                 </div>
-//               </div>
-
-
-//               {/* Contact Information */}
-
-//               <Separator />
-
-//               {/* Professional Information */}
-//               <div>
-//                 <h4 className="text-sm font-medium text-foreground mb-3">Professional Information</h4>
-//                 <div className="space-y-3">
-//                   <div className="flex items-center gap-3">
-//                     <Calendar className="w-4 h-4 text-muted-foreground" />
-//                     <div>
-//                       <p className="text-sm text-foreground">{new Date(user.createdAt).toLocaleDateString()}</p>
-//                       <p className="text-xs text-muted-foreground">Join Date</p>
-//                     </div>
-//                   </div>
-
-//                 </div>
-//               </div>
-
-//               <Separator />
-//               <div>
-//                 <h4 className="text-sm font-medium text-foreground mb-3">Assessments Taken</h4>
-//                 <div className="space-y-3">
-//                   <div className="flex items-center gap-3">
-//                     <Calendar className="w-4 h-4 text-muted-foreground" />
-//                     <div>
-//                       <p className="text-sm text-foreground">{new Date(user.createdAt).toLocaleDateString()}</p>
-//                       <p className="text-xs text-muted-foreground">Join Date</p>
-//                     </div>
-//                   </div>
-
-//                 </div>
-//               </div>
-//               <Separator />
-
-//               {/* Activity Stats */}
-//               <div>
-//                 <h4 className="text-sm font-medium text-foreground mb-3">Activity Overview</h4>
-//                 <div className="grid grid-cols-2 gap-4">
-//                   <div className="bg-muted/50 rounded-lg p-3">
-//                     <p className="text-lg font-semibold text-foreground">0</p>
-//                     <p className="text-xs text-muted-foreground">Total Candidates</p>
-//                   </div>
-//                   <div className="bg-muted/50 rounded-lg p-3">
-//                     <p className="text-lg font-semibold text-foreground">0</p>
-//                     <p className="text-xs text-muted-foreground">Active Jobs</p>
-//                   </div>
-//                   <div className="bg-muted/50 rounded-lg p-3">
-//                     <p className="text-lg font-semibold text-foreground">2h ago</p>
-//                     <p className="text-xs text-muted-foreground">Last Active</p>
-//                   </div>
-//                   <div className="bg-muted/50 rounded-lg p-3">
-//                     <p className="text-lg font-semibold text-foreground">15</p>
-//                     <p className="text-xs text-muted-foreground">Total Logins</p>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* Actions */}
-
-//           </div>
-//         </motion.div>
-//       </>
-//     </AnimatePresence>
-//   );
-// };
-
-// export default UserDetailSidebar;
-// legend: { position: "right" as const, labels: { boxWidth: 10, font: { size: 12 } } },
-
-
 import React, { useEffect, useState } from 'react';
 import { X, Mail, Phone, MapPin, Calendar, User, Briefcase, Book, Globe, Wrench, UserCheck } from 'lucide-react';
 import { Button } from './ui/button';
@@ -218,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getAssessmentsByUserId, getFranchiser } from './services/servicesapis';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { toast } from "sonner";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -237,23 +30,22 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
   const [franchiser, setFranchiser] = useState(null);
 
   useEffect(() => {
-    console.log('User:', user);
+    console.log(user);
     const getAssessmentsAndRes = async () => {
       try {
         const response = await getAssessmentsByUserId(user._id);
         if (!response.success) throw new Error(response.message);
         setAssessments(response.data);
       } catch (error) {
-        console.error('Error fetching assessments and results:', error);
+        toast.error('Error fetching assessments and results');
       }
       if (user.franchiserId) {
         try {
           const response = await getFranchiser(user.franchiserId);
           if (!response.success) throw new Error(response.message);
-          console.log('Franchiser:', response.data);
           setFranchiser(response.data.franchiser);
         } catch (error) {
-          console.error('Error fetching assessments and results:', error);
+          toast.error('Error fetching assessments and results');
         }
 
       }
