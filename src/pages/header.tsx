@@ -29,9 +29,10 @@ import { isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 
 const notifications = [
-    { id: 1, title: "New Assessment Available", message: "React Advanced Assessment is now available", time: "2 hours ago", unread: true },
-    { id: 2, title: "Job Match Found", message: "5 new jobs match your skills", time: "1 day ago", unread: true },
-    { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
+    {
+        id: 1, title: "You're All Set to Begin! 🚀",
+        message: "Welcome to EarlyJobs Assessments. A new challenge awaits—give it your best shot!", unread: true
+    },
 ];
 
 const Header = () => {
@@ -129,6 +130,16 @@ const Header = () => {
         // toast.success("Logged out successfully!");
         // navigate('/');
     };
+    useEffect(() => {
+        if (showNotifications === true) {
+            notifications.forEach((notification) => {
+                if (notification.unread) {
+                    notification.unread = false;
+                }
+            })
+
+        }
+    }, [showNotifications]);
 
     return (
         <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -147,7 +158,7 @@ const Header = () => {
                             src="/lovable-uploads/logo.png"
                             onClick={() => navigate('/dashboard')}
                             alt="EarlyJobs Logo"
-                            className="h-12 w-auto cursor-pointer"
+                            className="h-[3.5rem] w-auto cursor-pointer"
                         />
                     </div>
 
@@ -179,7 +190,6 @@ const Header = () => {
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-900">{notification.title}</p>
                                                     <p className="text-sm text-gray-600">{notification.message}</p>
-                                                    <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
                                                 </div>
                                                 {notification.unread && (
                                                     <div className="w-2 h-2 bg-orange-500 rounded-full mt-1"></div>

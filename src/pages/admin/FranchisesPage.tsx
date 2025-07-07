@@ -104,21 +104,15 @@ const FranchisesPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-                  <div className="text-center">
+                <div className="gap-4 pt-2 border-t">
+                  <div className="flex justify-between items-center w-full">
+                    <p className="text-sm text-gray-500">Active Users</p>
                     <div className="flex items-center justify-center gap-1">
                       <Users className="h-4 w-4 text-blue-500" />
                       <span className="font-semibold text-lg">{franchise.activeUsers}</span>
                     </div>
-                    <p className="text-xs text-gray-500">Active Users</p>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Calendar className="h-4 w-4 text-green-500" />
-                      <span className="font-semibold text-lg">{franchise.totalAssessments}</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Assessments</p>
-                  </div>
+
                 </div>
 
                 <div className="pt-2 border-t">

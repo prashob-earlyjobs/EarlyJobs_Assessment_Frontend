@@ -39,7 +39,7 @@ const menuItems = [
     title: 'Candidates',
     url: '/admin/candidates',
     icon: User,
-    permission: 'view_all_users'
+    permission: 'view_candidates'
   },
   {
     title: 'Assessments',
@@ -89,7 +89,7 @@ export const AdminSidebar: React.FC = () => {
         <div className={`p-6 ${isCollapsed ? 'p-[8px] pt-[18px]' : ''}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''} gap-3`} >
             <img
-              src="/lovable-uploads/3a0cf2fe-94a3-44e3-bea3-33a03e97cc31.png"
+              src="/lovable-uploads/logo.png"
               alt="EarlyJobs"
               className={`${isCollapsed ? 'w-[3rem] h-8' : 'w-10 h-10'} object-contain`}
             />
