@@ -78,7 +78,8 @@ export const getAssessmentsfromSearch = async ({ category, searchQuery, type, di
 export const getAssessmentById = async (assessmentId) => {
     try {
         const response = await axiosInstance.get(`/assessments/${assessmentId}`);
-        return response.data;
+
+        return response;
     } catch (error) {
         toast.error(`${error?.response?.data?.message}.`);
 
@@ -216,7 +217,7 @@ export const editAssessment = async (assessmentData, assessmentId) => {
 
 export const getAssessmentsByUserId = async (userId: string) => {
     try {
-        const response = await axiosInstance.get(`/admin/getAssessments/${userId}`);
+        const response = await axiosInstance.get(`assessments/getAssessments/${userId}`);
         return response.data;
     } catch (error) {
         toast.error(`${error?.response?.data?.message}.`);
@@ -294,4 +295,26 @@ export const getTransactionsForFranchisenAdmin = async (page = 1, limit = 10) =>
         return { success: false, message: errorMessage, error };
     }
 };
+interface Franchiser {
+    name: string;
+    email: string;
+    password: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    mobile: string;
+    zipCode: string;
+}
+
+export const addFranchiser = async (newFranchise: Franchiser) => {
+    try {
+        const response = await axiosInstance.post(`/admin/addFranchiser/`, newFranchise);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
+    }
+}
 

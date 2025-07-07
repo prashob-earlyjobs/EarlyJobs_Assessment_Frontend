@@ -214,7 +214,7 @@ const Login = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="referrerId">Referrer ID</Label>
+                    <Label htmlFor="referrerId">Referrer ID(optional)</Label>
                     <Input
                       id="referrerId"
                       type="text"

@@ -91,30 +91,42 @@ const Assessment = () => {
 
   const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
 
+  const [apiError, setError] = useState(false);
+
   useEffect(() => {
 
     const fetchData = async () => {
       setIsLoading(true); // Start loading
+
       try {
         const response = await getAssessmentById(id);
-        if (!response.success) throw new Error(response.message || "Failed to fetch assessment data");
+        console.log("response", response.data);
+        if (!response.data.success) throw new Error(response.message || "Failed to fetch assessment data");
         const currentDate = new Date("2025-07-03T12:15:00Z"); // 05:45 PM IST converted to UTC
-        const offerValid = new Date(response.data.assessment.offer.validUntil) >= currentDate;
-        if (response.data.assessment.offer && !offerValid) {
-          response.data.assessment.pricing.discountedPrice = response.data.assessment.pricing.basePrice;
+        const offerValid = new Date(response.data.data.assessment.offer.validUntil) >= currentDate;
+        if (response.data.data.assessment.offer && !offerValid) {
+          response.data.data.assessment.pricing.discountedPrice = response.data.data.assessment.pricing.basePrice;
         }
-        setAssessmentData(response.data.assessment);
 
-        if (response.data.assessment.pricing.discountedPrice > 0) {
+        setAssessmentData(response.data.data.assessment);
+        if (response.data.message === 'You have already taken this assessment') {
+          setError(true);
+          toast.error('You have already taken this assessment');
+        }
+
+        if (response.data.data.assessment.pricing.discountedPrice > 0) {
           const orderResponse = await getOrderIdForPayment({
-            amount: response.data.assessment.pricing.discountedPrice * 100, // Amount in paise
+            amount: response.data.data.assessment.pricing.discountedPrice * 100, // Amount in paise
             currency: "INR",
             receipt: `receipt_${id}`,
           });
           setOrderId(orderResponse.id);
         }
       } catch (error) {
-        toast.error("Failed to load data. Please try again later.");
+        console.log("Error fetching assessment data:");
+        console.log("error", error);
+        setError(true);
+
       } finally {
         setIsLoading(false); // End loading
       }
@@ -395,12 +407,13 @@ const Assessment = () => {
             <Button
               onClick={handlePayment}
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
-              disabled={!orderId}
+              disabled={!orderId || isLoading || apiError}
             >
-              {!orderId ? "Processing..." : `Pay ₹${assessmentFee} & Start Assessment`}
+              {isLoading ? "Processing..." : `Pay ₹${assessmentFee} & Start Assessment`}
             </Button>
             {razorpayError && <p className="text-red-500 text-center mt-2">Error loading payment: {razorpayError}</p>}
-            {!orderId && <p className="text-red-500 text-center mt-2">Initializing payment...</p>}
+            {isLoading && <p className="text-red-500 text-center mt-2">Initializing payment...</p>}
+            {apiError && <p className="text-red-500 text-center mt-2">You have already taken this assessment</p>}
             <Button
               variant="outline"
               onClick={() => navigate('/assessments')}

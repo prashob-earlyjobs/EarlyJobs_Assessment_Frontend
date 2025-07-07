@@ -22,6 +22,7 @@ import {
   BarChart3,
   Award,
   Briefcase,
+  Lightbulb,
   Bell,
   TrendingUp,
   Clock,
@@ -31,18 +32,34 @@ import {
   CreditCard,
   Repeat,
   User,
-  Download
+  Download,
+  ChevronRight,
+  FileText,
+  GraduationCap
 } from "lucide-react";
 import { toast } from "sonner";
 import Certificate from "@/components/Certificate";
-import { isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
+import { getAssessmentsByUserId, getUserStats, isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 import Header from "./header";
+
+
+const notifications = [
+  { id: 1, title: "New Assessment Available", message: "React Advanced Assessment is now available", time: "2 hours ago", unread: true },
+  { id: 2, title: "Job Match Found", message: "5 new jobs match your skills", time: "1 day ago", unread: true },
+  { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
+];
+
+
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const userName = "Alex Johnson";
   const { userCredentials, setUserCredentials } = useUser();
+  const [stats, setStats] = useState([{ key: "totalAssessments", label: "Total Assessments", value: "0", icon: Award, color: "text-purple-600" },
+
+  { key: "userAssessments", label: "Assessments Completed", value: "0", icon: BookOpen, color: "text-blue-600" },]);
   const [userDetails, setUserDetails] = useState({
     name: "",
     email: "",
@@ -52,6 +69,14 @@ const Dashboard = () => {
     },
     mobile: ""
   });
+  const [recentActivity, setRecentActivity] = useState([{
+    id: 0,
+    type: "welcome",
+    title: "Welcome to EarlyJobs!",
+    status: "Profile Updated",
+    time: "",
+    message: "Your profile has been successfully updated. You're all set to start taking assessments!"
+  },]);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -123,25 +148,76 @@ Certificate ID: EJ-CERT-2024-001
     certificateId: "EJ-CERT-2024-001"
   };
 
-  const notifications = [
-    { id: 1, title: "New Assessment Available", message: "React Advanced Assessment is now available", time: "2 hours ago", unread: true },
-    { id: 2, title: "Job Match Found", message: "5 new jobs match your skills", time: "1 day ago", unread: true },
-    { id: 3, title: "Certificate Ready", message: "Your JavaScript certificate is ready for download", time: "3 days ago", unread: false },
-  ];
+  useEffect(() => {
+    const userAssessments = async () => {
+      try {
+        const result = await getAssessmentsByUserId(userCredentials._id);
+        console.log("result", result);
 
-  const stats = [
-    { label: "Assessments Completed", value: "12", icon: BookOpen, color: "text-blue-600" },
-    { label: "Skills Verified", value: "8", icon: Award, color: "text-purple-600" },
-    { label: "Job Applications", value: "5", icon: Briefcase, color: "text-teal-600" },
-    { label: "Profile Views", value: "24", icon: Users, color: "text-green-600" },
-  ];
+        // Transform assessments into recent activity format
+        const recentActivities = result.data.map(assessment => ({
+          type: "assessment",
+          id: assessment.assessment._id,
+          title: assessment.assessment.title || "Untitled Assessment",
+          status: assessment.assessment.status || "Completed",
+          time: assessment.assessment.createdAt ? new Date(assessment.assessment.createdAt).toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }) : "",
+        }));
 
-  const recentActivity = [
-    { type: "assessment", title: "React Developer Assessment", status: "Completed", time: "2 hours ago" },
-    { type: "skill", title: "JavaScript Skill Verified", status: "Achieved", time: "1 day ago" },
-    { type: "job", title: "Applied to Frontend Developer", status: "Applied", time: "2 days ago" },
-    { type: "assessment", title: "Communication Skills Test", status: "In Progress", time: "3 days ago" },
-  ];
+        // Set recent activity, including the welcome message
+        setRecentActivity([
+          {
+            type: "welcome",
+            title: "Welcome to EarlyJobs!",
+            status: "Profile Updated",
+            time: "",
+            message: "Your profile has been successfully updated. You're all set to start taking assessments!"
+          },
+          ...recentActivities
+        ]);
+      } catch (error) {
+        console.error("Error fetching assessments:", error);
+        // Optionally set a default or error activity if desired
+        setRecentActivity([{
+          id: 1,
+          type: "error",
+          title: "Assessment Fetch Failed",
+          status: "Error",
+          time: new Date().toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }),
+          message: "Failed to load assessments. Please try again."
+        }]);
+      }
+    };
+    const getUserStatsAsync = async () => {
+      try {
+        const response = await getUserStats(userCredentials._id);
+        console.log("response", response);
+        if (response.success) {
+          const updatedStats = stats.map((stat) => ({
+            ...stat,
+            value: response.data[stat.key]?.toString() || "0",
+          }));
+          setStats(updatedStats);
+        }
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+
+    }
+    userAssessments();
+    getUserStatsAsync();
+
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
@@ -256,7 +332,7 @@ Certificate ID: EJ-CERT-2024-001
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Hi {userName.split(' ')[0]}, ready to upgrade your career?
+            Hi {userName.split(' ')[0]}👋, ready to upgrade your career?
           </h2>
           <p className="text-lg text-gray-600">
             Continue your journey by taking assessments and building your skill passport.
@@ -264,7 +340,7 @@ Certificate ID: EJ-CERT-2024-001
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
+          {stats?.length > 0 && stats?.map((stat, index) => (
             <Card key={index} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -329,6 +405,59 @@ Certificate ID: EJ-CERT-2024-001
                   </Button>
                 </CardContent>
               </Card>
+              <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <GraduationCap className="h-8 w-8" />
+                    <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                      Premium
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardTitle className="text-xl mb-2">AI Resume Builder</CardTitle>
+                  <CardDescription className="text-white-100 mb-4">
+                    Let AI craft your perfect resume and apply to dozens of companies.
+                  </CardDescription>
+                  <Button
+                    // onClick={handleBulkApplyBrowse}
+                    onClick={() => toast.info("This page available for premium candidates!")}
+                    variant="secondary"
+                    className="w-full rounded-2xl bg-white text-yellow-600 hover:bg-gray-50 mb-3"
+                  >
+                    Build Resume
+                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <FileText className="h-8 w-8" />
+                    <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                      Premium
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <CardTitle className="text-xl mb-2">AI Career Tutor</CardTitle>
+
+                  <CardDescription className="text-white/90 mb-4">
+                    Get personalized resume tips, role suggestions, and smart apply options — powered by AI.
+                  </CardDescription>
+
+                  <Button
+                    onClick={() => toast.info("This feature is available for premium users only.")}
+                    variant="secondary"
+                    className="w-full rounded-2xl bg-white text-blue-700 hover:bg-gray-100 mb-3"
+                  >
+                    Launch Career Tutor
+                    <img src="/lovable-uploads/lock.svg" alt="Lock Icon" className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+
 
               <Card className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-teal-600 to-teal-700 text-white">
                 <CardHeader className="pb-4">
@@ -345,11 +474,13 @@ Certificate ID: EJ-CERT-2024-001
                     Apply to multiple companies at once. Choose from 10, 20, 50, or 100 applications.
                   </CardDescription>
                   <Button
-                    onClick={handleBulkApplyBrowse}
+                    // onClick={handleBulkApplyBrowse}
+                    onClick={() => toast.info("This page available for premium candidates!")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
                   >
                     Browse Plans
+                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -369,11 +500,15 @@ Certificate ID: EJ-CERT-2024-001
                     Discover jobs matched to your skills and assessment scores.
                   </CardDescription>
                   <Button
-                    onClick={() => navigate('/jobs')}
+                    // onClick={() => navigate('/jobs')}
+                    onClick={() => toast.info("This page available for premium candidates!")}
+
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-green-600 hover:bg-gray-50"
                   >
                     Browse Jobs
+                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
+
                   </Button>
                 </CardContent>
               </Card>
@@ -427,7 +562,7 @@ Certificate ID: EJ-CERT-2024-001
               </CardHeader>
               <CardContent className="space-y-4">
                 {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <div key={index} className="flex items-center space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
                     <div className={`p-2 rounded-xl ${activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
                       activity.type === 'skill' ? 'bg-purple-100 text-purple-600' :
                         'bg-teal-100 text-teal-600'
@@ -435,6 +570,8 @@ Certificate ID: EJ-CERT-2024-001
                       {activity.type === 'assessment' && <BookOpen className="h-4 w-4" />}
                       {activity.type === 'skill' && <Award className="h-4 w-4" />}
                       {activity.type === 'job' && <Briefcase className="h-4 w-4" />}
+                      {activity.type === 'welcome' && <Lightbulb className="h-4 w-4" />}
+
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -453,12 +590,17 @@ Certificate ID: EJ-CERT-2024-001
                         <span className="text-xs text-gray-500">{activity.time}</span>
                       </div>
                     </div>
+                    {
+                      activity.type === 'assessment' && (
+                        <ChevronRight className="h-5 w-5 text-orange-600 cursor-pointer" onClick={() => navigate(`/assessment/${activity?.id}`)} />
+                      )
+                    }
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-0 shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* <Card className="rounded-3xl border-0 shadow-lg bg-gradient-to-br from-gray-50 to-gray-100">
               <CardHeader>
                 <CardTitle className="text-lg">This Week's Progress</CardTitle>
               </CardHeader>
@@ -482,7 +624,7 @@ Certificate ID: EJ-CERT-2024-001
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </main>
