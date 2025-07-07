@@ -318,3 +318,12 @@ export const addFranchiser = async (newFranchise: Franchiser) => {
     }
 }
 
+export const getUserStats = async (userId) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/getUserStats/${userId}`);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+        return error;
+    }
+}
