@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Award, Briefcase } from "lucide-react";
@@ -7,7 +6,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between p-6 lg:px-12">
         <div className="flex items-center space-x-2">
@@ -26,7 +25,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 lg:px-12 py-20">
+      <main className="max-w-7xl mx-auto px-6 lg:px-12 py-20 flex-1">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
             Upgrade Your Career with
@@ -82,6 +81,19 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <footer className="w-full py-8 bg-white border-t mt-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+          <div>
+            &copy; {new Date().getFullYear()} EarlyJobs. All rights reserved.
+          </div>
+          <div className="flex gap-6">
+            <a href="/privacy-policy" className="hover:text-orange-600 transition">Privacy Policy</a>
+            <a href="/terms-and-conditions" className="hover:text-orange-600 transition">Terms & Conditions</a>
+            <a href="/refund-policy" className="hover:text-orange-600 transition">Refund Policy</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

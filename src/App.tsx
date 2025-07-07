@@ -32,6 +32,9 @@ import { AdminProvider } from "./context/AdminContext";
 import { UserProvider } from "./context/index";
 import Transactions from "./pages/transactions";
 import TransactionsForAdmin from "./pages/admin/transactions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const queryClient = new QueryClient();
 
@@ -159,6 +162,9 @@ const App = () => (
               <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
               <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
               <Route path="/admin/transactions" element={<ProtectedRouteForAdmin> <TransactionsForAdmin /></ProtectedRouteForAdmin>} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
 
               {/* 404 Page */}
               <Route path="*" element={<NotFound />} />
