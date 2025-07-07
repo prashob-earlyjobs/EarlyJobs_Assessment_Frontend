@@ -35,6 +35,8 @@ import TransactionsForAdmin from "./pages/admin/transactions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
+import ContactUs from "./pages/ContactUs";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -165,6 +167,8 @@ const App = () => (
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/pricing" element={<Pricing />} />
 
               {/* 404 Page */}
               <Route path="*" element={<NotFound />} />
