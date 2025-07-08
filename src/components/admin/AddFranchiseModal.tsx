@@ -18,7 +18,17 @@ import { set } from 'date-fns';
 interface AddFranchiseModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (franchise: any) => void;
+  onSave: (franchise: {
+    name: string;
+    email: string;
+    password: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    mobile: string;
+  }) => void;
 }
 
 export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
@@ -38,6 +48,7 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mobile, setMobile] = useState('');
+  const [franchiseId, setFranchiseId] = useState('');
 
   const handleSave = async () => {
     if (password !== confirmPassword) {
@@ -58,7 +69,8 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
       state,
       country,
       zipCode,
-      mobile
+      mobile,
+      franchiseId,
     };
     try {
 
@@ -86,6 +98,7 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
     setCountry('');
     setZipCode('');
     setMobile('');
+    setFranchiseId('');
     setShowPassword(false);
     setShowConfirmPassword(false);
     onOpenChange(false);
@@ -93,7 +106,7 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] h-[64vh] overflow-y-auto">
+      <DialogContent className="w-[56vw] h-[72vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Franchise</DialogTitle>
           <DialogDescription>
@@ -132,7 +145,15 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
               placeholder="9876543210"
             />
           </div>
-
+          <div className="space-y-2">
+            <Label htmlFor="franchiseId">Franchise ID *</Label>
+            <Input
+              id="franchiseId"
+              value={franchiseId}
+              onChange={(e) => setFranchiseId(e.target.value)}
+              placeholder="EJF0000"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password *</Label>
             <div className="relative">
@@ -228,7 +249,7 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!name || !email || !password || !confirmPassword || !street || !city || !state || !country || !zipCode}>
+          <Button onClick={handleSave} disabled={!name || !email || !password || !confirmPassword || !street || !city || !state || !country || !zipCode || !franchiseId}>
             Add Franchise
           </Button>
         </DialogFooter>

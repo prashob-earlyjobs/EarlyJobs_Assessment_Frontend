@@ -44,6 +44,7 @@ import Offers from "./pages/admin/Offers";
 const queryClient = new QueryClient();
 
 const App = () => (
+
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

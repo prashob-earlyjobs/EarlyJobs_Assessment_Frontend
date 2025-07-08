@@ -332,7 +332,7 @@ Certificate ID: EJ-CERT-2024-001
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Hi {userName.split(' ')[0]}👋, ready to upgrade your career?
+            Hi {userCredentials?.name.split(' ')[0]}👋, ready to upgrade your career?
           </h2>
           <p className="text-lg text-gray-600">
             Continue your journey by taking assessments and building your skill passport.

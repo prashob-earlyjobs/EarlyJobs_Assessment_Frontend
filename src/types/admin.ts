@@ -15,6 +15,7 @@ export interface User {
 
 export interface Assessment {
   id: string;
+  assessmentId?: string;
   _id?: string; // Optional for compatibility with existing data
   title: string;
   description: string;
@@ -31,7 +32,17 @@ export interface Assessment {
   timeLimit: number; // in minutes
   passingScore: number; // in percentage
   tags: string[];
-
+  pricing: {
+    basePrice: number;
+    discountedPrice: number;
+  };
+  offer: {
+    title: string;
+    type: string;
+    value: number;
+    validUntil: string;
+  };
+  isPremium: boolean;
 }
 
 export interface AssessmentResult {
