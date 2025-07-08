@@ -20,7 +20,7 @@ import {
   X
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer ,getAssessmentLink, getOrderIdForPayment} from "@/components/services/servicesapis";
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, } from "@/components/services/servicesapis";
 
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
@@ -101,7 +101,7 @@ const Assessment = () => {
   const [offerCode, setOfferCode] = useState("");
   const [offerApplied, setOfferApplied] = useState(false);
   const [offerError, setOfferError] = useState("");
-  const [offerObj, setOfferObj] = useState<any>(null);
+  const [offerObj, setOfferObj] = useState(null);
 
   // Get offer code and discount from environment variables
   const VALID_OFFER_CODE = import.meta.env.VITE_APP_OFFER_CODE;

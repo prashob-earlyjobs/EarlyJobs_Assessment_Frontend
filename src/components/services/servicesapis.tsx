@@ -377,8 +377,6 @@ export const verifyFranchiseId = async (franchiseId: string) => {
     catch (error) {
         console.log("error", error);
         toast.error(`${error?.response?.data?.message}.`);
-    }
-}
         return error;
     }
 }
