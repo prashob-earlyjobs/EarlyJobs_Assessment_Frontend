@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
@@ -18,7 +17,8 @@ import {
   User,
   Calendar,
   Settings,
-  Repeat
+  Repeat,
+  Tag // <-- Add this import for the offers icon
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
@@ -58,6 +58,12 @@ const menuItems = [
     url: '/admin/transactions',
     icon: Repeat,
     permission: 'candidate_transactions'
+  },
+  {
+    title: 'Offers',
+    url: '/admin/offers',
+    icon: Tag, // <-- Use Tag icon for offers
+    permission: 'manage_offers' // <-- Add appropriate permission
   },
   {
     title: 'Settings',

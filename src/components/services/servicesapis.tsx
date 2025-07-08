@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import axiosInstance from "./apiinterseptor"; // Corrected import path
+import axiosInstance from "./apiinterseptor";
 import { toast } from "sonner";
 
 export const userLogin = async ({ email, password }: { email: string; password: string }) => {
@@ -327,3 +327,45 @@ export const getUserStats = async (userId) => {
         return error;
     }
 }
+
+// Offer APIs
+export const getOffers = async () => {
+    try {
+        const response = await axiosInstance.get('/offers');
+        return Array.isArray(response.data) ? response.data : response.data.data || [];
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to fetch offers"}.`);
+        return [];
+    }
+};
+
+export const addOffer = async (offerData) => {
+    try {
+        const response = await axiosInstance.post('/offers', offerData);
+        toast.success("Offer added successfully!");
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to add offer"}.`);
+        throw error;
+    }
+};
+
+export const editOffer = async (id, offerData) => {
+    try {
+        const response = await axiosInstance.put(`/offers/${id}`, offerData);
+        toast.success("Offer updated successfully!");
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to update offer"}.`);
+        throw error;
+    }
+};
+
+export const redeemOffer = async (code: string) => {
+    try {
+        const response = await axiosInstance.patch(`/offers/${code}/redeem`);
+        return response.data;
+    } catch (error) {
+        return { success: false, message: error?.response?.data?.message || "Failed to redeem offer" };
+    }
+};
