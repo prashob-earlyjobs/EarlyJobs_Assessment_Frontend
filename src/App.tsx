@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -32,146 +33,163 @@ import { AdminProvider } from "./context/AdminContext";
 import { UserProvider } from "./context/index";
 import Transactions from "./pages/transactions";
 import TransactionsForAdmin from "./pages/admin/transactions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
+import ContactUs from "./pages/ContactUs";
+import Pricing from "./pages/Pricing";
+import AboutUs from "./pages/AboutUs";
+import Offers from "./pages/admin/Offers";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AdminProvider>
-        <UserProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup/:id" element={<Login />} />
-              <Route path="/signup" element={<Login />} />
 
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AdminProvider>
+          <UserProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/onboarding" element={
+                  <ProtectedRoute>
 
-              <Route path="/onboarding" element={
-                <ProtectedRoute>
+                    <Onboarding />
 
-                  <Onboarding />
+                  </ProtectedRoute>} />
 
-                </ProtectedRoute>} />
+                {/* Protected Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/assessments"
+                  element={
+                    <ProtectedRoute>
+                      <Assessments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/assessment/:id"
+                  element={
+                    <ProtectedRoute>
+                      <Assessment />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/video-question/:id"
+                  element={
+                    <ProtectedRoute>
+                      <VideoQuestion />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/results/:id"
+                  element={
+                    <ProtectedRoute>
+                      <Results />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/transactions"
+                  element={
+                    <ProtectedRoute>
+                      <Transactions />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/assessments"
-                element={
-                  <ProtectedRoute>
-                    <Assessments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/assessment/:id"
-                element={
-                  <ProtectedRoute>
-                    <Assessment />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/video-question/:id"
-                element={
-                  <ProtectedRoute>
-                    <VideoQuestion />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/results/:id"
-                element={
-                  <ProtectedRoute>
-                    <Results />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Transactions />
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/jobs"
+                  element={
+                    <ProtectedRoute>
+                      <Jobs />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulk-applying"
+                  element={
+                    <ProtectedRoute>
+                      <BulkApplying />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulk-applying/verify/:count"
+                  element={
+                    <ProtectedRoute>
+                      <BulkApplyingVerify />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulk-applying/payment/:count"
+                  element={
+                    <ProtectedRoute>
+                      <BulkApplyingPayment />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulk-applying/success"
+                  element={
+                    <ProtectedRoute>
+                      <BulkApplyingSuccess />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/admin" element={<ProtectedRouteForAdmin> <AdminDashboard /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/users" element={<ProtectedRouteForAdmin> <UsersPage /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/candidates" element={<ProtectedRouteForAdmin> <CandidatesPage /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/assessments" element={<ProtectedRouteForAdmin> <AssessmentsPage /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/transactions" element={<ProtectedRouteForAdmin> <TransactionsForAdmin /></ProtectedRouteForAdmin>} />
+                <Route path="/admin/offers" element={
+                  <ProtectedRouteForAdmin>
+                    <Offers />
+                  </ProtectedRouteForAdmin>
+                } />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/contact-us" element={<ContactUs />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/about-us" element={<AboutUs />} />
 
-              <Route
-                path="/jobs"
-                element={
-                  <ProtectedRoute>
-                    <Jobs />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bulk-applying"
-                element={
-                  <ProtectedRoute>
-                    <BulkApplying />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bulk-applying/verify/:count"
-                element={
-                  <ProtectedRoute>
-                    <BulkApplyingVerify />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bulk-applying/payment/:count"
-                element={
-                  <ProtectedRoute>
-                    <BulkApplyingPayment />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bulk-applying/success"
-                element={
-                  <ProtectedRoute>
-                    <BulkApplyingSuccess />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/admin" element={<ProtectedRouteForAdmin> <AdminDashboard /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/users" element={<ProtectedRouteForAdmin> <UsersPage /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/candidates" element={<ProtectedRouteForAdmin> <CandidatesPage /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/assessments" element={<ProtectedRouteForAdmin> <AssessmentsPage /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
-              <Route path="/admin/transactions" element={<ProtectedRouteForAdmin> <TransactionsForAdmin /></ProtectedRouteForAdmin>} />
-
-              {/* 404 Page */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </UserProvider>
-      </AdminProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+                {/* 404 Page */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </UserProvider>
+        </AdminProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

@@ -43,7 +43,9 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         'manage_franchises',
         'view_analytics',
         'system_settings',
-        'candidate_transactions'
+        'candidate_transactions',
+        'manage_offers'
+
       ],
       'franchise_admin': [
         "view_analytics",
