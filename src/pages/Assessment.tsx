@@ -15,10 +15,11 @@ import {
   Save,
   AlertCircle,
   CreditCard,
-  Shield
+  Shield,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment } from "@/components/services/servicesapis";
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer } from "@/components/services/servicesapis";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
 
@@ -92,6 +93,14 @@ const Assessment = () => {
   const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
 
   const [apiError, setError] = useState(false);
+  const [offerCode, setOfferCode] = useState("");
+  const [offerApplied, setOfferApplied] = useState(false);
+  const [offerError, setOfferError] = useState("");
+  const [offerObj, setOfferObj] = useState<any>(null);
+
+  // Get offer code and discount from environment variables
+  const VALID_OFFER_CODE = import.meta.env.VITE_APP_OFFER_CODE;
+  const OFFER_DISCOUNT_PERCENT = Number(import.meta.env.VITE_APP_OFFER_DISCOUNT_PERCENT); // e.g., 10 for 10%
 
   useEffect(() => {
 
@@ -136,14 +145,28 @@ const Assessment = () => {
   }, [id, userCredentials]);
 
   // Dynamically set assessment fee based on offer validity
-  const assessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
+  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
     ? assessmentData.pricing.discountedPrice
     : assessmentData.pricing.basePrice;
+
+  const getDiscountAmount = () => {
+    if (!offerApplied || !offerObj) return 0;
+    if (offerObj.discountType === "percentage") {
+      return Math.round((baseAssessmentFee * offerObj.discountValue) / 100);
+    }
+    if (offerObj.discountType === "fixed") {
+      return offerObj.discountValue;
+    }
+    return 0;
+  };
+
+  const discountAmount = getDiscountAmount();
+  const finalAssessmentFee = Math.max(0, baseAssessmentFee - discountAmount);
 
   const addCandidateTransactionDetails = async (paymentId: string) => {
     const details = {
       transactionId: paymentId || orderId, // Use paymentId from Razorpay or fallback to orderId
-      transactionAmount: assessmentFee,
+      transactionAmount: finalAssessmentFee,
       transactionStatus: 'success', // Assuming success on payment completion
       pricing: {
         basePrice: assessmentData.pricing.basePrice,
@@ -163,6 +186,15 @@ const Assessment = () => {
   };
 
   const handlePayment = () => {
+    if (finalAssessmentFee <= 0) {
+      // No payment needed, directly complete payment
+      toast.success("Offer applied! No payment required. Starting assessment...");
+      setPaymentCompleted(true);
+      setShowPayment(false);
+      addCandidateTransactionDetails("FREE-OFFER");
+      return;
+    }
+
     if (!Razorpay || !orderId) {
       toast.error("Payment initialization failed. Please try again.");
       return;
@@ -170,7 +202,7 @@ const Assessment = () => {
 
     const options: RazorpayOrderOptions = {
       key: import.meta.env.VITE_APP_RAZORPAY_KEY || "YOUR_RAZORPAY_KEY",
-      amount: assessmentFee * 100,
+      amount: finalAssessmentFee * 100, // Always use discounted price
       currency: "INR",
       name: "EarlyJobs",
       description: `Assessment Fee for ${assessmentData.title}`,
@@ -190,7 +222,7 @@ const Assessment = () => {
         color: "#ea580c",
       },
       modal: {
-        confirm_close: true, // Prompt user before closing payment modal
+        confirm_close: true,
       },
     };
 
@@ -340,6 +372,29 @@ const Assessment = () => {
     navigate(`/results/${id}`);
   };
 
+  const handleApplyOffer = async () => {
+    setOfferError("");
+    try {
+      // Call your backend to validate/redeem the offer code
+      const res = await redeemOffer(offerCode.trim().toUpperCase());
+      if (res && res.success) {
+        setOfferApplied(true);
+        setOfferObj(res.data); // Save offer details for calculation
+        toast.success(`Offer code applied!`);
+      } else {
+        setOfferApplied(false);
+        setOfferObj(null);
+        setOfferError(res.message || "Invalid offer code.");
+        toast.error(res.message || "Invalid offer code.");
+      }
+    } catch (e) {
+      setOfferApplied(false);
+      setOfferObj(null);
+      setOfferError("Invalid or expired offer code.");
+      toast.error("Invalid or expired offer code.");
+    }
+  };
+
   if (showPayment && isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -386,8 +441,62 @@ const Assessment = () => {
                 </div>
                 <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
                   <span>Assessment Fee:</span>
-                  <span>₹{assessmentFee}</span>
+                  <span>
+                    ₹{finalAssessmentFee}
+                    {offerApplied && offerObj && (
+                      <span className="ml-2 text-green-600 text-xs">
+                        (Offer Applied! {offerObj.discountType === "percentage" ? `-${offerObj.discountValue}%` : `-₹${offerObj.discountValue}`})
+                      </span>
+                    )}
+                  </span>
                 </div>
+                {offerApplied && offerObj && (
+                  <div className="flex justify-between text-sm text-green-700">
+                    <span>Discount:</span>
+                    <span>-₹{discountAmount}</span>
+                  </div>
+                )}
+              </div>
+              {/* Offer Code Input */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Have an offer code?</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={offerCode}
+                    onChange={e => setOfferCode(e.target.value)}
+                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Enter offer code"
+                    disabled={offerApplied}
+                  />
+                  {!offerApplied ? (
+                    <Button
+                      onClick={handleApplyOffer}
+                      disabled={!offerCode}
+                      className="rounded-lg bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      Apply
+                    </Button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOfferApplied(false);
+                        setOfferObj(null);
+                        setOfferCode("");
+                        setOfferError("");
+                      }}
+                      className="p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition"
+                      title="Remove offer code"
+                    >
+                      <X className="h-5 w-5 text-gray-500" />
+                    </button>
+                  )}
+                </div>
+                {offerError && <p className="text-red-500 text-xs mt-1">{offerError}</p>}
+                {offerApplied && (
+                  <p className="text-green-600 text-xs mt-1">Offer code applied successfully!</p>
+                )}
               </div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
@@ -409,7 +518,7 @@ const Assessment = () => {
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
               disabled={!orderId || isLoading || apiError}
             >
-              {isLoading ? "Processing..." : `Pay ₹${assessmentFee} & Start Assessment`}
+              {isLoading ? "Processing..." : `Pay ₹${finalAssessmentFee} & Start Assessment`}
             </Button>
             {razorpayError && <p className="text-red-500 text-center mt-2">Error loading payment: {razorpayError}</p>}
             {isLoading && <p className="text-red-500 text-center mt-2">Initializing payment...</p>}
