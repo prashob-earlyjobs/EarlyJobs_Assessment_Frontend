@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,45 +28,25 @@ import Header from "./header";
 import { useUser } from "@/context";
 import { toast } from "sonner";
 
-const LIMIT = 10;
 const RECOMMENDED_ASSESSMENTS_LIMIT = 5;
 
 const Transactions = () => {
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
     const [assessments, setAssessments] = useState([]);
-    const [transactionPage, setTransactionPage] = useState(1);
-    const [hasMoreTransactions, setHasMoreTransactions] = useState(true);
     const [loadingTransactions, setLoadingTransactions] = useState(false);
     const [loadingAssessments, setLoadingAssessments] = useState(false);
-    const { userCredentials, setUserCredentials } = useUser();
-
-    const transactionObserver = useRef<IntersectionObserver | null>(null);
-
-    const lastTransactionRef = useCallback(
-        (node: HTMLDivElement | null) => {
-            if (loadingTransactions) return;
-            if (transactionObserver.current) transactionObserver.current.disconnect();
-            transactionObserver.current = new IntersectionObserver(entries => {
-                if (entries[0].isIntersecting && hasMoreTransactions) {
-                    setTransactionPage(prev => prev + 1);
-                }
-            });
-            if (node) transactionObserver.current.observe(node);
-        },
-        [loadingTransactions, hasMoreTransactions]
-    );
+    const { userCredentials } = useUser();
 
     const getTransactionsForUser = async () => {
+        if (!userCredentials?._id) return;
         setLoadingTransactions(true);
         try {
             const response = await getTransactions(userCredentials._id);
             const fetched = response.data.transactions;
             setTransactions(fetched);
-            setHasMoreTransactions(fetched.length === LIMIT);
         } catch (err) {
-            toast.error("Failed to fetch assessments: please try again later.");
-
+            toast.error("Failed to fetch transactions. Please try again later.");
         } finally {
             setLoadingTransactions(false);
         }
@@ -86,7 +65,7 @@ const Transactions = () => {
             });
             setAssessments(response.data.assessments);
         } catch (err) {
-            toast.error("An error occurred. Please try again later.");
+            toast.error("An error occurred while fetching recommended assessments.");
         } finally {
             setLoadingAssessments(false);
         }
@@ -94,7 +73,7 @@ const Transactions = () => {
 
     useEffect(() => {
         getTransactionsForUser();
-    }, [transactionPage]);
+    }, [userCredentials]);
 
     useEffect(() => {
         getRecommendedAssessments();
@@ -158,57 +137,53 @@ const Transactions = () => {
                     </p>
                     <div className="grid lg:grid-cols-2 gap-6">
                         {transactions.length > 0 ? (
-                            transactions.map((transaction, index) => {
-                                const isLast = index === transactions.length - 1;
-                                return (
-                                    <Card
-                                        key={transaction._id}
-                                        ref={isLast ? lastTransactionRef : null}
-                                        className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                                    >
-                                        <CardHeader className="pt-4 pb-4">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="p-3 rounded-2xl bg-blue-100 text-blue-700">
-                                                        <CreditCard className="h-6 w-6" />
-                                                    </div>
-                                                    <div>
-                                                        <CardTitle className="text-xl">{transaction.assessmentTitle}</CardTitle>
-                                                        <CardDescription className="text-sm text-gray-600">
-                                                            Transaction ID: {transaction._id}
-                                                        </CardDescription>
-                                                    </div>
+                            [...transactions].reverse().map((transaction) => (
+                                <Card
+                                    key={transaction._id}
+                                    className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <CardHeader className="pt-4 pb-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="p-3 rounded-2xl bg-blue-100 text-blue-700">
+                                                    <CreditCard className="h-6 w-6" />
                                                 </div>
-                                                <Badge
-                                                    className={`rounded-full text-xs px-2 py-1 ${transaction.transactionStatus === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
-                                                >
-                                                    {transaction.transactionStatus}
-                                                </Badge>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="pb-6">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center space-x-6 text-sm text-gray-500">
-                                                    <div className="flex items-center space-x-1">
-                                                        <Clock className="h-4 w-4" />
-                                                        <span>{formatDate(transaction.createdAt)}</span>
-                                                    </div>
-                                                    <div className="flex items-center space-x-1">
-                                                        <Zap className="h-4 w-4" />
-                                                        <span className="font-semibold text-gray-900">{formatPrice(transaction.transactionAmount)}</span>
-                                                    </div>
+                                                <div>
+                                                    <CardTitle className="text-xl">{transaction.assessmentTitle}</CardTitle>
+                                                    <CardDescription className="text-sm text-gray-600">
+                                                        Transaction ID: {transaction._id}
+                                                    </CardDescription>
                                                 </div>
                                             </div>
-                                            <Button
-                                                onClick={() => navigate(`/assessment/${transaction.assessmentId}`)}
-                                                className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all duration-300"
+                                            <Badge
+                                                className={`rounded-full text-xs px-2 py-1 ${transaction.transactionStatus === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
                                             >
-                                                View Assessment
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })
+                                                {transaction.transactionStatus}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pb-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center space-x-6 text-sm text-gray-500">
+                                                <div className="flex items-center space-x-1">
+                                                    <Clock className="h-4 w-4" />
+                                                    <span>{formatDate(transaction.createdAt)}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                    <Zap className="h-4 w-4" />
+                                                    <span className="font-semibold text-gray-900">{formatPrice(transaction.transactionAmount)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            onClick={() => navigate(`/assessment/${transaction.assessmentId}`)}
+                                            className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all duration-300"
+                                        >
+                                            View Assessment
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))
                         ) : (
                             <div className="text-center py-16 col-span-2">
                                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -228,7 +203,7 @@ const Transactions = () => {
                         )}
                     </div>
                     {loadingTransactions && (
-                        <div className="text-center py-6 text-gray-600">Loading more transactions...</div>
+                        <div className="text-center py-6 text-gray-600">Loading transactions...</div>
                     )}
                 </div>
 
@@ -286,7 +261,7 @@ const Transactions = () => {
                                                         </Badge>
                                                     </div>
                                                     <div className="flex items-center space-x-1" style={{ marginLeft: '0px' }}>
-                                                        {assessment.tags.length > 0 && (
+                                                        {assessment.tags?.length > 0 && (
                                                             assessment.tags.map(tag => (
                                                                 <Badge
                                                                     key={tag}
@@ -443,6 +418,7 @@ function getIcon(skill: string) {
 }
 
 export default Transactions;
+
 
 const style = document.createElement('style');
 style.innerHTML = `

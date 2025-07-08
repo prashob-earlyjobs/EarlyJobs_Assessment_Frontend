@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -7,11 +6,17 @@ import { AddAssessmentModal } from '@/components/admin/AddAssessmentModal';
 import { AddFranchiseModal } from '@/components/admin/AddFranchiseModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardStats as Stats } from '@/types/admin';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Copy } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { useAdmin } from '@/context/AdminContext';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showAddAssessment, setShowAddAssessment] = useState(false);
   const [showAddFranchise, setShowAddFranchise] = useState(false);
+  const { currentUser, setCurrentUser } = useAdmin();
 
   // Mock data - in real app this would come from API
   const stats: Stats = {
@@ -30,14 +35,22 @@ const AdminDashboard: React.FC = () => {
     { id: 4, type: 'assessment', message: 'Sarah Smith scored 95% in Java Assessment', time: '6 hours ago' },
   ];
 
-  const handleAddAssessment = (assessment) => {
-    console.log('New assessment created:', assessment);
-    // In real app, this would make an API call
-  };
 
   const handleAddFranchise = (franchise) => {
     console.log('New franchise added:', franchise);
     // In real app, this would make an API call
+  };
+
+  const inviteLink = `https://earlyjobs.ai/signup/${currentUser?.franchiseId || ''}`;
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(inviteLink)
+      .then(() => {
+        toast.success('Invite link copied to clipboard!');
+      })
+      .catch((err) => {
+        toast.error('Failed to copy invite link.');
+        console.error('Clipboard error:', err);
+      });
   };
 
   return (
@@ -48,74 +61,36 @@ const AdminDashboard: React.FC = () => {
           <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your platform.</p>
         </div>
 
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Invite Link</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <Input
+                type="text"
+                value={inviteLink}
+                readOnly
+                className="flex-1 bg-gray-50 border-gray-200 rounded-lg text-sm"
+              />
+              <Button
+                onClick={handleCopyToClipboard}
+                className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-4 py-2"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+              </Button>
+            </div>
+            <p className="text-sm text-gray-500">Share this link with potential franchise partners to invite them to sign up.</p>
+          </CardContent>
+        </Card>
         <DashboardStats stats={stats} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'assessment' ? 'bg-blue-500' :
-                        activity.type === 'user' ? 'bg-green-500' : 'bg-purple-500'
-                      }`} />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{activity.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setShowAddAssessment(true)}
-                  className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Add Assessment</div>
-                  <div className="text-sm text-gray-500 mt-1">Create new assessment</div>
-                </button>
-                <button
-                  onClick={() => navigate('/admin/users')}
-                  className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Add User</div>
-                  <div className="text-sm text-gray-500 mt-1">Register new user</div>
-                </button>
-                <button
-                  onClick={() => navigate('/admin')}
-                  className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">View Reports</div>
-                  <div className="text-sm text-gray-500 mt-1">Analytics & reports</div>
-                </button>
-                <button
-                  onClick={() => setShowAddFranchise(true)}
-                  className="p-4 text-left rounded-lg border hover:bg-gray-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Manage Franchises</div>
-                  <div className="text-sm text-gray-500 mt-1">Franchise settings</div>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <AddAssessmentModal
         open={showAddAssessment}
         onOpenChange={setShowAddAssessment}
-        onSave={handleAddAssessment}
       />
 
       <AddFranchiseModal

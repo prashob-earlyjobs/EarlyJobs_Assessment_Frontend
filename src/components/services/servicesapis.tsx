@@ -305,6 +305,8 @@ interface Franchiser {
     country: string;
     mobile: string;
     zipCode: string;
+    franchiseId: string
+
 }
 
 export const addFranchiser = async (newFranchise: Franchiser) => {
@@ -318,3 +320,62 @@ export const addFranchiser = async (newFranchise: Franchiser) => {
     }
 }
 
+export const getUserStats = async (userId) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/getUserStats/${userId}`);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
+
+export const getAssessmentsVelox = async () => {
+    try {
+        const response = await axiosInstance.get(`/admin/getAssessmentsVelox`);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
+
+export const getCandidatesForAssessment = async (assessmentId) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getCandidatesForAssessment/${assessmentId}`);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
+export const getResultForCandidateAssessment = async (interviewId) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getResultForCandidateAssessment/${interviewId}`);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+
+}
+
+export const getAssessmentLink = async (assessmentId, details) => {
+    try {
+        const response = await axiosInstance.post(`assessments/getAssessmentLink/${assessmentId}`, details);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
+
+export const verifyFranchiseId = async (franchiseId: string) => {
+    try {
+        const response = await axiosInstance.get(`auth/verifyFranchiseId/${franchiseId}`);
+        return response.data;
+    }
+    catch (error) {
+        console.log("error", error);
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
