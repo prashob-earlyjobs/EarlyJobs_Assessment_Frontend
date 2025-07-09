@@ -241,7 +241,7 @@ const Assessments = () => {
                             </Badge>
                           </div>
                           <div className="flex items-center space-x-1" style={{ marginLeft: '0px' }}>
-                            {assessment.tags.length > 0 && (
+                            {assessment?.tags?.length > 0 && (
                               assessment.tags.map(tag => (
                                 <Badge
                                   key={tag}

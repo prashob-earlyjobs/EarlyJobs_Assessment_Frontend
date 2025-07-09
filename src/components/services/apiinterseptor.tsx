@@ -81,7 +81,12 @@ axiosInstance.interceptors.response.use(
         dataMessage === 'Access denied. No token provided.' ||
         dataMessage === 'Invalid refresh token'
       ) {
-        if (!pathname.includes('/login')) { // Avoid logout on login page
+        if (pathname.includes('/signup')) {
+
+          return Promise.reject(error);
+
+        }
+        else if (!pathname.includes('/login')) { // Avoid logout on login page
           toast.error('Logging out invalid/missing token...');
           await logout();
         }

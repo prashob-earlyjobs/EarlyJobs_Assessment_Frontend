@@ -16,10 +16,12 @@ import {
   AlertCircle,
   CreditCard,
   Shield,
+  Play,
   X
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer } from "@/components/services/servicesapis";
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, } from "@/components/services/servicesapis";
+
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
 
@@ -35,16 +37,15 @@ export interface IPricing {
   discountedPrice: number;
 }
 
-// Define according to your actual question schema structure
 export interface IQuestion {
   questionText: string;
   options?: string[];
   answer?: string | number;
-  // Add other fields as needed
 }
 
 export interface AssessmentType {
   _id?: string;
+  assessmentId?: string;
   title: string;
   description?: string;
   type: "mcq" | "coding" | "video" | "mixed";
@@ -77,7 +78,7 @@ const Assessment = () => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(true);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // New loading state
+  const [isLoading, setIsLoading] = useState(true);
   const { userCredentials } = useUser();
 
   const [assessmentData, setAssessmentData] = useState<AssessmentType>({
@@ -93,25 +94,27 @@ const Assessment = () => {
   const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
 
   const [apiError, setError] = useState(false);
+
+  const [assessmentLink, setAssessmentLink] = useState<string | null>(null);
+  const [assessmentDetails, setAssessmentDetails] = useState(null);
+
   const [offerCode, setOfferCode] = useState("");
   const [offerApplied, setOfferApplied] = useState(false);
   const [offerError, setOfferError] = useState("");
-  const [offerObj, setOfferObj] = useState<any>(null);
+  const [offerObj, setOfferObj] = useState(null);
 
   // Get offer code and discount from environment variables
   const VALID_OFFER_CODE = import.meta.env.VITE_APP_OFFER_CODE;
   const OFFER_DISCOUNT_PERCENT = Number(import.meta.env.VITE_APP_OFFER_DISCOUNT_PERCENT); // e.g., 10 for 10%
 
   useEffect(() => {
-
     const fetchData = async () => {
-      setIsLoading(true); // Start loading
-
+      setIsLoading(true);
       try {
         const response = await getAssessmentById(id);
         console.log("response", response.data);
         if (!response.data.success) throw new Error(response.message || "Failed to fetch assessment data");
-        const currentDate = new Date("2025-07-03T12:15:00Z"); // 05:45 PM IST converted to UTC
+        const currentDate = new Date("2025-07-03T12:15:00Z");
         const offerValid = new Date(response.data.data.assessment.offer.validUntil) >= currentDate;
         if (response.data.data.assessment.offer && !offerValid) {
           response.data.data.assessment.pricing.discountedPrice = response.data.data.assessment.pricing.basePrice;
@@ -125,25 +128,32 @@ const Assessment = () => {
 
         if (response.data.data.assessment.pricing.discountedPrice > 0) {
           const orderResponse = await getOrderIdForPayment({
-            amount: response.data.data.assessment.pricing.discountedPrice * 100, // Amount in paise
+            amount: response.data.data.assessment.pricing.discountedPrice * 100,
             currency: "INR",
             receipt: `receipt_${id}`,
           });
           setOrderId(orderResponse.id);
         }
       } catch (error) {
-        console.log("Error fetching assessment data:");
-        console.log("error", error);
+        console.error("Error fetching assessment data:", error);
         setError(true);
-
       } finally {
-        setIsLoading(false); // End loading
+        setIsLoading(false);
       }
     };
-
     fetchData();
   }, [id, userCredentials]);
 
+  // useEffect to open the assessment link when it updates
+  useEffect(() => {
+    if (assessmentLink) {
+      console.log("Opening assessment link:", assessmentLink);
+      window.open(assessmentLink, '_blank');
+      setAssessmentLink(null); // Reset to prevent reopening
+    }
+  }, [assessmentLink]);
+
+  const assessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
   // Dynamically set assessment fee based on offer validity
   const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
     ? assessmentData.pricing.discountedPrice
@@ -165,6 +175,7 @@ const Assessment = () => {
 
   const addCandidateTransactionDetails = async (paymentId: string) => {
     const details = {
+
       transactionId: paymentId || orderId, // Use paymentId from Razorpay or fallback to orderId
       transactionAmount: finalAssessmentFee,
       transactionStatus: 'success', // Assuming success on payment completion
@@ -172,9 +183,9 @@ const Assessment = () => {
         basePrice: assessmentData.pricing.basePrice,
         discountedPrice: assessmentData.pricing.discountedPrice
       },
-      referrerId: userCredentials.referrerId || null, // Optional field for referral tracking
+      referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
-      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z"),
+      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-25T12:15:00Z"),
       isPremium: assessmentData.isPremium || false
     };
 
@@ -310,53 +321,33 @@ const Assessment = () => {
     return () => clearInterval(timer);
   }, [paymentCompleted]);
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
+  const handleStartAssessment = async () => {
+    setIsLoading(true);
+    console.log("userCredentials", userCredentials);
 
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleAnswerChange = (value: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [currentQuestion]: value
-    }));
-    toast.success("Answer saved automatically", { duration: 1000 });
-  };
-
-  const handleNext = () => {
-    if (currentQuestion < totalQuestions) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentQuestion > 1) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
-
-  const handleQuestionJump = (questionNumber: number) => {
-    setCurrentQuestion(questionNumber);
-  };
-
-  const toggleFlag = () => {
-    setFlaggedQuestions(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(currentQuestion)) {
-        newSet.delete(currentQuestion);
-        toast.success("Question unflagged");
+    const details = {
+      assessmentId: assessmentData.assessmentId,
+      firstName: userCredentials.name,
+      lastName: userCredentials.name,
+      email: userCredentials.email,
+      mobile: userCredentials.mobile
+    };
+    console.log("details", details);
+    try {
+      const response = await getAssessmentLink(assessmentData.assessmentId, details);
+      console.log("response", response);
+      if (response.success) {
+        setAssessmentDetails(response.data);
+        setAssessmentLink(response.data.publicLink);
       } else {
-        newSet.add(currentQuestion);
-        toast.success("Question flagged for review");
+        toast.error(`${response.message}.`);
       }
-      return newSet;
-    });
+    } catch (error) {
+      console.error("Error fetching assessment link:", error);
+      toast.error("Failed to start assessment. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -542,232 +533,82 @@ const Assessment = () => {
   const isFlagged = flaggedQuestions.has(currentQuestion);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/assessments')}
-                className="rounded-2xl"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Exit Assessment
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">React Developer Assessment</h1>
-                <p className="text-sm text-gray-600">Question {currentQuestion} of {totalQuestions}</p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
+        <CardHeader className="text-center pb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-8 w-8 text-white" />
+          </div>
+          <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
+          <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData?.title}</h3>
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex justify-between">
+                <span>Duration:</span>
+                <span>{assessmentData?.timeLimit} minutes</span>
               </div>
-            </div>
-            <div className="flex items-center space-x-6">
-              {/* Timer */}
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-2xl ${timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                <Clock className="h-5 w-5" />
-                <span className="font-mono font-bold text-lg">{formatTime(timeRemaining)}</span>
+              <div className="flex justify-between">
+                <span>Questions:</span>
+                <span>{assessmentData?.questions?.length}</span>
               </div>
-              {/* Progress */}
-              <div className="flex items-center space-x-2 min-w-[120px]">
-                <span className="text-sm text-gray-600">Progress:</span>
-                <div className="flex-1">
-                  <Progress value={progress} className="h-2" />
-                </div>
-                <span className="text-sm font-medium text-gray-900">{Math.round(progress)}%</span>
+              <div className="flex justify-between">
+                <span>Attempts:</span>
+                <span>1</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Assessment Type:</span>
+                <span>{assessmentData?.type}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
+                <span>Status:</span>
+                <span className="text-green-600">Payment Confirmed</span>
               </div>
             </div>
           </div>
-        </div>
-      </header>
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Question Navigation Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="rounded-3xl border-0 shadow-lg sticky top-32">
-              <CardHeader>
-                <CardTitle className="text-lg">Question Navigation</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-2">
-                  {questions.map((_, index) => {
-                    const questionNumber = index + 1;
-                    const isCurrentQuestion = questionNumber === currentQuestion;
-                    const isQuestionAnswered = answers[questionNumber] !== undefined;
-                    const isQuestionFlagged = flaggedQuestions.has(questionNumber);
-                    return (
-                      <button
-                        key={questionNumber}
-                        onClick={() => handleQuestionJump(questionNumber)}
-                        className={`
-                          h-10 w-10 rounded-xl border-2 text-sm font-medium transition-all relative
-                          ${isCurrentQuestion
-                            ? 'border-orange-500 bg-orange-500 text-white shadow-lg'
-                            : isQuestionAnswered
-                              ? 'border-green-200 bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                          }
-                        `}
-                      >
-                        {questionNumber}
-                        {isQuestionFlagged && (
-                          <Flag className="absolute -top-1 -right-1 h-3 w-3 text-orange-500 fill-current" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Answered:</span>
-                    <span className="font-medium text-green-600">{Object.keys(answers).length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Remaining:</span>
-                    <span className="font-medium text-gray-900">{totalQuestions - Object.keys(answers).length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Flagged:</span>
-                    <span className="font-medium text-orange-600">{flaggedQuestions.size}</span>
-                  </div>
-                </div>
-                <div className="mt-6 pt-4 border-t">
-                  <div className="flex items-center space-x-2 text-xs text-gray-500 mb-3">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                      <span>Current</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-3 h-3 bg-green-100 rounded border border-green-200"></div>
-                      <span>Answered</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Flag className="h-3 w-3 text-orange-500" />
-                      <span>Flagged</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
+            <p className="text-sm text-green-700 font-medium">
+              Payment successfully processed on {new Date().toLocaleString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'Asia/Kolkata',
+                timeZoneName: 'short',
+              })}
+            </p>
           </div>
-          {/* Question Content */}
-          <div className="lg:col-span-3">
-            <Card className="rounded-3xl border-0 shadow-lg">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="rounded-full">
-                      Question {currentQuestion}
-                    </Badge>
-                    {isAnswered && (
-                      <Badge className="rounded-full bg-green-100 text-green-700">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Answered
-                      </Badge>
-                    )}
-                    {isFlagged && (
-                      <Badge variant="outline" className="rounded-full border-orange-300 text-orange-600">
-                        <Flag className="h-3 w-3 mr-1" />
-                        Flagged
-                      </Badge>
-                    )}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleFlag}
-                    className={`rounded-2xl ${isFlagged ? 'border-orange-300 text-orange-600' : 'border-gray-200'}`}
-                  >
-                    <Flag className="h-4 w-4 mr-2" />
-                    {isFlagged ? 'Unflag' : 'Flag'} for Review
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                <div>
-                  <h2 className="text-2xl font-semibold text-gray-900 leading-relaxed mb-6">
-                    {currentQuestionData.question}
-                  </h2>
-                  <RadioGroup
-                    value={answers[currentQuestion] || ""}
-                    onValueChange={handleAnswerChange}
-                    className="space-y-4"
-                  >
-                    {currentQuestionData.options.map((option, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start space-x-3 p-4 rounded-2xl border border-gray-200 hover:bg-orange-50 hover:border-orange-300 transition-colors cursor-pointer"
-                        onClick={() => handleAnswerChange(option)}
-                      >
-                        <RadioGroupItem value={option} id={`option-${index}`} className="mt-1" />
-                        <Label
-                          htmlFor={`option-${index}`}
-                          className="flex-1 text-base leading-relaxed cursor-pointer"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                {/* Auto-save indicator */}
-                {isAnswered && (
-                  <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 p-3 rounded-2xl">
-                    <Save className="h-4 w-4" />
-                    <span>Your answer has been saved automatically</span>
-                  </div>
-                )}
-                {/* Navigation Buttons */}
-                <div className="flex items-center justify-between pt-6 border-t">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentQuestion === 1}
-                    className="rounded-2xl px-6"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                  <div className="flex items-center space-x-4">
-                    {currentQuestion === totalQuestions ? (
-                      <Button
-                        onClick={handleSubmit}
-                        className="bg-green-600 hover:bg-green-700 text-white rounded-2xl px-8 shadow-lg"
-                      >
-                        Submit Assessment
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleNext}
-                        className="bg-orange-600 hover:bg-orange-700 text-white rounded-2xl px-6 shadow-lg"
-                      >
-                        Next
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            {/* Warning for unanswered questions */}
-            {currentQuestion === totalQuestions && Object.keys(answers).length < totalQuestions && (
-              <Card className="rounded-3xl border-0 shadow-lg mt-6 bg-orange-50 border-orange-200">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-3">
-                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
-                    <div>
-                      <h3 className="font-medium text-orange-900 mb-1">Incomplete Assessment</h3>
-                      <p className="text-sm text-orange-700">
-                        You have {totalQuestions - Object.keys(answers).length} unanswered questions.
-                        You can still submit, but consider reviewing them first.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          <Button
+            onClick={handleStartAssessment}
+            className="w-full h-12 bg-green-600 hover:bg-green-700 rounded-2xl text-base shadow-lg flex items-center justify-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
+                Loading...
+              </>
+            ) : (
+              <>
+                <Play className="h-5 w-5 mr-2" />
+                Start Assessment
+              </>
             )}
-          </div>
-        </div>
-      </div>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/assessments')}
+            className="w-full h-12 rounded-2xl border-gray-200 mt-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assessments
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };

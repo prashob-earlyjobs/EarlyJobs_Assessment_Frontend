@@ -384,15 +384,17 @@ export const getTransactionsForFranchisenAdmin = async (
   }
 };
 interface Franchiser {
-  name: string;
-  email: string;
-  password: string;
-  street: string;
-  city: string;
-  state: string;
-  country: string;
-  mobile: string;
-  zipCode: string;
+    name: string;
+    email: string;
+    password: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    mobile: string;
+    zipCode: string;
+    franchiseId: string
+
 }
 
 export const addFranchiser = async (newFranchise: Franchiser) => {
@@ -410,16 +412,14 @@ export const addFranchiser = async (newFranchise: Franchiser) => {
 };
 
 export const getUserStats = async (userId) => {
-  try {
-    const response = await axiosInstance.get(
-      `/assessments/getUserStats/${userId}`
-    );
-    return response.data;
-  } catch (error) {
-    toast.error(`${error?.response?.data?.message}.`);
-    return error;
-  }
-};
+    try {
+        const response = await axiosInstance.get(`/assessments/getUserStats/${userId}`);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+        return error;
+    }
+}
 
 // Offer APIs
 export const getOffers = async () => {
@@ -516,3 +516,27 @@ export const uploadResume = async (file: File, candidateId: string) => {
     throw error;
   }
 };
+
+
+export const getAssessmentLink = async (assessmentId, details) => {
+    try {
+        const response = await axiosInstance.post(`assessments/getAssessmentLink/${assessmentId}`, details);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
+
+
+export const verifyFranchiseId = async (franchiseId: string) => {
+    try {
+        const response = await axiosInstance.get(`auth/verifyFranchiseId/${franchiseId}`);
+        return response.data;
+    }
+    catch (error) {
+        console.log("error", error);
+        toast.error(`${error?.response?.data?.message}.`);
+        return error;
+    }
+}

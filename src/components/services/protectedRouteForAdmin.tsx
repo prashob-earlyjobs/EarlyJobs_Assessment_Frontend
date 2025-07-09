@@ -39,7 +39,8 @@ const ProtectedRouteForAdmin: FC<ProtectedRouteProps> = ({ children }) => {
                         id: loggedIn.user._id,
                         name: loggedIn.user.name,
                         email: loggedIn.user.email,
-                        role: loggedIn.user.role
+                        role: loggedIn.user.role,
+                        franchiseId: loggedIn.user?.franchiseId
                     });
                     setIsAuthenticated(!!loggedIn); // Convert to boolean
                 }

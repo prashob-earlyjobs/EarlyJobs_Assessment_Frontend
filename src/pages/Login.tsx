@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +9,15 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { isUserLoggedIn, userLogin, userSignup } from "@/components/services/servicesapis";
+import { isUserLoggedIn, userLogin, userSignup, verifyFranchiseId } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // New state for confirm password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { userCredentials, setUserCredentials } = useUser();
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -23,7 +25,7 @@ const Login = () => {
     name: "",
     email: "",
     mobile: "",
-    referrerId: "",
+    referrerId: id || "",
     password: "",
     confirmPassword: ""
   });
@@ -37,9 +39,31 @@ const Login = () => {
       } else if (response.success && response.user.role !== 'super_admin' && response.user.role !== 'franchise_admin') {
         navigate('/dashboard');
       } else {
-        navigate('/login');
+        if (!location.pathname.includes('signup')) {
+          console.log("User not logged in", location.pathname);
+          navigate('/login');
+        }
       }
     };
+
+    const verifyId = async () => {
+      const response = await verifyFranchiseId(id);
+      console.log("response", response);
+      if (!response.success) {
+        toast.error(response.message);
+        navigate('/signup');
+      }
+      else {
+        toast.success("Franchise ID verified successfully!");
+      }
+
+    }
+    if (id) {
+      verifyId();
+    }
+
+
+
     checkUserLoggedIn();
   }, []);
 
@@ -78,9 +102,21 @@ const Login = () => {
     navigate('/dashboard');
   };
 
+  const [defaultTab, setDefaultTab] = useState('login');
+
+  useEffect(() => {
+    if (id) {
+      setDefaultTab('signup');
+    } else if (location.pathname.includes('signup')) {
+      setDefaultTab('signup');
+    } else {
+      setDefaultTab('login');
+    }
+    setSignupData({ ...signupData, referrerId: id || "" });
+  }, [id, location.pathname]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
-      {/* Background Pattern */}
       <div
         className="absolute inset-0 opacity-50"
         style={{
@@ -89,7 +125,6 @@ const Login = () => {
       ></div>
 
       <div className="relative w-full max-w-md">
-        {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
@@ -99,7 +134,6 @@ const Login = () => {
           Back to Home
         </Button>
 
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img
@@ -113,7 +147,7 @@ const Login = () => {
         </div>
 
         <Card className="shadow-2xl border-0 rounded-3xl overflow-hidden">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={defaultTab} onValueChange={(value) => setDefaultTab(value)} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-gray-50 rounded-none h-14">
               <TabsTrigger value="login" className="text-base font-medium rounded-2xl mx-2 my-2">Login</TabsTrigger>
               <TabsTrigger value="signup" className="text-base font-medium rounded-2xl mx-2 my-2">Sign Up</TabsTrigger>
@@ -214,12 +248,12 @@ const Login = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="referrerId">Referrer ID(optional)</Label>
+                    <Label htmlFor="referrerId">Referrer ID (optional)</Label>
                     <Input
                       id="referrerId"
                       type="text"
                       placeholder="Enter Referrer ID"
-                      value={signupData.referrerId}
+                      value={id ? id : signupData.referrerId}
                       onChange={(e) => setSignupData({ ...signupData, referrerId: e.target.value })}
                       className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                     />
