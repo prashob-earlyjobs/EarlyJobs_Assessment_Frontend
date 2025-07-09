@@ -125,18 +125,19 @@ export const getAssessmentById = async (assessmentId) => {
 };
 
 export const updateProfile = async (profileData) => {
-  try {
-    const response = await axiosInstance.put(
-      "/auth/update-profile",
-      profileData
-    );
-    return response.data;
-  } catch (error) {
-    toast.error(`${error?.response?.data?.message}.`);
+    try {
+      console.log("Updating profile with data:", profileData);
+        const response = await axiosInstance.put('/auth/update-profile', profileData);
+        console.log("Profile updated successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
 
-    return error;
-  }
-};
+        return error;
+    }
+}
+
+
 export const userLogout = async () => {
   try {
     const response = await axiosInstance.post("/auth/logout");

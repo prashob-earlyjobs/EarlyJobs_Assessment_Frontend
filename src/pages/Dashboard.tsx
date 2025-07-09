@@ -421,7 +421,7 @@ Certificate ID: EJ-CERT-2024-001
                   </CardDescription>
                   <Button
                     // onClick={handleBulkApplyBrowse}
-                    onClick={() => toast.info("This page available for premium candidates!")}
+                    onClick={() => toast.info("Access granted to select candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-yellow-600 hover:bg-gray-50 mb-3"
                   >
@@ -448,7 +448,7 @@ Certificate ID: EJ-CERT-2024-001
                   </CardDescription>
 
                   <Button
-                    onClick={() => toast.info("This feature is available for premium users only.")}
+                    onClick={() => toast.info("Access granted to select candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-blue-700 hover:bg-gray-100 mb-3"
                   >
@@ -475,7 +475,7 @@ Certificate ID: EJ-CERT-2024-001
                   </CardDescription>
                   <Button
                     // onClick={handleBulkApplyBrowse}
-                    onClick={() => toast.info("This page available for premium candidates!")}
+                    onClick={() => toast.info("Access granted to select candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
                   >
@@ -501,7 +501,7 @@ Certificate ID: EJ-CERT-2024-001
                   </CardDescription>
                   <Button
                     // onClick={() => navigate('/jobs')}
-                    onClick={() => toast.info("This page available for premium candidates!")}
+                    onClick={() => toast.info("Access granted to select candidates only")}
 
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-green-600 hover:bg-gray-50"

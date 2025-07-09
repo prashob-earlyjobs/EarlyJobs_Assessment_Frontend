@@ -704,7 +704,7 @@ const Onboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { userCredentials } = useUser()
   const [formData, setFormData] = useState({
-    resume: null as File | null,
+    resumeUrl: null as File | null,
     skills: [] as string[],
     bio: "",
     dateOfBirth: "",
@@ -836,9 +836,11 @@ const Onboarding = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">EJ</span>
-          </div>
+        <img
+              src="/lovable-uploads/logo.png"
+              alt="EarlyJobs Logo"
+              className="h-20 w-auto"
+            />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
           <p className="text-gray-600">Let's set up your account in just 3 simple steps</p>
         </div>
@@ -944,10 +946,10 @@ const Onboarding = () => {
                     />
                     <label htmlFor="resume-upload" className="cursor-pointer">
                       <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      {formData.resume ? (
+                      {formData.resumeUrl ? (
                         <div className="text-green-600 font-medium">
                           <Check className="h-5 w-5 inline mr-2" />
-                          {formData.resume.name}
+                          {/* {formData.resume.name} */}
                         </div>
                       ) : (
                         <>
@@ -1074,7 +1076,7 @@ const Onboarding = () => {
                   <div>
                     <span className="text-sm text-gray-500">Resume</span>
                     <p className="font-medium">
-                      {formData.resume ? formData.resume.name : "Not uploaded"}
+                      {/* {formData.resume ? formData.resume.name : "Not uploaded"} */}
                     </p>
                   </div>
 

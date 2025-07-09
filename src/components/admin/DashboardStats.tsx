@@ -25,14 +25,14 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Assessments Taken',
+      title: 'Assessments Available',
       value: stats.assessmentsTaken.toLocaleString(),
       icon: Calendar,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
     {
-      title: 'Average Score',
+      title: 'Assessments Taken',
       value: `${stats.averageScore}%`,
       icon: BarChart,
       color: 'text-orange-600',
