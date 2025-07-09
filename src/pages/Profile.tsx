@@ -293,7 +293,7 @@ const Profile = () => {
 
       };
 
-      console.log("Payload to update profile:", payload);
+
 
       const response = await updateProfile(payload);
       

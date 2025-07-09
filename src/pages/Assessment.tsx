@@ -20,8 +20,7 @@ import {
   X
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink } from "@/components/services/servicesapis";
-
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, storeAssessmentDetailsApi, matchAssessmentsDetails } from "@/components/services/servicesapis";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
 
@@ -68,6 +67,20 @@ export interface AssessmentType {
   updatedAt?: Date;
 }
 
+interface OfferObj {
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  title?: string;
+}
+
+interface AssessmentDetails {
+  publicLink: string;
+  interviewId?: string;
+  candidateId?: string;
+  linkExpiryTime?: Date;
+  createdAt?: Date;
+}
+
 const Assessment = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -92,50 +105,61 @@ const Assessment = () => {
   });
 
   const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
-
-  const [apiError, setError] = useState(false);
-
-  const [assessmentDetails, setAssessmentDetails] = useState(null);
-
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [assessmentLink, setAssessmentLink] = useState<string | null>(null);
+  const [assessmentDetails, setAssessmentDetails] = useState<AssessmentDetails | null>(null);
   const [offerCode, setOfferCode] = useState("");
   const [offerApplied, setOfferApplied] = useState(false);
   const [offerError, setOfferError] = useState("");
-  const [offerObj, setOfferObj] = useState(null);
+  const [offerObj, setOfferObj] = useState<OfferObj | null>(null);
+  const [startAssessment, setStartAssessment] = useState(false)
 
-  // Get offer code and discount from environment variables
-  const VALID_OFFER_CODE = import.meta.env.VITE_APP_OFFER_CODE;
-  const OFFER_DISCOUNT_PERCENT = Number(import.meta.env.VITE_APP_OFFER_DISCOUNT_PERCENT); // e.g., 10 for 10%
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      setApiError(null);
       try {
         const response = await getAssessmentById(id);
-        console.log("response", response.data);
-        if (!response.data.success) throw new Error(response.message || "Failed to fetch assessment data");
-        const currentDate = new Date("2025-07-03T12:15:00Z");
+        if (!response.data.success) {
+          throw new Error(response.message || "Failed to fetch assessment data");
+        }
+        const currentDate = new Date("2025-07-09T08:04:00Z"); // 01:34 PM IST
         const offerValid = new Date(response.data.data.assessment.offer.validUntil) >= currentDate;
-        if (response.data.data.assessment.offer && !offerValid) {
-          response.data.data.assessment.pricing.discountedPrice = response.data.data.assessment.pricing.basePrice;
+        const assessment = response.data.data.assessment;
+        if (assessment.offer && !offerValid) {
+          assessment.pricing.discountedPrice = assessment.pricing.basePrice;
         }
-
-        setAssessmentData(response.data.data.assessment);
-        if (response.data.message === 'You have already taken this assessment') {
-          setError(true);
-          toast.error('You have already taken this assessment');
+        setAssessmentData(assessment);
+        if (response.data.message === "You have already taken this assessment") {
+          setApiError("You have already taken this assessment");
+          toast.error("You have already taken this assessment");
         }
-
-        if (response.data.data.assessment.pricing.discountedPrice > 0) {
+        if (assessment.pricing.discountedPrice > 0) {
           const orderResponse = await getOrderIdForPayment({
-            amount: response.data.data.assessment.pricing.discountedPrice * 100,
+            amount: assessment.pricing.discountedPrice * 100,
             currency: "INR",
             receipt: `receipt_${id}`,
           });
           setOrderId(orderResponse.id);
         }
+
+        // Check for existing assessment link
+        const matchResponse = await matchAssessmentsDetails(userCredentials._id, assessment.assessmentId);
+        if (matchResponse.success) {
+          setAssessmentDetails(matchResponse.data);
+          setAssessmentLink(matchResponse.data.assessmentLink);
+          setShowPayment(false); // Skip payment if link is valid
+          setPaymentCompleted(true); // Simulate payment completion
+        }
       } catch (error) {
-        console.error("Error fetching assessment data:", error);
-        setError(true);
+
+        if (error.response.data.message === "Assessment not found for this user") {
+          return
+        }
+
+        setApiError(error.message || "Failed to fetch assessment data");
+        toast.error(error.message || "Failed to fetch assessment data");
       } finally {
         setIsLoading(false);
       }
@@ -143,7 +167,15 @@ const Assessment = () => {
     fetchData();
   }, [id, userCredentials]);
 
-  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
+
+  useEffect(() => {
+    if (startAssessment) {
+      storeAssessmentDetails();
+      setStartAssessment(false)
+    }
+  }, [assessmentLink])
+
+  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z")
     ? assessmentData.pricing.discountedPrice
     : assessmentData.pricing.basePrice;
 
@@ -153,7 +185,7 @@ const Assessment = () => {
       return Math.round((baseAssessmentFee * offerObj.discountValue) / 100);
     }
     if (offerObj.discountType === "fixed") {
-      return offerObj.discountValue;
+      return Math.min(offerObj.discountValue, baseAssessmentFee);
     }
     return 0;
   };
@@ -163,58 +195,126 @@ const Assessment = () => {
 
   const addCandidateTransactionDetails = async (paymentId: string) => {
     const details = {
-      transactionId: paymentId || orderId, // Use paymentId from Razorpay or fallback to orderId
+      transactionId: paymentId || orderId || `FREE-${Date.now()}`,
       transactionAmount: finalAssessmentFee,
-      transactionStatus: 'success', // Assuming success on payment completion
+      transactionStatus: "success",
       pricing: {
         basePrice: assessmentData.pricing.basePrice,
         discountedPrice: assessmentData.pricing.discountedPrice
       },
       referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
-      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-25T12:15:00Z"),
+      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z"),
       isPremium: assessmentData.isPremium || false
     };
-
     try {
-      const response = await addCandidateTransaction(userCredentials._id, id, details);
+      await addCandidateTransaction(userCredentials._id, id, details);
     } catch (error) {
-      toast.error("Failed to add candidate transaction. Please try again.");
+      toast.error("Failed to record transaction. Please contact support.");
     }
   };
 
-  const handlePayment = () => {
+  const storeAssessmentDetails = async () => {
+    if (!assessmentDetails) {
+      return;
+    }
+    const details = {
+      assessmentId: id,
+      assessmentIdVelox: assessmentData.assessmentId,
+      assessmentLink: assessmentDetails.publicLink,
+      interviewId: assessmentDetails.interviewId || null,
+      candidateId: assessmentDetails.candidateId,
+      linkExpiryTime: assessmentDetails.linkExpiryTime
+    };
+    try {
+      const response = await storeAssessmentDetailsApi(userCredentials._id, details);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to store assessment details");
+      }
+    } catch (error) {
+      toast.error("Failed to store assessment details. Please try again.");
+    }
+  };
+
+  const handleStartAssessment = async () => {
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      if (!assessmentData.assessmentId || !userCredentials.name || !userCredentials.email || !userCredentials.mobile) {
+        return toast.error("Please fill all the details in Profile section.");
+      }
+      const details = {
+        assessmentId: assessmentData.assessmentId,
+        firstName: "df",
+        lastName: " ",
+        email: "fd@gmail.com",
+        mobile: userCredentials.mobile
+      };
+      const response = await getAssessmentLink(assessmentData.assessmentId, details);
+      if (response.success) {
+        setAssessmentDetails(response.data);
+        setAssessmentLink(response.data.publicLink);
+        // await storeAssessmentDetails();
+      } else {
+        throw new Error(response.message || "Failed to get assessment link");
+      }
+    } catch (error) {
+      setApiError(error.message || "Failed to start assessment");
+      toast.error(error.message || "Failed to start assessment. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
     if (finalAssessmentFee <= 0) {
-      // No payment needed, directly complete payment
       toast.success("Offer applied! No payment required. Starting assessment...");
       setPaymentCompleted(true);
       setShowPayment(false);
-      addCandidateTransactionDetails("FREE-OFFER");
+      await addCandidateTransactionDetails("FREE-OFFER");
+      await handleStartAssessment();
       return;
     }
 
-    if (!Razorpay || !orderId) {
-      toast.error("Payment initialization failed. Please try again.");
+    if (!Razorpay) {
+      toast.error("Payment initialization failed. Razorpay not loaded.");
       return;
+    }
+
+    if (!orderId) {
+      try {
+        const orderResponse = await getOrderIdForPayment({
+          amount: finalAssessmentFee * 100,
+          currency: "INR",
+          receipt: `receipt_${id}`,
+        });
+        setOrderId(orderResponse.id);
+      } catch (error) {
+        toast.error("Failed to initialize payment. Please try again.");
+        return;
+      }
     }
 
     const options: RazorpayOrderOptions = {
       key: import.meta.env.VITE_APP_RAZORPAY_KEY || "YOUR_RAZORPAY_KEY",
-      amount: finalAssessmentFee * 100, // Always use discounted price
+      amount: finalAssessmentFee * 100,
       currency: "INR",
       name: "EarlyJobs",
       description: `Assessment Fee for ${assessmentData.title}`,
-      order_id: orderId || "",
-      handler: (response) => {
+      order_id: orderId,
+      handler: async (response) => {
         toast.success("Payment successful! Starting assessment...");
         setPaymentCompleted(true);
         setShowPayment(false);
-        addCandidateTransactionDetails(response.razorpay_payment_id);
+        await addCandidateTransactionDetails(response.razorpay_payment_id);
+        await handleStartAssessment();
+        setStartAssessment(true)
+
       },
       prefill: {
-        name: "Alex Johnson",
-        email: "alex@example.com",
-        contact: "9876543210",
+        name: userCredentials.name || "Alex Johnson",
+        email: userCredentials.email || "alex@example.com",
+        contact: userCredentials.mobile || "9876543210",
       },
       theme: {
         color: "#ea580c",
@@ -224,149 +324,36 @@ const Assessment = () => {
       },
     };
 
-    const razorpayInstance = new Razorpay(options);
-    razorpayInstance.on("payment.failed", (error) => {
-      toast.error(`Payment failed: ${error.error.description}`);
-    });
-    razorpayInstance.open();
-  };
-
-  const questions = [
-    {
-      id: 1,
-      question: "What is the primary purpose of React Hooks?",
-      options: [
-        "To replace class components entirely",
-        "To allow state and lifecycle features in functional components",
-        "To improve performance of React applications",
-        "To simplify component styling"
-      ],
-      type: "multiple-choice"
-    },
-    {
-      id: 2,
-      question: "Which of the following is the correct way to update state in a functional component?",
-      options: [
-        "this.setState({value: newValue})",
-        "setState(newValue)",
-        "setStateVariable(newValue)",
-        "updateState(newValue)"
-      ],
-      type: "multiple-choice"
-    },
-    {
-      id: 3,
-      question: "What does JSX stand for?",
-      options: [
-        "JavaScript XML",
-        "Java Syntax Extension",
-        "JavaScript Extension",
-        "JSON XML"
-      ],
-      type: "multiple-choice"
-    },
-    {
-      id: 4,
-      question: "Which hook is used for side effects in React?",
-      options: [
-        "useState",
-        "useEffect",
-        "useContext",
-        "useReducer"
-      ],
-      type: "multiple-choice"
-    },
-    {
-      id: 5,
-      question: "What is the virtual DOM in React?",
-      options: [
-        "A copy of the real DOM kept in memory",
-        "A faster version of the regular DOM",
-       "A debugging tool for React",
-        "A component rendering engine"
-      ],
-      type: "multiple-choice"
-    }
-  ];
-
-  const totalQuestions = questions.length;
-  const progress = ((currentQuestion - 1) / totalQuestions) * 100;
-
-  useEffect(() => {
-    if (!paymentCompleted) return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [paymentCompleted]);
-
-  const handleStartAssessment = async () => {
-    setIsLoading(true);
-    console.log("userCredentials", userCredentials);
-
-    const details = {
-      assessmentId: assessmentData.assessmentId,
-      firstName: userCredentials.name,
-      lastName: userCredentials.name,
-      email: userCredentials.email,
-      mobile: userCredentials.mobile
-    };
-    console.log("results/${id}");
     try {
-      const response = await getAssessmentLink(assessmentData.assessmentId, details);
-      console.log("response", response);
-      if (response.success) {
-        setAssessmentDetails(response.data);
-        // Redirect to the assessment link in the same window
-        window.location.replace(response.data.publicLink);
-      } else {
-        toast.error(`${response.message}.`);
-      }
+      const razorpayInstance = new Razorpay(options);
+      razorpayInstance.on("payment.failed", (error) => {
+        toast.error(`Payment failed: ${error.error.description}`);
+      });
+      razorpayInstance.open();
     } catch (error) {
-      console.error("Error fetching assessment link:", error);
-      toast.error("Failed to start assessment. Please try again.");
-    } finally {
-      setIsLoading(false);
+      toast.error("Failed to initiate payment. Please try again.");
     }
-  };
-
-  const handleSubmit = () => {
-    const answeredQuestions = Object.keys(answers).length;
-    if (answeredQuestions < totalQuestions) {
-      const unanswered = totalQuestions - answeredQuestions;
-      if (!confirm(`You have ${unanswered} unanswered questions. Are you sure you want to submit?`)) {
-        return;
-      }
-    }
-
-    toast.success("Assessment submitted successfully!");
-    navigate(`/results/${id}`);
   };
 
   const handleApplyOffer = async () => {
     setOfferError("");
+    if (!offerCode.trim()) {
+      setOfferError("Please enter an offer code.");
+      return;
+    }
     try {
-      // Call your backend to validate/redeem the offer code
       const res = await redeemOffer(offerCode.trim().toUpperCase());
       if (res && res.success) {
         setOfferApplied(true);
-        setOfferObj(res.data); // Save offer details for calculation
-        toast.success(`Offer code applied!`);
+        setOfferObj(res.data);
+        toast.success(`Offer code "${offerCode}" applied!`);
       } else {
         setOfferApplied(false);
         setOfferObj(null);
         setOfferError(res.message || "Invalid offer code.");
         toast.error(res.message || "Invalid offer code.");
       }
-    } catch (e) {
+    } catch (error) {
       setOfferApplied(false);
       setOfferObj(null);
       setOfferError("Invalid or expired offer code.");
@@ -386,6 +373,9 @@ const Assessment = () => {
       </div>
     );
   }
+  const handleVeloxWindow = () => {
+    window.open(assessmentLink, '_blank');
+  }
 
   if (showPayment) {
     return (
@@ -400,15 +390,15 @@ const Assessment = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-gray-50 rounded-2xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData?.title}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Duration:</span>
-                  <span>{assessmentData?.timeLimit} minutes</span>
+                  <span>{assessmentData.timeLimit} minutes</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Questions:</span>
-                  <span>{assessmentData?.questions?.length}</span>
+                  <span>{assessmentData.questions.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Attempts:</span>
@@ -416,7 +406,7 @@ const Assessment = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Assessment Type:</span>
-                  <span>{assessmentData?.type}</span>
+                  <span>{assessmentData.type}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
                   <span>Assessment Fee:</span>
@@ -436,14 +426,13 @@ const Assessment = () => {
                   </div>
                 )}
               </div>
-              {/* Offer Code Input */}
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Have an offer code?</label>
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
                     value={offerCode}
-                    onChange={e => setOfferCode(e.target.value)}
+                    onChange={(e) => setOfferCode(e.target.value)}
                     className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Enter offer code"
                     disabled={offerApplied}
@@ -451,7 +440,7 @@ const Assessment = () => {
                   {!offerApplied ? (
                     <Button
                       onClick={handleApplyOffer}
-                      disabled={!offerCode}
+                      disabled={!offerCode.trim()}
                       className="rounded-lg bg-orange-600 hover:bg-orange-700 text-white"
                     >
                       Apply
@@ -495,16 +484,15 @@ const Assessment = () => {
             <Button
               onClick={handlePayment}
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
-              disabled={!orderId || isLoading || apiError}
+              disabled={isLoading || !!apiError || (finalAssessmentFee > 0 && (!orderId || !Razorpay))}
             >
-              {isLoading ? "Processing..." : `Pay ₹${finalAssessmentFee} & Start Assessment`}
+              {isLoading ? "Processing..." : assessmentDetails ? "Start Assessment" : finalAssessmentFee <= 0 ? "Start Assessment" : `Pay ₹${finalAssessmentFee} & Start Assessment`}
             </Button>
             {razorpayError && <p className="text-red-500 text-center mt-2">Error loading payment: {razorpayError}</p>}
-            {isLoading && <p className="text-red-500 text-center mt-2">Initializing payment...</p>}
-            {apiError && <p className="text-red-500 text-center mt-2">You have already taken this assessment</p>}
+            {apiError && <p className="text-red-500 text-center mt-2">{apiError}</p>}
             <Button
               variant="outline"
-              onClick={() => navigate('/assessments')}
+              onClick={() => navigate("/assessments")}
               className="w-full h-12 rounded-2xl border-gray-200 mt-2"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -515,10 +503,6 @@ const Assessment = () => {
       </div>
     );
   }
-
-  const currentQuestionData = questions[currentQuestion - 1];
-  const isAnswered = answers[currentQuestion] !== undefined;
-  const isFlagged = flaggedQuestions.has(currentQuestion);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -532,15 +516,15 @@ const Assessment = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-gray-50 rounded-2xl p-4">
-            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData?.title}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>Duration:</span>
-                <span>{assessmentData?.timeLimit} minutes</span>
+                <span>{assessmentData.timeLimit} minutes</span>
               </div>
               <div className="flex justify-between">
                 <span>Questions:</span>
-                <span>{assessmentData?.questions?.length}</span>
+                <span>{assessmentData.questions.length}</span>
               </div>
               <div className="flex justify-between">
                 <span>Attempts:</span>
@@ -548,7 +532,7 @@ const Assessment = () => {
               </div>
               <div className="flex justify-between">
                 <span>Assessment Type:</span>
-                <span>{assessmentData?.type}</span>
+                <span>{assessmentData.type}</span>
               </div>
               <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
                 <span>Status:</span>
@@ -558,22 +542,22 @@ const Assessment = () => {
           </div>
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
             <p className="text-sm text-green-700 font-medium">
-              Payment successfully processed on {new Date().toLocaleString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
+              Payment successfully processed on</p><p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
                 hour12: true,
-                timeZone: 'Asia/Kolkata',
-                timeZoneName: 'short',
+                timeZone: "Asia/Kolkata",
+                timeZoneName: "short",
               })}
             </p>
           </div>
           <Button
-            onClick={handleStartAssessment}
+            onClick={handleVeloxWindow}
             className="w-full h-12 bg-green-600 hover:bg-green-700 rounded-2xl text-base shadow-lg flex items-center justify-center"
-            disabled={isLoading}
+            disabled={isLoading || !assessmentLink}
           >
             {isLoading ? (
               <>
@@ -589,7 +573,7 @@ const Assessment = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate('/assessments')}
+            onClick={() => navigate("/assessments")}
             className="w-full h-12 rounded-2xl border-gray-200 mt-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
