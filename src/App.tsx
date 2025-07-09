@@ -57,6 +57,9 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/signup/:id" element={<Login />} />
+                <Route path="/signup" element={<Login />} />
+
                 <Route path="/onboarding" element={
                   <ProtectedRoute>
 

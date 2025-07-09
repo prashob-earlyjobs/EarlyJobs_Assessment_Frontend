@@ -193,24 +193,18 @@ export const getUsers = async ({ searchQuery, role, page = 1, limit = 10 }) => {
   }
 };
 
-export const getUsersForFranchise = async ({
-  id,
-  searchQuery,
-  role,
-  page = 1,
-  limit = 10,
-}) => {
-  try {
-    const response = await axiosInstance.get(
-      `/admin/getUsersForFranchise/${id}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`
-    );
-    return response.data;
-  } catch (error) {
-    toast.error(`${error?.response?.data?.message}.`);
+export const getUsersForFranchise = async ({ franchiseId, searchQuery, role, page = 1, limit = 10 }) => {
+    try {
+        const response = await axiosInstance.get(`/admin/getUsersForFranchise/${franchiseId}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
 
-    return error;
-  }
-};
+        return error;
+    }
+
+}
+
 
 export const setUserStatusAactivity = async (userId, isActive) => {
   try {
@@ -283,17 +277,19 @@ export const editAssessment = async (assessmentData, assessmentId) => {
 };
 
 export const getAssessmentsByUserId = async (userId: string) => {
-  try {
-    const response = await axiosInstance.get(
-      `assessments/getAssessments/${userId}`
-    );
-    return response.data;
-  } catch (error) {
-    toast.error(`${error?.response?.data?.message}.`);
 
-    return error;
-  }
-};
+    try {
+        const response = await axiosInstance.get(`assessments/getAssessments/${userId}`);
+        console.log("response", response.data);
+        return response.data;
+
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+
+        return error;
+    }
+}
+
 
 export const getFranchiser = async (franchiserId: string) => {
   try {
@@ -539,4 +535,36 @@ export const verifyFranchiseId = async (franchiseId: string) => {
         toast.error(`${error?.response?.data?.message}.`);
         return error;
     }
+
+}
+
+
+
+
+
+export const storeAssessmentDetailsApi = async (userId, data) => {
+    try {
+        const response = await axiosInstance.post(`/assessments/storeAssessmentDetails/${userId}`, data);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to store assessment details"}.`);
+        throw error;
+    }
+}
+export const matchAssessmentsDetails = async (userId, assessmentId) => {
+
+    const response = await axiosInstance.get(`/assessments/matchAssessmentsDetails/${userId}/${assessmentId}`);
+    return response.data;
+
+}
+
+export const getPaidAssessments = async (userId) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/getPaidAssessments/${userId}`);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+
 }
