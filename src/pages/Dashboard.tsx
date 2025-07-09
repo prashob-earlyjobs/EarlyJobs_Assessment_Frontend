@@ -157,10 +157,10 @@ Certificate ID: EJ-CERT-2024-001
         // Transform assessments into recent activity format
         const recentActivities = result.data.map(assessment => ({
           type: "assessment",
-          id: assessment.assessment._id,
-          title: assessment.assessment.title || "Untitled Assessment",
-          status: assessment.assessment.status || "Completed",
-          time: assessment.assessment.createdAt ? new Date(assessment.assessment.createdAt).toLocaleString('en-IN', {
+          id: assessment._id,
+          title: assessment.title || "Untitled Assessment",
+          status: assessment.status || "Completed",
+          time: assessment.createdAt ? new Date(assessment.createdAt).toLocaleString('en-IN', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',

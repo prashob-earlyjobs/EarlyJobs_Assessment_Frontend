@@ -24,7 +24,7 @@ const CandidatesPage: React.FC = () => {
     // Reset search and filter when users change
     const resetSearchAndFilter = async () => {
       try {
-        const response = currentUser.role === 'super_admin' ? await getUsers({ searchQuery: searchTerm, role: 'candidate' }) : await getUsersForFranchise({ id: currentUser.id, searchQuery: searchTerm, role: 'candidate' });
+        const response = currentUser.role === 'super_admin' ? await getUsers({ searchQuery: searchTerm, role: 'candidate' }) : await getUsersForFranchise({ franchiseId: currentUser.franchiseId, searchQuery: searchTerm, role: 'candidate' });
 
         if (!response.success) {
           throw new Error(response.message);
@@ -63,7 +63,7 @@ const CandidatesPage: React.FC = () => {
         <Card >
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>Candidate Overview</CardTitle>
+              <CardTitle>Candidates Overview</CardTitle>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input

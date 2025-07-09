@@ -143,9 +143,9 @@ export const getUsers = async ({ searchQuery, role, page = 1, limit = 10 }) => {
     }
 };
 
-export const getUsersForFranchise = async ({ id, searchQuery, role, page = 1, limit = 10 }) => {
+export const getUsersForFranchise = async ({ franchiseId, searchQuery, role, page = 1, limit = 10 }) => {
     try {
-        const response = await axiosInstance.get(`/admin/getUsersForFranchise/${id}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
+        const response = await axiosInstance.get(`/admin/getUsersForFranchise/${franchiseId}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
         toast.error(`${error?.response?.data?.message}.`);
@@ -218,7 +218,9 @@ export const editAssessment = async (assessmentData, assessmentId) => {
 export const getAssessmentsByUserId = async (userId: string) => {
     try {
         const response = await axiosInstance.get(`assessments/getAssessments/${userId}`);
+        console.log("response", response.data);
         return response.data;
+
     } catch (error) {
         toast.error(`${error?.response?.data?.message}.`);
 
@@ -422,3 +424,29 @@ export const redeemOffer = async (code: string) => {
         return { success: false, message: error?.response?.data?.message || "Failed to redeem offer" };
     }
 };
+
+export const storeAssessmentDetailsApi = async (userId, data) => {
+    try {
+        const response = await axiosInstance.post(`/assessments/storeAssessmentDetails/${userId}`, data);
+        return response.data;
+    } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to store assessment details"}.`);
+        throw error;
+    }
+}
+export const matchAssessmentsDetails = async (userId, assessmentId) => {
+
+    const response = await axiosInstance.get(`/assessments/matchAssessmentsDetails/${userId}/${assessmentId}`);
+    return response.data;
+
+}
+
+export const getPaidAssessments = async (userId) => {
+    try {
+        const response = await axiosInstance.get(`/assessments/getPaidAssessments/${userId}`);
+        return response.data;
+    }
+    catch (error) {
+        toast.error(`${error?.response?.data?.message}.`);
+    }
+}
