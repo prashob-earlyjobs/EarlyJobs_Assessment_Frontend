@@ -245,9 +245,9 @@ const Assessment = () => {
       }
       const details = {
         assessmentId: assessmentData.assessmentId,
-        firstName: "df",
+        firstName: userCredentials.name,
         lastName: " ",
-        email: "fd@gmail.com",
+        email: userCredentials.email,
         mobile: userCredentials.mobile
       };
       const response = await getAssessmentLink(assessmentData.assessmentId, details);
