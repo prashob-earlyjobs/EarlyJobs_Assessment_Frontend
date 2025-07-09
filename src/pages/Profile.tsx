@@ -1,11 +1,23 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -24,7 +36,12 @@ import {
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
-import { isUserLoggedIn, updateProfile } from "@/components/services/servicesapis";
+import {
+  isUserLoggedIn,
+  updateProfile,
+  uploadPhoto,
+  uploadResume,
+} from "@/components/services/servicesapis";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -59,7 +76,6 @@ const Profile = () => {
             year: "",
             percentage: "",
             fieldOfStudy: "",
-
           },
         ],
       },
@@ -71,8 +87,8 @@ const Profile = () => {
       preferredJobRole: "",
       skills: [] as string[],
     },
-    profilePhoto: null as File | null,
-    resume: null as File | null,
+    avatar: "", // Store S3 URL for profile photo
+    resumeUrl: "", // Store S3 URL for resume
   });
 
   useEffect(() => {
@@ -156,26 +172,41 @@ const Profile = () => {
     }
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Photo size should be less than 5MB");
         return;
       }
-      setProfileData((prev) => ({ ...prev, profilePhoto: file }));
-      toast.success("Photo uploaded successfully!");
+      try {
+        const url = await uploadPhoto(file, profileData.email);
+        if (url) {
+          setProfileData((prev) => ({ ...prev, avatar: url }));
+
+          console.log("Photo uploaded successfully: eee", url);
+        }
+      } catch {
+        // Error handled in service
+      }
     }
   };
 
-  const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
         toast.error("Resume size should be less than 10MB");
         return;
       }
-      setProfileData((prev) => ({ ...prev, resume: file }));
+      try {
+        const url = await uploadResume(file, profileData.email);
+        if (url) {
+          setProfileData((prev) => ({ ...prev, resumeUrl: url }));
+        }
+      } catch {
+        // Error handled in service
+      }
     }
   };
 
@@ -257,12 +288,24 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const response = await updateProfile(profileData);
+      const payload = {
+        ...profileData
+
+      };
+
+      console.log("Payload to update profile:", payload);
+
+      const response = await updateProfile(payload);
+      
       if (!response.success) {
         throw new Error(response.message || "Failed to update profile");
       }
+
+      // Update local state with response data
       const updatedUserData = {
         ...response.data.user,
+        avatar: profileData.avatar, // Keep the existing avatar URL
+        resumeUrl: profileData.resumeUrl, // Keep the existing resume URL
         profile: {
           ...response.data.user.profile,
           professionalInformation: {
@@ -283,6 +326,7 @@ const Profile = () => {
           },
         },
       };
+
       setProfileData(updatedUserData);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -329,11 +373,8 @@ const Profile = () => {
               <div className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24">
                   <AvatarImage
-                    src={
-                      profileData.profilePhoto
-                        ? URL.createObjectURL(profileData.profilePhoto)
-                        : "/placeholder-avatar.jpg"
-                    }
+                    src={profileData.avatar || "/placeholder-avatar.jpg"}
+                    alt="Profile"
                   />
                   <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white text-xl">
                     {profileData.name.charAt(0)?.toUpperCase() || "U"}
@@ -366,7 +407,18 @@ const Profile = () => {
                     <div>
                       <h3 className="font-medium">Upload Resume</h3>
                       <p className="text-sm text-gray-500">
-                        {profileData.resume ? profileData.resume.name : "Auto-fill profile data from your resume"}
+                        {profileData.resumeUrl ? (
+                          <a
+                            href={profileData.resumeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            View Current Resume
+                          </a>
+                        ) : (
+                          "Upload your resume (PDF, DOC, DOCX)"
+                        )}
                       </p>
                     </div>
                   </div>
@@ -376,7 +428,7 @@ const Profile = () => {
                     onClick={() => resumeInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Choose File
+                    {profileData.resumeUrl ? "Update Resume" : "Upload Resume"}
                   </Button>
                 </div>
                 <input
@@ -386,7 +438,9 @@ const Profile = () => {
                   onChange={handleResumeUpload}
                   className="hidden"
                 />
-                <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX (Max: 10MB)</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Supported formats: PDF, DOC, DOCX (Max: 10MB)
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -418,7 +472,6 @@ const Profile = () => {
                     readOnly
                     onChange={(e) => handleInputChange("mobile", e.target.value)}
                     className="rounded-2xl cursor-not-allowed bg-gray-100"
-
                   />
                 </div>
                 <div className="space-y-2">

@@ -12,39 +12,39 @@ const FranchisesPage: React.FC = () => {
 
   // Mock data for franchises
   const [mockFranchises, setMockFranchises] = useState([
-    {
-      id: '1',
-      name: 'TechCorp Solutions',
-      contactEmail: 'admin@techcorp.com',
-      contactPhone: '+1-555-0123',
-      location: 'New York, NY',
-      activeUsers: 45,
-      totalAssessments: 120,
-      joinDate: '2024-01-15',
-      status: 'active' as const
-    },
-    {
-      id: '2',
-      name: 'Innovation Hub',
-      contactEmail: 'contact@innovhub.com',
-      contactPhone: '+1-555-0456',
-      location: 'San Francisco, CA',
-      activeUsers: 32,
-      totalAssessments: 89,
-      joinDate: '2024-02-20',
-      status: 'active' as const
-    },
-    {
-      id: '3',
-      name: 'StartupBridge',
-      contactEmail: 'info@startupbridge.com',
-      contactPhone: '+1-555-0789',
-      location: 'Austin, TX',
-      activeUsers: 18,
-      totalAssessments: 45,
-      joinDate: '2024-03-10',
-      status: 'inactive' as const
-    }
+    // {
+    //   id: '1',
+    //   name: 'TechCorp Solutions',
+    //   contactEmail: 'admin@techcorp.com',
+    //   contactPhone: '+1-555-0123',
+    //   location: 'New York, NY',
+    //   activeUsers: 45,
+    //   totalAssessments: 120,
+    //   joinDate: '2024-01-15',
+    //   status: 'active' as const
+    // },
+    // {
+    //   id: '2',
+    //   name: 'Innovation Hub',
+    //   contactEmail: 'contact@innovhub.com',
+    //   contactPhone: '+1-555-0456',
+    //   location: 'San Francisco, CA',
+    //   activeUsers: 32,
+    //   totalAssessments: 89,
+    //   joinDate: '2024-02-20',
+    //   status: 'active' as const
+    // },
+    // {
+    //   id: '3',
+    //   name: 'StartupBridge',
+    //   contactEmail: 'info@startupbridge.com',
+    //   contactPhone: '+1-555-0789',
+    //   location: 'Austin, TX',
+    //   activeUsers: 18,
+    //   totalAssessments: 45,
+    //   joinDate: '2024-03-10',
+    //   status: 'inactive' as const
+    // }
   ]);
 
   const handleAddFranchise = (newFranchise) => {

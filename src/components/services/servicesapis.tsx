@@ -89,7 +89,9 @@ export const getAssessmentById = async (assessmentId) => {
 
 export const updateProfile = async (profileData) => {
     try {
+      console.log("Updating profile with data:", profileData);
         const response = await axiosInstance.put('/auth/update-profile', profileData);
+        console.log("Profile updated successfully:", response.data);
         return response.data;
     } catch (error) {
         toast.error(`${error?.response?.data?.message}.`);
@@ -97,6 +99,8 @@ export const updateProfile = async (profileData) => {
         return error;
     }
 }
+
+
 export const userLogout = async () => {
     try {
         const response = await axiosInstance.post('/auth/logout');
@@ -421,4 +425,54 @@ export const redeemOffer = async (code: string) => {
     } catch (error) {
         return { success: false, message: error?.response?.data?.message || "Failed to redeem offer" };
     }
+};
+
+// Upload photo to S3 using email as folder ID
+export const uploadPhoto = async (file: File, email: string) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosInstance.post(`/upload/${email}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (response.data?.fileUrl) {
+      toast.success("Photo uploaded successfully!");
+      return response.data.fileUrl;
+    } else {
+      console.error('Unexpected response structure:', response.data);
+      toast.error("Failed to upload photo - unexpected response format.");
+      return null;
+    }
+  } catch (error: any) {
+    console.error('Photo upload error:', error);
+    toast.error(error?.response?.data?.message || "Failed to upload photo. Please try again.");
+    return null;
+  }
+};
+
+// Upload resume to S3 using email as folder ID
+export const uploadResume = async (file: File, email: string) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosInstance.post(`/upload/${email}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (response.data?.fileUrl) {
+      toast.success("Resume uploaded successfully!");
+      return response.data.fileUrl;
+    } else {
+      console.error('Unexpected response structure:', response.data);
+      toast.error("Failed to upload resume - unexpected response format.");
+      return null;
+    }
+  } catch (error: any) {
+    console.error('Resume upload error:', error);
+    toast.error(error?.response?.data?.message || "Failed to upload resume. Please try again.");
+    return null;
+  }
 };

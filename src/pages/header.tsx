@@ -41,6 +41,7 @@ const Header = () => {
     const [userDetails, setUserDetails] = useState({
         name: "",
         email: "",
+        avatar: "",
         profile: {
 
             preferredJobRole: "",
@@ -212,7 +213,7 @@ const Header = () => {
 
                         <div className="flex items-center space-x-3 cursor-pointer" onClick={handleProfileClick}>
                             <Avatar className="h-10 w-10">
-                                <AvatarImage src="/placeholder-avatar.jpg" />
+                                <AvatarImage src={userDetails.avatar} />
                                 <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
                                     {userDetails.name.split(' ').map(n => n[0]).join('')?.toUpperCase()}
                                 </AvatarFallback>

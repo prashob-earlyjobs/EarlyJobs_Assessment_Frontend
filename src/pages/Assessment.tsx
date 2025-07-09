@@ -20,7 +20,7 @@ import {
   X
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, } from "@/components/services/servicesapis";
+import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink } from "@/components/services/servicesapis";
 
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
@@ -95,7 +95,6 @@ const Assessment = () => {
 
   const [apiError, setError] = useState(false);
 
-  const [assessmentLink, setAssessmentLink] = useState<string | null>(null);
   const [assessmentDetails, setAssessmentDetails] = useState(null);
 
   const [offerCode, setOfferCode] = useState("");
@@ -144,17 +143,6 @@ const Assessment = () => {
     fetchData();
   }, [id, userCredentials]);
 
-  // useEffect to open the assessment link when it updates
-  useEffect(() => {
-    if (assessmentLink) {
-      console.log("Opening assessment link:", assessmentLink);
-      window.open(assessmentLink, '_blank');
-      setAssessmentLink(null); // Reset to prevent reopening
-    }
-  }, [assessmentLink]);
-
-  const assessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
-  // Dynamically set assessment fee based on offer validity
   const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-03T12:15:00Z")
     ? assessmentData.pricing.discountedPrice
     : assessmentData.pricing.basePrice;
@@ -175,7 +163,6 @@ const Assessment = () => {
 
   const addCandidateTransactionDetails = async (paymentId: string) => {
     const details = {
-
       transactionId: paymentId || orderId, // Use paymentId from Razorpay or fallback to orderId
       transactionAmount: finalAssessmentFee,
       transactionStatus: 'success', // Assuming success on payment completion
@@ -295,7 +282,7 @@ const Assessment = () => {
       options: [
         "A copy of the real DOM kept in memory",
         "A faster version of the regular DOM",
-        "A debugging tool for React",
+       "A debugging tool for React",
         "A component rendering engine"
       ],
       type: "multiple-choice"
@@ -332,13 +319,14 @@ const Assessment = () => {
       email: userCredentials.email,
       mobile: userCredentials.mobile
     };
-    console.log("details", details);
+    console.log("results/${id}");
     try {
       const response = await getAssessmentLink(assessmentData.assessmentId, details);
       console.log("response", response);
       if (response.success) {
         setAssessmentDetails(response.data);
-        setAssessmentLink(response.data.publicLink);
+        // Redirect to the assessment link in the same window
+        window.location.replace(response.data.publicLink);
       } else {
         toast.error(`${response.message}.`);
       }
