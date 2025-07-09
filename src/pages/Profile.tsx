@@ -1,11 +1,23 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -24,7 +36,12 @@ import {
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
-import { isUserLoggedIn, updateProfile } from "@/components/services/servicesapis";
+import {
+  isUserLoggedIn,
+  updateProfile,
+  uploadPhoto,
+  uploadResume,
+} from "@/components/services/servicesapis";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -59,7 +76,6 @@ const Profile = () => {
             year: "",
             percentage: "",
             fieldOfStudy: "",
-
           },
         ],
       },
@@ -71,7 +87,8 @@ const Profile = () => {
       preferredJobRole: "",
       skills: [] as string[],
     },
-    profilePhoto: null as File | null,
+    resumeUrl: "", // Add this field
+    avatar: "", // Changed from profilePhoto to avatar
     resume: null as File | null,
   });
 
@@ -90,10 +107,11 @@ const Profile = () => {
             ...response.user.profile,
             professionalInformation: {
               ...response.user.profile.professionalInformation,
-              education:
-                Array.isArray(response.user.profile.professionalInformation.education)
-                  ? response.user.profile.professionalInformation.education
-                  : [
+              education: Array.isArray(
+                response.user.profile.professionalInformation.education
+              )
+                ? response.user.profile.professionalInformation.education
+                : [
                     {
                       id: Date.now().toString(),
                       degree: "",
@@ -156,31 +174,53 @@ const Profile = () => {
     }
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload photo to S3 and set URL
+  const handlePhotoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Photo size should be less than 5MB");
         return;
       }
-      setProfileData((prev) => ({ ...prev, profilePhoto: file }));
-      toast.success("Photo uploaded successfully!");
+      try {
+        const url = await uploadPhoto(file, profileData.email);
+        if (url) {
+          setProfileData((prev) => ({ ...prev, avatar: url })); // Changed from profilePhoto to avatar
+        }
+      } catch {
+        // Error handled in service
+      }
     }
   };
 
-  const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
         toast.error("Resume size should be less than 10MB");
         return;
       }
-      setProfileData((prev) => ({ ...prev, resume: file }));
+      try {
+        const url = await uploadResume(file, profileData.email); // Pass candidate ID
+        if (url) {
+          setProfileData((prev) => ({ 
+            ...prev, 
+            resumeUrl: url 
+          }));
+        }
+      } catch {
+        // Error handled in service
+      }
     }
   };
 
   const addSkill = () => {
-    if (newSkill.trim() && !profileData.profile.skills.includes(newSkill.trim())) {
+    if (
+      newSkill.trim() &&
+      !profileData.profile.skills.includes(newSkill.trim())
+    ) {
       setProfileData((prev) => ({
         ...prev,
         profile: {
@@ -219,7 +259,10 @@ const Profile = () => {
         ...prev.profile,
         professionalInformation: {
           ...prev.profile.professionalInformation,
-          education: [...prev.profile.professionalInformation.education, newEducation],
+          education: [
+            ...prev.profile.professionalInformation.education,
+            newEducation,
+          ],
         },
       },
     }));
@@ -237,8 +280,7 @@ const Profile = () => {
             edu.id === id ? { ...edu, [field]: value } : edu
           ),
         },
-      },
-    }));
+      }}));
   };
 
   const removeEducation = (id: string) => {
@@ -248,7 +290,9 @@ const Profile = () => {
         ...prev.profile,
         professionalInformation: {
           ...prev.profile.professionalInformation,
-          education: prev.profile.professionalInformation.education.filter((edu) => edu.id !== id),
+          education: prev.profile.professionalInformation.education.filter(
+            (edu) => edu.id !== id
+          ),
         },
       },
     }));
@@ -257,20 +301,30 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const response = await updateProfile(profileData);
+      const payload = {
+        ...profileData,
+        avatar: profileData.avatar || "",
+        resumeUrl: profileData.resumeUrl || "", // Include resumeUrl in the payload
+      };
+
+      const response = await updateProfile(payload);
+
       if (!response.success) {
         throw new Error(response.message || "Failed to update profile");
       }
+
       const updatedUserData = {
         ...response.data.user,
+        avatar: profileData.avatar, // Changed from profilePhoto to avatar
         profile: {
           ...response.data.user.profile,
           professionalInformation: {
             ...response.data.user.profile.professionalInformation,
-            education:
-              Array.isArray(response.data.user.profile.professionalInformation.education)
-                ? response.data.user.profile.professionalInformation.education
-                : [
+            education: Array.isArray(
+              response.data.user.profile.professionalInformation.education
+            )
+              ? response.data.user.profile.professionalInformation.education
+              : [
                   {
                     id: Date.now().toString(),
                     degree: "",
@@ -283,6 +337,7 @@ const Profile = () => {
           },
         },
       };
+
       setProfileData(updatedUserData);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -323,15 +378,17 @@ const Profile = () => {
                 <User className="h-6 w-6 text-orange-600" />
                 <span>Personal Information</span>
               </CardTitle>
-              <CardDescription>Update your basic personal details</CardDescription>
+              <CardDescription>
+                Update your basic personal details
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24">
                   <AvatarImage
                     src={
-                      profileData.profilePhoto
-                        ? URL.createObjectURL(profileData.profilePhoto)
+                      profileData.avatar // Changed from profilePhoto to avatar
+                        ? profileData.avatar
                         : "/placeholder-avatar.jpg"
                     }
                   />
@@ -366,7 +423,18 @@ const Profile = () => {
                     <div>
                       <h3 className="font-medium">Upload Resume</h3>
                       <p className="text-sm text-gray-500">
-                        {profileData.resume ? profileData.resume.name : "Auto-fill profile data from your resume"}
+                        {profileData.resumeUrl ? (
+                          <a
+                            href={profileData.resumeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            View Current Resume
+                          </a>
+                        ) : (
+                          "Upload your resume (PDF, DOC, DOCX)"
+                        )}
                       </p>
                     </div>
                   </div>
@@ -376,7 +444,7 @@ const Profile = () => {
                     onClick={() => resumeInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Choose File
+                    {profileData.resumeUrl ? "Update Resume" : "Upload Resume"}
                   </Button>
                 </div>
                 <input
@@ -386,7 +454,9 @@ const Profile = () => {
                   onChange={handleResumeUpload}
                   className="hidden"
                 />
-                <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX (Max: 10MB)</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Supported formats: PDF, DOC, DOCX (Max: 10MB)
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -416,9 +486,10 @@ const Profile = () => {
                     id="mobile"
                     value={profileData.mobile}
                     readOnly
-                    onChange={(e) => handleInputChange("mobile", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("mobile", e.target.value)
+                    }
                     className="rounded-2xl cursor-not-allowed bg-gray-100"
-
                   />
                 </div>
                 <div className="space-y-2">
@@ -428,7 +499,9 @@ const Profile = () => {
                     type="date"
                     readOnly
                     value={profileData.profile.dateOfBirth}
-                    onChange={(e) => handleInputChange("profile.dateOfBirth", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("profile.dateOfBirth", e.target.value)
+                    }
                     className="rounded-2xl cursor-not-allowed bg-gray-100"
                   />
                 </div>
@@ -436,7 +509,9 @@ const Profile = () => {
                   <Label htmlFor="gender">Gender</Label>
                   <Select
                     value={profileData.profile.gender}
-                    onValueChange={(value) => handleInputChange("profile.gender", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("profile.gender", value)
+                    }
                     disabled
                   >
                     <SelectTrigger className="rounded-2xl">
@@ -457,7 +532,9 @@ const Profile = () => {
                   id="bio"
                   readOnly
                   value={profileData.profile.bio}
-                  onChange={(e) => handleInputChange("profile.bio", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("profile.bio", e.target.value)
+                  }
                   className="rounded-2xl min-h-[100px] cursor-not-allowed bg-gray-100"
                   placeholder="Tell us about yourself..."
                 />
@@ -479,7 +556,12 @@ const Profile = () => {
                   <Input
                     id="street"
                     value={profileData.profile.address?.street}
-                    onChange={(e) => handleInputChange("profile.address.street", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "profile.address.street",
+                        e.target.value
+                      )
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -488,7 +570,9 @@ const Profile = () => {
                   <Input
                     id="city"
                     value={profileData.profile.address?.city}
-                    onChange={(e) => handleInputChange("profile.address.city", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("profile.address.city", e.target.value)
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -497,7 +581,9 @@ const Profile = () => {
                   <Input
                     id="state"
                     value={profileData.profile.address?.state}
-                    onChange={(e) => handleInputChange("profile.address.state", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("profile.address.state", e.target.value)
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -506,7 +592,12 @@ const Profile = () => {
                   <Input
                     id="zipCode"
                     value={profileData.profile.address?.zipCode}
-                    onChange={(e) => handleInputChange("profile.address.zipCode", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "profile.address.zipCode",
+                        e.target.value
+                      )
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -515,7 +606,12 @@ const Profile = () => {
                   <Input
                     id="country"
                     value={profileData.profile.address?.country}
-                    onChange={(e) => handleInputChange("profile.address.country", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "profile.address.country",
+                        e.target.value
+                      )
+                    }
                     className="rounded-2xl"
                   />
                 </div>
@@ -536,9 +632,15 @@ const Profile = () => {
                   <Label htmlFor="currentJobTitle">Current Job Title</Label>
                   <Input
                     id="currentJobTitle"
-                    value={profileData.profile.professionalInformation?.currentJobTitle}
+                    value={
+                      profileData.profile.professionalInformation
+                        ?.currentJobTitle
+                    }
                     onChange={(e) =>
-                      handleInputChange("profile.professionalInformation.currentJobTitle", e.target.value)
+                      handleInputChange(
+                        "profile.professionalInformation.currentJobTitle",
+                        e.target.value
+                      )
                     }
                     className="rounded-2xl"
                   />
@@ -548,21 +650,35 @@ const Profile = () => {
                   <Input
                     id="experience"
                     type="number"
-                    value={profileData.profile.professionalInformation?.experience || ""}
+                    value={
+                      profileData.profile.professionalInformation?.experience ||
+                      ""
+                    }
                     onChange={(e) =>
-                      handleInputChange("profile.professionalInformation.experience", e.target.value)
+                      handleInputChange(
+                        "profile.professionalInformation.experience",
+                        e.target.value
+                      )
                     }
                     className="rounded-2xl"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="expectedSalary">Expected Salary (Annual)</Label>
+                  <Label htmlFor="expectedSalary">
+                    Expected Salary (Annual)
+                  </Label>
                   <Input
                     id="expectedSalary"
                     type="number"
-                    value={profileData.profile.professionalInformation?.expectedSalaryAnnual}
+                    value={
+                      profileData.profile.professionalInformation
+                        ?.expectedSalaryAnnual
+                    }
                     onChange={(e) =>
-                      handleInputChange("profile.professionalInformation.expectedSalaryAnnual", e.target.value)
+                      handleInputChange(
+                        "profile.professionalInformation.expectedSalaryAnnual",
+                        e.target.value
+                      )
                     }
                     className="rounded-2xl"
                     placeholder="80000"
@@ -573,9 +689,15 @@ const Profile = () => {
                   <Input
                     id="noticePeriod"
                     type="number"
-                    value={profileData.profile.professionalInformation?.noticePeriod || ""}
+                    value={
+                      profileData.profile.professionalInformation
+                        ?.noticePeriod || ""
+                    }
                     onChange={(e) =>
-                      handleInputChange("profile.professionalInformation.noticePeriod", e.target.value)
+                      handleInputChange(
+                        "profile.professionalInformation.noticePeriod",
+                        e.target.value
+                      )
                     }
                     className="rounded-2xl"
                   />
@@ -583,9 +705,14 @@ const Profile = () => {
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="workMode">Preferred Work Mode</Label>
                   <Select
-                    value={profileData.profile.professionalInformation?.workMode}
+                    value={
+                      profileData.profile.professionalInformation?.workMode
+                    }
                     onValueChange={(value) =>
-                      handleInputChange("profile.professionalInformation.workMode", value)
+                      handleInputChange(
+                        "profile.professionalInformation.workMode",
+                        value
+                      )
                     }
                   >
                     <SelectTrigger className="rounded-2xl">
@@ -612,7 +739,11 @@ const Profile = () => {
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {profileData.profile.skills.map((skill, index) => (
-                  <Badge key={index} variant="secondary" className="rounded-full px-3 py-1">
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="rounded-full px-3 py-1"
+                  >
                     {skill}
                     <Button
                       variant="ghost"
@@ -647,86 +778,122 @@ const Profile = () => {
                   <Calendar className="h-6 w-6 text-orange-600" />
                   <span>Education</span>
                 </div>
-                <Button onClick={addEducation} variant="outline" className="rounded-2xl">
+                <Button
+                  onClick={addEducation}
+                  variant="outline"
+                  className="rounded-2xl"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Education
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {Array.isArray(profileData.profile.professionalInformation.education) &&
-                profileData.profile.professionalInformation.education.map((edu) => (
-                  <div
-                    key={edu.id}
-                    className="p-4 border rounded-2xl relative bg-white shadow-md transition-all duration-200 hover:shadow-lg"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeEducation(edu.id)}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+              {Array.isArray(
+                profileData.profile.professionalInformation.education
+              ) &&
+                profileData.profile.professionalInformation.education.map(
+                  (edu) => (
+                    <div
+                      key={edu.id}
+                      className="p-4 border rounded-2xl relative bg-white shadow-md transition-all duration-200 hover:shadow-lg"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Degree</Label>
-                        <Input
-                          value={edu.degree || ""}
-                          onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="Bachelor of Computer Science"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Institution</Label>
-                        <Input
-                          value={edu.institution || ""}
-                          onChange={(e) => updateEducation(edu.id, "institution", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="University Name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Year of Graduation</Label>
-                        <Input
-                          type="number"
-                          value={edu.year || ""}
-                          onChange={(e) => updateEducation(edu.id, "year", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="2023"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Percentage/CGPA</Label>
-                        <Input
-                          value={edu.percentage || ""}
-                          type="number"
-                          onChange={(e) => updateEducation(edu.id, "percentage", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="85% or 8.5 CGPA"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Field of Study</Label>
-                        <Input
-                          value={edu.fieldOfStudy || ""}
-                          onChange={(e) => updateEducation(edu.id, "fieldOfStudy", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="Computer Science, Electrical Engineering, etc."
-                        />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeEducation(edu.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Degree</Label>
+                          <Input
+                            value={edu.degree || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "degree", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="Bachelor of Computer Science"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Institution</Label>
+                          <Input
+                            value={edu.institution || ""}
+                            onChange={(e) =>
+                              updateEducation(
+                                edu.id,
+                                "institution",
+                                e.target.value
+                              )
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="University Name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Year of Graduation</Label>
+                          <Input
+                            type="number"
+                            value={edu.year || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "year", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="2023"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Percentage/CGPA</Label>
+                          <Input
+                            value={edu.percentage || ""}
+                            type="number"
+                            onChange={(e) =>
+                              updateEducation(
+                                edu.id,
+                                "percentage",
+                                e.target.value
+                              )
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="85% or 8.5 CGPA"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Field of Study</Label>
+                          <Input
+                            value={edu.fieldOfStudy || ""}
+                            onChange={(e) =>
+                              updateEducation(
+                                edu.id,
+                                "fieldOfStudy",
+                                e.target.value
+                              )
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="Computer Science, Electrical Engineering, etc."
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              {profileData.profile.professionalInformation.education.length === 0 && (
-                <p className="text-center text-gray-500">No education entries added yet.</p>
+                  )
+                )}
+              {profileData.profile.professionalInformation.education.length ===
+                0 && (
+                <p className="text-center text-gray-500">
+                  No education entries added yet.
+                </p>
               )}
             </CardContent>
           </Card>
 
           <div className="flex justify-center">
-            <Button onClick={handleSave} className="rounded-2xl px-8 py-3 text-lg bg-orange-600 text-white hover:bg-orange-700">
+            <Button
+              onClick={handleSave}
+              className="rounded-2xl px-8 py-3 text-lg bg-orange-600 text-white hover:bg-orange-700"
+            >
               <Save className="h-5 w-5 mr-2" />
               Save Profile
             </Button>
