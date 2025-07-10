@@ -55,7 +55,7 @@ export async function refreshAccessToken(): Promise<string> {
 
     return accessToken;
   } catch (error) {
-    toast.error('❌ Failed to refresh access token:');
+    toast.error('Your session has expired. Please log in again.');
     throw error;
   }
 }
@@ -111,7 +111,6 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(originalRequest);
           }
         } catch (refreshError) {
-          toast.error('🔁 Token refresh failed:');
           if (!pathname.includes('/login')) {
             await logout();
           }
