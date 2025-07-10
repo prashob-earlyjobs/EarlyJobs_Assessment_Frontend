@@ -40,7 +40,6 @@ const Login = () => {
         navigate('/dashboard');
       } else {
         if (!location.pathname.includes('signup')) {
-          console.log("User not logged in", location.pathname);
           navigate('/login');
         }
       }
@@ -48,7 +47,6 @@ const Login = () => {
 
     const verifyId = async () => {
       const response = await verifyFranchiseId(id);
-      console.log("response", response);
       if (!response.success) {
         toast.error(response.message);
         navigate('/signup');

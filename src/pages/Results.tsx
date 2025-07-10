@@ -19,11 +19,18 @@ import {
   AlertTriangle,
   Calendar
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { getPaidAssessments, getResultForCandidateAssessment, getAssessmentById } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 import Header from "./header";
+import CertificateWithPDF from "@/components/Certificate";
 
 const Results = () => {
   const navigate = useNavigate();
@@ -35,7 +42,8 @@ const Results = () => {
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const { userCredentials } = useUser();
   const [completedAssessments, setCompletedAssessments] = useState([]);
-  const [isDataCame, setIsDataCame] = useState(false);
+  const [showCertificateDialog, setShowCertificateDialog] = useState(false);
+  const [certificateData, setCertificateData] = useState(null);
 
   const getAssessmentsData = async (assessments) => {
     const assessmentPromises = assessments.map(async (assessment) => {
@@ -94,6 +102,7 @@ const Results = () => {
         console.log("selectedAssessment", selectedAssessment);
 
         const response = await getResultForCandidateAssessment(selectedAssessment?.interviewId);
+
         if (!response.success) {
           throw new Error(response.message);
         }
@@ -104,7 +113,7 @@ const Results = () => {
       } catch (error) {
         console.error("Error fetching results:", error);
         setError(error.message);
-        toast.error(error.message);
+        toast.error('Assessment is not yet completed or does not reviewed.');
       } finally {
         setLoading(false);
       }
@@ -113,6 +122,63 @@ const Results = () => {
       getReport();
     }
   }, [id, userCredentials._id, selectedAssessment]);
+
+  // useEffect(() => {
+  //   if(!error){
+  //     completedAssessments?.map((assessment) => {
+
+  //       if(assessment.interviewId === selectedAssessment?.interviewId){
+
+  //         setCertificateData({
+  //           candidateName: userCredentials.name,
+  //           assessmentName: assessment.assessmentData.title,
+  //           score: 85,
+  //           date: new Date().toLocaleDateString(),
+  //           skillsVerified: "",
+  //           certificateId: "EJ-CERT-2024-001"
+  //         });
+  //       }
+  //     }
+        
+  //     )
+
+  //   }
+  // }, [selectedAssessment]);
+
+  useEffect(() => {
+    if (!error && selectedAssessment && completedAssessments) {
+      const matchedAssessment = completedAssessments.find(
+        (assessment) => assessment.interviewId === selectedAssessment.interviewId
+      );
+  
+      if (matchedAssessment && results?.report) {
+        const skillsVerified = results?.report.reportSkills
+          .filter((skill) => skill.score > 4)
+          .map((skill) => skill.skill);
+  
+        // Calculate percentage score
+        const actualScorePercent = (results?.report.score / 10) * 100; // Assuming score is out of 10
+        const communicationScorePercent = (results?.report.communicationScore / 10) * 100; // Assuming communicationScore is out of 10
+        const finalPercentage = Math.round(
+          0.7 * actualScorePercent + 0.3 * communicationScorePercent
+        );
+  
+        setCertificateData({
+          candidateName: userCredentials.name,
+          assessmentName: matchedAssessment.assessmentData.title,
+          score: finalPercentage, // Use calculated percentage
+          date: new Date().toLocaleDateString(),
+          skillsVerified,
+          interviewId: matchedAssessment.interviewId,
+          certificateId: `EJ-CERT-${new Date().getFullYear()}-${matchedAssessment.interviewId.slice(0, 8)}`,
+        });
+      }
+    }
+  }, [error, selectedAssessment, completedAssessments, userCredentials, results]);
+
+  useEffect(() => {
+  console.log("results", results);  
+  },[results])
 
   const handleDownloadReport = () => {
     toast.success("Downloading your interview report...");
@@ -438,6 +504,20 @@ const Results = () => {
                 </CardContent>
               </Card>
             }
+  
+  <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Your Certificate</span>
+            
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <CertificateWithPDF {...certificateData} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
             {/* Quick Actions */}
             <Card className="rounded-3xl border-0 shadow-lg">
@@ -446,9 +526,10 @@ const Results = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
-                  onClick={handleDownloadReport}
+                  onClick={()=> setShowCertificateDialog(true)}
                   variant="outline"
-                  className="w-full rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                  className={`w-full rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300 ${error !== null ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  disabled={error !== null}
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Download Report

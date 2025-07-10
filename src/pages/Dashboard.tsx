@@ -6,29 +6,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
+import Certificate from "@/components/Certificate";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import {
   BookOpen,
   BarChart3,
   Award,
   Briefcase,
   Lightbulb,
-  Bell,
   TrendingUp,
   Clock,
   Target,
-  Users,
-  LogOut,
   CreditCard,
   Repeat,
   User,
@@ -38,10 +32,10 @@ import {
   GraduationCap
 } from "lucide-react";
 import { toast } from "sonner";
-import Certificate from "@/components/Certificate";
 import { getAssessmentsByUserId, getUserStats, isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 import Header from "./header";
+import CertificateWithPDF from "@/components/Certificate";
 
 
 const notifications = [
@@ -96,48 +90,7 @@ const Dashboard = () => {
     setShowCertificateDialog(true);
   };
 
-  const downloadCertificateAsPDF = async () => {
-    try {
-      // Create a temporary container for the certificate
-      const certificateElement = document.getElementById('certificate');
-      if (!certificateElement) {
-        toast.error("Certificate not found");
-        return;
-      }
-
-      // For now, we'll create a simple text-based PDF simulation
-      // In a real application, you would use libraries like html2canvas + jsPDF
-      const certificateContent = `
-CERTIFICATE OF ACHIEVEMENT
-
-This is to certify that
-${userDetails.name}
-has successfully completed the
-React Developer Assessment
-with a score of 85%
-
-Skills Verified: JavaScript, React, Node.js, Problem Solving
-Date: ${new Date().toLocaleDateString()}
-Certificate ID: EJ-CERT-2024-001
-      `;
-
-      const blob = new Blob([certificateContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `EarlyJobs_Certificate_${userDetails.name.replace(' ', '_')}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(url);
-      toast.success("Certificate downloaded successfully!");
-      setShowCertificateDialog(false);
-    } catch (error) {
-      toast.error("Failed to download certificate");
-    }
-  };
+  
 
   const certificateData = {
     candidateName: userDetails.name,
@@ -152,7 +105,6 @@ Certificate ID: EJ-CERT-2024-001
     const userAssessments = async () => {
       try {
         const result = await getAssessmentsByUserId(userCredentials._id);
-        console.log("result", result);
 
         // Transform assessments into recent activity format
         const recentActivities = result.data.map(assessment => ({
@@ -179,7 +131,6 @@ Certificate ID: EJ-CERT-2024-001
           ...recentActivities
         ]);
       } catch (error) {
-        console.error("Error fetching assessments:", error);
         // Optionally set a default or error activity if desired
         setRecentActivity([{
           id: 1,
@@ -201,7 +152,6 @@ Certificate ID: EJ-CERT-2024-001
     const getUserStatsAsync = async () => {
       try {
         const response = await getUserStats(userCredentials._id);
-        console.log("response", response);
         if (response.success) {
           const updatedStats = stats.map((stat) => ({
             ...stat,
@@ -210,7 +160,7 @@ Certificate ID: EJ-CERT-2024-001
           setStats(updatedStats);
         }
       } catch (error) {
-        console.error("Error fetching user stats:", error);
+        console.error("Error fetching user stats:");
       }
 
     }
@@ -317,14 +267,11 @@ Certificate ID: EJ-CERT-2024-001
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Your Certificate</span>
-              <Button onClick={downloadCertificateAsPDF} className="rounded-2xl bg-orange-600 hover:bg-orange-700">
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+             
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            <Certificate {...certificateData} />
+            <CertificateWithPDF {...certificateData} />
           </div>
         </DialogContent>
       </Dialog>
@@ -397,7 +344,7 @@ Certificate ID: EJ-CERT-2024-001
                     Track your progress and see detailed analytics of your performance.
                   </CardDescription>
                   <Button
-                    onClick={() => navigate('/results/latest')}
+                    onClick={() => navigate('/results')}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-purple-600 hover:bg-gray-50"
                   >
@@ -533,7 +480,7 @@ Certificate ID: EJ-CERT-2024-001
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={handleDownloadCertificate}
+                    onClick={()=> navigate('/results')}
                     className="h-16 rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300 flex flex-col space-y-1"
                   >
                     <Award className="h-5 w-5 text-purple-600" />
