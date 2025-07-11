@@ -1,65 +1,37 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AddFranchiseModal } from '@/components/admin/AddFranchiseModal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, Calendar, MapPin, Phone, Mail, Plus } from 'lucide-react';
+import { getFranchises } from '@/components/services/servicesapis';
 
 const FranchisesPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Mock data for franchises
-  const [mockFranchises, setMockFranchises] = useState([
-    // {
-    //   id: '1',
-    //   name: 'TechCorp Solutions',
-    //   contactEmail: 'admin@techcorp.com',
-    //   contactPhone: '+1-555-0123',
-    //   location: 'New York, NY',
-    //   activeUsers: 45,
-    //   totalAssessments: 120,
-    //   joinDate: '2024-01-15',
-    //   status: 'active' as const
-    // },
-    // {
-    //   id: '2',
-    //   name: 'Innovation Hub',
-    //   contactEmail: 'contact@innovhub.com',
-    //   contactPhone: '+1-555-0456',
-    //   location: 'San Francisco, CA',
-    //   activeUsers: 32,
-    //   totalAssessments: 89,
-    //   joinDate: '2024-02-20',
-    //   status: 'active' as const
-    // },
-    // {
-    //   id: '3',
-    //   name: 'StartupBridge',
-    //   contactEmail: 'info@startupbridge.com',
-    //   contactPhone: '+1-555-0789',
-    //   location: 'Austin, TX',
-    //   activeUsers: 18,
-    //   totalAssessments: 45,
-    //   joinDate: '2024-03-10',
-    //   status: 'inactive' as const
-    // }
-  ]);
+  const [mockFranchises, setMockFranchises] = useState([]);
 
   const handleAddFranchise = (newFranchise) => {
     setMockFranchises([...mockFranchises, newFranchise]);
   };
+  useEffect(() => {
+    const fetchFranchises = async () => {
+      try{
+        const response = await getFranchises();
+        
+        setMockFranchises(response);
 
-  const handleViewDetails = (franchise) => {
-    console.log('View franchise details:', franchise);
-    // In real app, would open details modal or navigate to details page
-  };
+      }
+      catch(error){
+        console.error('Error fetching franchises:', error);
+      }
+    }
+    fetchFranchises();
+  }, []);
 
-  const handleManageUsers = (franchise) => {
-    console.log('Manage users for franchise:', franchise);
-    // In real app, would navigate to franchise users page
-  };
 
   return (
     <AdminLayout>
@@ -75,20 +47,26 @@ const FranchisesPage: React.FC = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockFranchises.map((franchise) => (
-            <Card key={franchise.id} className="hover:shadow-lg transition-shadow">
+        {mockFranchises?.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          { mockFranchises?.map((franchise) => (
+            <Card key={franchise._id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{franchise.name}</CardTitle>
                     <CardDescription className="flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
-                      {franchise.location}
+                      {
+                        franchise.location.street &&
+                        franchise.location.city &&
+                        franchise.location.state &&
+                        franchise.location.zipCode ?`
+                      ${franchise.location.street}, ${franchise.location.city}, ${franchise.location.state}, ${franchise.location.zipCode}` : 'N/A'
+                      }
                     </CardDescription>
                   </div>
-                  <Badge variant={franchise.status === 'active' ? 'default' : 'secondary'}>
-                    {franchise.status}
+                  <Badge variant={franchise.status  ? 'default' : 'secondary'}>
+                    {franchise.status ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -96,11 +74,11 @@ const FranchisesPage: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Mail className="h-3 w-3" />
-                    {franchise.contactEmail}
+                    {franchise?.contactEmail}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Phone className="h-3 w-3" />
-                    {franchise.contactPhone}
+                    {franchise?.contactPhone}
                   </div>
                 </div>
 
@@ -109,7 +87,7 @@ const FranchisesPage: React.FC = () => {
                     <p className="text-sm text-gray-500">Active Users</p>
                     <div className="flex items-center justify-center gap-1">
                       <Users className="h-4 w-4 text-blue-500" />
-                      <span className="font-semibold text-lg">{franchise.activeUsers}</span>
+                      <span className="font-semibold text-lg">{franchise?.activeUsers}</span>
                     </div>
                   </div>
 
@@ -117,32 +95,14 @@ const FranchisesPage: React.FC = () => {
 
                 <div className="pt-2 border-t">
                   <p className="text-xs text-gray-500">
-                    Joined: {new Date(franchise.joinDate).toLocaleDateString()}
+                    Joined: {new Date(franchise?.joinDate).toLocaleDateString()}
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => handleViewDetails(franchise)}
-                  >
-                    View Details
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => handleManageUsers(franchise)}
-                  >
-                    Manage Users
-                  </Button>
-                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          )) }</div>: <div className="text-center flex items-center justify-center h-[40vh]"> <p className="text-gray-600 text-lg font-semibold">No franchises found</p></div>
+        }
       </div>
 
       <AddFranchiseModal

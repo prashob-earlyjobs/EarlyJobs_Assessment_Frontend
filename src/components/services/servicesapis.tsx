@@ -43,6 +43,24 @@ export const isUserLoggedIn = async () => {
   }
 };
 
+export const sendOtptoMobile = async ({phoneNumber,email}) => {
+  try {
+    const response = await axiosInstance.post("/auth/send-otp", {phoneNumber,email });
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
+
+export const verifyOtpMobile = async ({phoneNumber,email ,otp}) => {
+  try {
+    const response = await axiosInstance.post("/auth/verify-otp", {phoneNumber,email , otp});
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
+
 export const userSignup = async ({
   name,
   email,
@@ -589,6 +607,17 @@ export const getResultForCandidateAssessment = async (interviewId) => {
 export const getCandidatesForAssessment = async (assessmentId) => {
   try {
     const response = await axiosInstance.get(`/admin/getCandidatesForAssessment/${assessmentId}`);
+    return response.data;
+  }
+  catch (error) {
+    toast.error(`${error?.response?.data?.message}.`);
+  }
+}
+
+
+export const getFranchises= async () => {
+  try {
+    const response = await axiosInstance.get(`/admin/getFranchises`);
     return response.data;
   }
   catch (error) {
