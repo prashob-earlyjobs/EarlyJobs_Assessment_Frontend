@@ -196,15 +196,15 @@ const Assessment = () => {
   const addCandidateTransactionDetails = async (paymentId: string) => {
     const details = {
       transactionId: paymentId || orderId || `FREE-${Date.now()}`,
-      transactionAmount: finalAssessmentFee,
+      transactionAmount: finalAssessmentFee || "0",
       transactionStatus: "success",
       pricing: {
-        basePrice: assessmentData.pricing.basePrice,
-        discountedPrice: assessmentData.pricing.discountedPrice
+        basePrice: assessmentData.pricing.basePrice  || 0,
+        discountedPrice: assessmentData.pricing.discountedPrice  || 0
       },
       referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
-      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z"),
+      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z") || false,
       isPremium: assessmentData.isPremium || false
     };
     try {
@@ -396,10 +396,7 @@ const Assessment = () => {
                   <span>Duration:</span>
                   <span>{assessmentData.timeLimit} minutes</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Questions:</span>
-                  <span>{assessmentData.questions.length}</span>
-                </div>
+               
                 <div className="flex justify-between">
                   <span>Attempts:</span>
                   <span>1</span>
@@ -522,10 +519,7 @@ const Assessment = () => {
                 <span>Duration:</span>
                 <span>{assessmentData.timeLimit} minutes</span>
               </div>
-              <div className="flex justify-between">
-                <span>Questions:</span>
-                <span>{assessmentData.questions.length}</span>
-              </div>
+            
               <div className="flex justify-between">
                 <span>Attempts:</span>
                 <span>1</span>
