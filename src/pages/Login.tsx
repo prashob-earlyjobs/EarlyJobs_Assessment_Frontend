@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Cookies from "js-cookie";
-import { isUserLoggedIn, userLogin, userSignup, verifyFranchiseId } from "@/components/services/servicesapis";
+import axios from "axios";
+import { isUserLoggedIn, sendOtptoMobile, userLogin, userSignup, verifyFranchiseId, verifyOtpMobile } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 
 const Login = () => {
@@ -19,7 +21,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { userCredentials, setUserCredentials } = useUser();
-
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     name: "",
@@ -29,6 +30,8 @@ const Login = () => {
     password: "",
     confirmPassword: ""
   });
+  const [otp, setOtp] = useState("");
+  const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
 
   useEffect(() => {
     const checkUserLoggedIn = async () => {
@@ -40,7 +43,6 @@ const Login = () => {
         navigate('/dashboard');
       } else {
         if (!location.pathname.includes('signup')) {
-          console.log("User not logged in", location.pathname);
           navigate('/login');
         }
       }
@@ -48,22 +50,17 @@ const Login = () => {
 
     const verifyId = async () => {
       const response = await verifyFranchiseId(id);
-      console.log("response", response);
       if (!response.success) {
         toast.error(response.message);
         navigate('/signup');
-      }
-      else {
+      } else {
         toast.success("Franchise ID verified successfully!");
       }
+    };
 
-    }
     if (id) {
       verifyId();
     }
-
-
-
     checkUserLoggedIn();
   }, []);
 
@@ -86,14 +83,74 @@ const Login = () => {
       toast.error("Passwords don't match!");
       return;
     }
-    const response = await userSignup(signupData);
-    if (!response.success) {
-      toast.error(response.response.data.message);
+    try {
+      // Generate OTP
+      const otpResponse = await sendOtptoMobile({
+        phoneNumber: signupData.mobile.replace(/^\+91/, ''),
+        email: signupData.email
+      });
+
+      if (!otpResponse.success) {
+        toast.error(otpResponse.data.message);
+        return;
+      }
+
+      setIsOtpDialogOpen(true);
+      toast.success("OTP sent to your mobile number and email!");
+    } catch (error) {
+      toast.error("Error during signup or OTP generation");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const otpResponse = await sendOtptoMobile({
+        phoneNumber: signupData.mobile.replace(/^\+91/, ''),
+        email: signupData.email
+      });
+
+      if (!otpResponse.success) {
+        toast.error(otpResponse.data.message);
+        return;
+      }
+
+      setOtp(""); // Clear previous OTP input
+      toast.success("OTP resent to your mobile number and email!");
+    } catch (error) {
+      toast.error("Error resending OTP");
+    }
+  };
+
+  const handleOtpVerification = async () => {
+    if (otp.length !== 6) {
+      toast.error("Please enter a 6-digit OTP");
       return;
-    } else {
-      Cookies.set("accessToken", response.data.accessToken);
+    }
+
+    try {
+      const response = await verifyOtpMobile({
+        phoneNumber: signupData.mobile.replace(/^\+91/, ''),
+        email: signupData.email,
+        otp
+      });
+
+      if (!response.success) {
+        toast.error(response.data.message);
+        return;
+      }
+
+      const signupResponse = await userSignup(signupData);
+      if (!signupResponse.success) {
+        toast.error(signupResponse.data.message);
+        return;
+      }
+
+      Cookies.set("accessToken", signupResponse.data.accessToken);
+      setIsOtpDialogOpen(false);
       toast.success("Account created successfully!");
       navigate('/onboarding');
+    } catch (error) {
+      toast.error("Error verifying OTP");
     }
   };
 
@@ -308,6 +365,48 @@ const Login = () => {
             </TabsContent>
           </Tabs>
         </Card>
+
+        <Dialog open={isOtpDialogOpen} onOpenChange={setIsOtpDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Verify OTP</DialogTitle>
+              <DialogDescription>
+                Enter the 6-digit OTP sent to your mobile and email.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="otp">OTP</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                  className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                  required
+                />
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleOtpVerification}
+                  className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+                  disabled={!otp || otp.length !== 6}
+                >
+                  Verify OTP
+                </Button>
+                <Button
+                  onClick={handleResendOtp}
+                  variant="outline"
+                  className="w-full h-12 rounded-2xl text-base"
+                >
+                  Resend OTP
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           By continuing, you agree to our Terms of Service and Privacy Policy

@@ -35,7 +35,7 @@ const TransactionsForAdmin = () => {
 
                 }
             } catch (error) {
-                console.error("Failed to fetch transactions:", error);
+                console.error("Failed to fetch transactions:");
             } finally {
                 setLoading(false);
             }
@@ -48,7 +48,7 @@ const TransactionsForAdmin = () => {
                     setTotalCommission(response.data.earnings.totalCommission || 0);
                 }
             } catch (error) {
-                console.error("Failed to fetch transactions:", error);
+                console.error("Failed to fetch transactions:");
             } finally {
                 setLoading(false);
             }

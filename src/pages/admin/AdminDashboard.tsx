@@ -18,7 +18,6 @@ const AdminDashboard: React.FC = () => {
   const [showAddFranchise, setShowAddFranchise] = useState(false);
   const { currentUser, setCurrentUser } = useAdmin();
 
-  console.log('Current User:', currentUser);
 
   // Check if user is franchise admin
   const isFranchiseAdmin = currentUser?.role === "franchise_admin";
@@ -125,7 +124,6 @@ const AdminDashboard: React.FC = () => {
 
 
   const handleAddFranchise = (franchise) => {
-    console.log('New franchise added:', franchise);
     // In real app, this would make an API call
   };
 
@@ -137,7 +135,6 @@ const AdminDashboard: React.FC = () => {
       })
       .catch((err) => {
         toast.error('Failed to copy invite link.');
-        console.error('Clipboard error:', err);
       });
   };
 
@@ -149,8 +146,8 @@ const AdminDashboard: React.FC = () => {
             {isFranchiseAdmin ? 'Franchise Dashboard' : 'Admin Dashboard'}
           </h1>
           <p className="text-gray-600 mt-2">
-            {isFranchiseAdmin 
-              ? 'Manage your candidates, assessments, and transactions.' 
+            {isFranchiseAdmin
+              ? 'Manage your candidates, assessments, and transactions.'
               : 'Welcome back! Here\'s what\'s happening with your platform.'
             }
           </p>
@@ -183,7 +180,7 @@ const AdminDashboard: React.FC = () => {
               </Button>
             </div>
             <p className="text-sm text-gray-500">
-              {isFranchiseAdmin 
+              {isFranchiseAdmin
                 ? 'Share this link with candidates to invite them to take assessments through your franchise.'
                 : 'Share this link with potential franchise partners to invite them to sign up.'
               }

@@ -30,7 +30,6 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
   const [franchiser, setFranchiser] = useState(null);
 
   useEffect(() => {
-    console.log(user);
     const getAssessmentsAndRes = async () => {
       try {
         const response = await getAssessmentsByUserId(user._id);

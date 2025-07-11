@@ -86,7 +86,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
             >
               <option value="all">All Roles</option>
               <option value="candidate">Candidates</option>
-              <option value="franchise">Franchises</option>
+              <option value="franchise_admin">Franchises</option>
               <option value="super_admin">Admins</option>
             </select>
           </div>

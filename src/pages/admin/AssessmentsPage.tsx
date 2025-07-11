@@ -67,11 +67,9 @@ const AssessmentsPage: React.FC = () => {
         if (!response.success) {
           throw new Error(response.message);
         }
-        console.log("response", response);
         setAssessment(response.data || []);
         setCandidates(response.data.interviewCandidates || []);
       } catch (error) {
-        console.log("Error fetching candidates:", error);
         toast.error("An error occurred. Please try again later.");
         setCandidates([]);
       }
@@ -90,9 +88,7 @@ const AssessmentsPage: React.FC = () => {
   const handleViewDetails = async (candidate) => {
     setSelectedCandidate(candidate);
     setShowDetails(true);
-    console.log("candidate", candidate);
     const response = await getResultForCandidateAssessment(candidate.interviewId);
-    console.log("response", response);
     setResult(response);
   };
 

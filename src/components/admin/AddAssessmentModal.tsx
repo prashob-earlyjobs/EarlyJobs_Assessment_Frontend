@@ -51,12 +51,11 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
     const getAssessmentsFromVelox = async () => {
       try {
         const response = await getAssessmentsVelox();
-        console.log("response", response);
         if (response && Array.isArray(response)) {
           setAssessmentData(response);
         }
       } catch (error) {
-        console.error('Error fetching assessments:', error);
+        return
       }
     };
     if (open) {

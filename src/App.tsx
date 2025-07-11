@@ -109,7 +109,7 @@ const App = () => (
                   }
                 />
                 <Route
-                  path="/results/:id"
+                  path="/results/"
                   element={
                     <ProtectedRoute>
                       <Results />

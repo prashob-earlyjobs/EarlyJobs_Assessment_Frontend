@@ -75,10 +75,6 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
     try {
 
       const response = await addFranchiser(newFranchise);
-      console.log(
-        "response",
-        response
-      )
     }
 
     catch (error) {
