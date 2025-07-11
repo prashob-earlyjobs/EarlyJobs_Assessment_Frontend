@@ -30,7 +30,7 @@ const FranchisesPage: React.FC = () => {
       }
     }
     fetchFranchises();
-  }, []);
+  }, [showAddModal]);
 
 
   return (
@@ -57,16 +57,16 @@ const FranchisesPage: React.FC = () => {
                     <CardDescription className="flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {
-                        franchise.location.street &&
-                        franchise.location.city &&
-                        franchise.location.state &&
-                        franchise.location.zipCode ?`
-                      ${franchise.location.street}, ${franchise.location.city}, ${franchise.location.state}, ${franchise.location.zipCode}` : 'N/A'
+                        franchise?.location?.street &&
+                        franchise?.location?.city &&
+                        franchise?.location?.state &&
+                        franchise?.location?.zipCode ?`
+                      ${franchise?.location?.street}, ${franchise?.location.city}, ${franchise?.location.state}, ${franchise?.location.zipCode}` : 'N/A'
                       }
                     </CardDescription>
                   </div>
                   <Badge variant={franchise.status  ? 'default' : 'secondary'}>
-                    {franchise.status ? 'Active' : 'Inactive'}
+                    {franchise?.status ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
               </CardHeader>
