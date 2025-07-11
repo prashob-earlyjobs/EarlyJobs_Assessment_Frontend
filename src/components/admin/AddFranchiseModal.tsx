@@ -73,31 +73,31 @@ export const AddFranchiseModal: React.FC<AddFranchiseModalProps> = ({
       franchiseId,
     };
     try {
-
+      
       const response = await addFranchiser(newFranchise);
+      onSave(newFranchise);
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setStreet('');
+      setCity('');
+      setState('');
+      setCountry('');
+      setZipCode('');
+      setMobile('');
+      setFranchiseId('');
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      onOpenChange(false);
     }
 
     catch (error) {
       toast.error(`${error?.response?.data?.message}.`);
       return error;
     }
-    onSave(newFranchise);
 
     // Reset form
-    setName('');
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    setStreet('');
-    setCity('');
-    setState('');
-    setCountry('');
-    setZipCode('');
-    setMobile('');
-    setFranchiseId('');
-    setShowPassword(false);
-    setShowConfirmPassword(false);
-    onOpenChange(false);
   };
 
   return (
