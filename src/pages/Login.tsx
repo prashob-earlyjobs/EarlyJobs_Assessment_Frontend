@@ -298,23 +298,32 @@ const Login = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
-                   <Input
+                    <input
                       id="mobile"
+                      name="mobile"
                       type="text"
-                      placeholder="9876543210"
                       value={signupData.mobile}
+                      placeholder="9876543210"
                       onChange={(e) => {
                         const value = e.target.value;
                         if (/^\d{0,10}$/.test(value)) {
                           setSignupData({ ...signupData, mobile: value });
                         }
                       }}
-                      inputMode="numeric"
                       pattern="\d{10}"
-                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                      inputMode="numeric"
                       required
-                      />
+                      onInvalid={(e) => {
+                        (e.target as HTMLInputElement).setCustomValidity("Mobile number must be exactly 10 digits");
+                      }}
+                      onInput={(e) => {
+                        (e.target as HTMLInputElement).setCustomValidity("");
+                      }}
+                      className="h-12 w-full rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 px-4"
+                    />
                   </div>
+
+
                   <div className="space-y-2">
                     <Label htmlFor="referrerId">Referrer ID (optional)</Label>
                     <Input
