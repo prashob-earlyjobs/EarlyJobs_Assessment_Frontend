@@ -173,7 +173,7 @@ const Assessment = () => {
       storeAssessmentDetails();
       setStartAssessment(false)
     }
-  }, [assessmentLink])
+  }, [assessmentLink,startAssessment])
 
   const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z")
     ? assessmentData.pricing.discountedPrice
@@ -273,6 +273,8 @@ const Assessment = () => {
       setShowPayment(false);
       await addCandidateTransactionDetails("FREE-OFFER");
       await handleStartAssessment();
+        setStartAssessment(true)
+
       return;
     }
 
