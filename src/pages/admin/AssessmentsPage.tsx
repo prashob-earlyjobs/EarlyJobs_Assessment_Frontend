@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AddAssessmentModal } from '@/components/admin/AddAssessmentModal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import { useAdmin } from '@/context/AdminContext';
 import UserDetailSidebar from '@/components/UserDetailSidebar';
 import { a } from 'node_modules/framer-motion/dist/types.d-D0HXPxHm';
 import UserResultsSidebar from '@/components/userResultSidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Clock,
   CalendarDays,
@@ -231,13 +232,21 @@ const AssessmentsPage: React.FC = () => {
                               {assessment.difficulty}
                             </Badge>
                           </div>
-                          <p className="text-gray-600 mb-3">{assessment.description}</p>
-                          <div className="flex flex-wrap gap-2">
                             {assessment?.tags?.map((tag, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
                                 {tag}
                               </Badge>
                             ))}
+                          <Tooltip>
+                        <TooltipTrigger asChild>
+                          <CardDescription className="text-sm text-gray-600 mt-3 max-h-[64px] leading-snug line-clamp-3 cursor-default">
+                            {assessment.description}
+                          </CardDescription>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs text-sm text-gray-600">
+                          {assessment.description}
+                        </TooltipContent>
+                        </Tooltip>                          <div className="flex flex-wrap gap-2">
                           </div>
                         </div>
                         <div className="flex gap-2 ml-4">
@@ -270,10 +279,7 @@ const AssessmentsPage: React.FC = () => {
                           <p className="text-2xl font-semibold text-gray-900">{assessment.timeLimit}</p>
                           <p className="text-sm text-gray-500">Minutes</p>
                         </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-semibold text-gray-900">{assessment?.questions?.length}</p>
-                          <p className="text-sm text-gray-500">Questions</p>
-                        </div>
+                       
                         <div className="text-center">
                           <p className="text-2xl font-semibold text-gray-900">{assessment.attempts}</p>
                           <p className="text-sm text-gray-500">Attempts</p>
@@ -324,9 +330,9 @@ const AssessmentsPage: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 flex flex-wrap gap-[10px]">
+              <div className="space-y-4 flex flex-wrap justify-center gap-[10px]">
                 {candidates.map((candidate) => (
-                  <div key={candidate.interviewId} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors" style={{ margin: "0px" }}>
+                  <div key={candidate.interviewId} className="border rounded-lg p-4 max-w-[514px] hover:bg-gray-50 transition-colors" style={{ margin: "0px" }}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12">

@@ -22,7 +22,7 @@ export interface Assessment {
   skillTags: string[];
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   duration: number; // in minutes
-  questions: string[]; // Assuming questions are objects, adjust type as needed
+  questions?: string[]; // Assuming questions are objects, adjust type as needed
   attempts: number;
   averageScore: number;
   completionRate: number;

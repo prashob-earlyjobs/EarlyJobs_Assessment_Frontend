@@ -104,7 +104,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
       duration: parseInt(duration),
       type: type as "mcq" | "coding" | "video" | "mixed",
       category: category as "technical" | "aptitude" | "personality" | "communication",
-      questions: [],
+      // questions: [],
       attempts: 0,
       averageScore: 0,
       completionRate: 0,
@@ -220,9 +220,8 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="technical">Technical</SelectItem>
-                  <SelectItem value="aptitude">Aptitude</SelectItem>
-                  <SelectItem value="personality">Personality</SelectItem>
-                  <SelectItem value="communication">Communication</SelectItem>
+                  <SelectItem value="non-technical">Non Technical</SelectItem>
+                  
                 </SelectContent>
               </Select>
             </div>
@@ -252,7 +251,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="questions">Number of Questions *</Label>
             <Input
               id="questions"
@@ -261,7 +260,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
               onChange={(e) => setQuestions(e.target.value)}
               placeholder="25"
             />
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="skill-tag">Skill Tags *</Label>
@@ -294,7 +293,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="basePrice">Base Price ($) *</Label>
+              <Label htmlFor="basePrice">Base Price (Rs) *</Label>
               <Input
                 id="basePrice"
                 type="number"
@@ -305,7 +304,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="discountedPrice">Discounted Price ($) *</Label>
+              <Label htmlFor="discountedPrice">Discounted Price (Rs) *</Label>
               <Input
                 id="discountedPrice"
                 type="number"

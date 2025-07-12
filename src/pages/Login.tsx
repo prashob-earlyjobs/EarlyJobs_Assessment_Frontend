@@ -307,7 +307,7 @@ useEffect(() => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img
-              src="/lovable-Uploads/logo.png"
+              src="/lovable-uploads/logo.png"
               alt="EarlyJobs"
               className="h-20 w-32"
             />

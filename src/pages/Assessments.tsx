@@ -26,6 +26,7 @@ import {
 import { getAssessmentsfromSearch } from "@/components/services/servicesapis";
 import Header from "./header";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const LIMIT = 10;
 
@@ -108,7 +109,7 @@ const Assessments = () => {
     switch (category) {
       case "technical":
         return "bg-blue-100 text-blue-700";
-      case "communication":
+      case "non-technical":
         return "bg-green-100 text-green-700";
       case "personality":
         return "bg-yellow-100 text-yellow-700";
@@ -199,11 +200,7 @@ const Assessments = () => {
                           switch (assessment.category) {
                             case "technical":
                               return <Code className="h-6 w-6" />;
-                            case "communication":
-                              return <MessageSquare className="h-6 w-6" />;
-                            case "personality":
-                              return <Settings className="h-6 w-6" />;
-                            case "aptitude":
+                            case "non-technical":
                               return <BarChart className="h-6 w-6" />;
                             default:
                               return <Award className="h-6 w-6" />;
@@ -239,6 +236,10 @@ const Assessments = () => {
                             >
                               {assessment.difficulty}
                             </Badge>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                        <Clock className="h-4 w-4" />
+                        <span>{assessment.timeLimit} min</span>
+                      </div>
                           </div>
                           <div className="flex items-center space-x-1" style={{ marginLeft: '0px' }}>
                             {assessment?.tags?.length > 0 && (
@@ -259,25 +260,22 @@ const Assessments = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="pb-[24px]">
-                  <CardDescription className="text-gray-600 mb-[12px] leading-relaxed">
-                    {assessment.description}
-                  </CardDescription>
-                  <div className="flex items-center justify-between mb-6">
+                 <Tooltip>
+  <TooltipTrigger asChild>
+    <CardDescription className="text-sm text-gray-600 mb-3 h-[64px] leading-snug line-clamp-3 cursor-default">
+      {assessment.description}
+    </CardDescription>
+  </TooltipTrigger>
+  <TooltipContent className="max-w-xs text-sm text-gray-600">
+    {assessment.description}
+  </TooltipContent>
+</Tooltip>
+                  {/* <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-6 text-sm text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{assessment.timeLimit} min</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <BookOpen className="h-4 w-4" />
-                        <span>{assessment.questions} questions</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="h-4 w-4" />
-                        <span>{assessment.participants}</span>
-                      </div>
+                      
+                     
                     </div>
-                  </div>
+                  </div> */}
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 mb-6 border border-[#2C84DB]">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
