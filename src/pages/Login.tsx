@@ -83,6 +83,10 @@ const Login = () => {
       toast.error("Passwords don't match!");
       return;
     }
+    if(signupData.mobile.length !== 10) {
+      toast.error("Please enter a valid mobile number!");
+      return;
+    }
     try {
       // Generate OTP
       const otpResponse = await sendOtptoMobile({
@@ -294,15 +298,22 @@ const Login = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
-                    <Input
+                   <Input
                       id="mobile"
-                      type="tel"
-                      placeholder="+91 9876543210"
+                      type="text"
+                      placeholder="9876543210"
                       value={signupData.mobile}
-                      onChange={(e) => setSignupData({ ...signupData, mobile: e.target.value })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,10}$/.test(value)) {
+                          setSignupData({ ...signupData, mobile: value });
+                        }
+                      }}
+                      inputMode="numeric"
+                      pattern="\d{10}"
                       className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                       required
-                    />
+                      />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="referrerId">Referrer ID (optional)</Label>

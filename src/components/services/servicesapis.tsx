@@ -43,9 +43,9 @@ export const isUserLoggedIn = async () => {
   }
 };
 
-export const sendOtptoMobile = async ({phoneNumber,email}) => {
+export const sendOtptoMobile = async ({phoneNumber,email},tochangePassword=false) => {
   try {
-    const response = await axiosInstance.post("/auth/send-otp", {phoneNumber,email });
+    const response = await axiosInstance.post("/auth/send-otp", {phoneNumber,email,tochangePassword });
     return response.data;
   } catch (error) {
     return error;
@@ -97,6 +97,19 @@ export const userSignup = async ({
   }
 };
 
+export const resetPassword = async (userId:string,newPassword: string) => {
+  try {
+    const response = await axiosInstance.patch(`/auth/reset-password/${userId}`, {
+      newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    toast.error(`${error?.response?.data?.message}.`);
+
+    return error;
+  }
+  
+}
 export const completeProfile = async (profileData) => {
   try {
     const response = await axiosInstance.put(
