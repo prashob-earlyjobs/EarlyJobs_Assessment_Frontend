@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { isUserLoggedIn, sendOtptoMobile, userLogin, userSignup, verifyFranchiseId, verifyOtpMobile } from "@/components/services/servicesapis";
+import { isUserLoggedIn, resetPassword, sendOtptoMobile, userLogin, userSignup, verifyFranchiseId, verifyOtpMobile } from "@/components/services/servicesapis";
 import { useUser } from "@/context";
 
 const Login = () => {
@@ -32,6 +32,11 @@ const Login = () => {
   });
   const [otp, setOtp] = useState("");
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
+  const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] = useState(false);
+  const [isForgotOtpDialogOpen, setIsForgotOtpDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [forgotPasswordData, setForgotPasswordData] = useState({ email: "", mobile: "", newPassword: "", confirmPassword: "" });
+  const [forgotOtp, setForgotOtp] = useState("");
 
   useEffect(() => {
     const checkUserLoggedIn = async () => {
@@ -83,8 +88,11 @@ const Login = () => {
       toast.error("Passwords don't match!");
       return;
     }
+    if (signupData.mobile.length !== 10) {
+      toast.error("Please enter a valid mobile number!");
+      return;
+    }
     try {
-      // Generate OTP
       const otpResponse = await sendOtptoMobile({
         phoneNumber: signupData.mobile.replace(/^\+91/, ''),
         email: signupData.email
@@ -107,14 +115,14 @@ const Login = () => {
       const otpResponse = await sendOtptoMobile({
         phoneNumber: signupData.mobile.replace(/^\+91/, ''),
         email: signupData.email
-      });
+      },true);
 
       if (!otpResponse.success) {
         toast.error(otpResponse.data.message);
         return;
       }
-
-      setOtp(""); // Clear previous OTP input
+      setUserCredentials(otpResponse.data.user);
+      setOtp("");
       toast.success("OTP resent to your mobile number and email!");
     } catch (error) {
       toast.error("Error resending OTP");
@@ -151,6 +159,111 @@ const Login = () => {
       navigate('/onboarding');
     } catch (error) {
       toast.error("Error verifying OTP");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (forgotPasswordData.mobile.length !== 10) {
+      toast.error("Please enter a valid mobile number!");
+      return;
+    }
+    if (!forgotPasswordData.email) {
+      toast.error("Please enter your email!");
+      return;
+    }
+    try {
+      const otpResponse = await sendOtptoMobile({
+        phoneNumber: forgotPasswordData.mobile.replace(/^\+91/, ''),
+        email: forgotPasswordData.email
+      },true);
+
+      if (!otpResponse.success) {
+        throw new Error(otpResponse.response.data);
+      }
+      setUserCredentials(otpResponse.user);
+      setIsForgotPasswordDialogOpen(false);
+      setIsForgotOtpDialogOpen(true);
+
+      toast.success("OTP sent to your mobile number and email!");
+    } catch (error) {
+      toast.error("User does not exist with this mobile number or email");
+    }
+  };
+useEffect(() => {
+  console.log(userCredentials);
+}, [userCredentials]);
+  const handleForgotOtpVerification = async () => {
+    if (forgotOtp.length !== 6) {
+      toast.error("Please enter a 6-digit OTP");
+      return;
+    }
+
+    try {
+      const response = await verifyOtpMobile({
+        phoneNumber: forgotPasswordData.mobile.replace(/^\+91/, ''),
+        email: forgotPasswordData.email,
+        otp: forgotOtp
+      });
+
+      if (!response.success) {
+        toast.error(response.data.message);
+        return;
+      }
+
+      setIsForgotOtpDialogOpen(false);
+      setIsResetPasswordDialogOpen(true);
+      toast.success("OTP verified successfully!");
+    } catch (error) {
+      toast.error("Error verifying OTP");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (forgotPasswordData.newPassword !== forgotPasswordData.confirmPassword) {
+      toast.error("Passwords don't match!");
+      return;
+    }
+        const passwordRegex =
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}$/;
+    
+      if (!forgotPasswordData.newPassword || !forgotPasswordData.confirmPassword) {
+        toast.error("Please fill in both password fields");
+        return;
+      }
+    
+      if (forgotPasswordData.newPassword !== forgotPasswordData.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+    
+      if (forgotPasswordData.newPassword.length < 6) {
+        toast.error("Password must be at least 6 characters long");
+        return;
+      }
+    
+      if (!passwordRegex.test(forgotPasswordData.newPassword)) {
+        toast.error(
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        );
+        return;
+      }
+    console.log(userCredentials, forgotPasswordData.newPassword);
+    try {
+      const response = await resetPassword(userCredentials._id, forgotPasswordData.newPassword);
+      
+
+      if (!response.success) {
+        toast.error(response.message);
+        return;
+      }
+
+      setIsResetPasswordDialogOpen(false);
+      setForgotPasswordData({ email: "", mobile: "", newPassword: "", confirmPassword: "" });
+      setForgotOtp("");
+      toast.success("Password reset successfully!");
+      setDefaultTab('login');
+    } catch (error) {
+      toast.error("Error resetting password");
     }
   };
 
@@ -194,7 +307,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img
-              src="/lovable-uploads/logo.png"
+              src="/lovable-Uploads/logo.png"
               alt="EarlyJobs"
               className="h-20 w-32"
             />
@@ -252,6 +365,15 @@ const Login = () => {
                       </button>
                     </div>
                   </div>
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPasswordDialogOpen(true)}
+                      className="text-sm text-orange-600 hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <Button type="submit" className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg">
                     Sign In
                   </Button>
@@ -294,14 +416,23 @@ const Login = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
-                    <Input
+                    <input
                       id="mobile"
-                      type="tel"
-                      placeholder="+91 9876543210"
+                      name="mobile"
+                      type="text"
                       value={signupData.mobile}
-                      onChange={(e) => setSignupData({ ...signupData, mobile: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                      placeholder="9876543210"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,10}$/.test(value)) {
+                          setSignupData({ ...signupData, mobile: value });
+                        }
+                      }}
+                      pattern="\d{10}"
+                      inputMode="numeric"
                       required
+                     
+                      className="h-12 w-full rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 px-4"
                     />
                   </div>
                   <div className="space-y-2">
@@ -404,6 +535,162 @@ const Login = () => {
                   Resend OTP
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isForgotPasswordDialogOpen} onOpenChange={setIsForgotPasswordDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Forgot Password</DialogTitle>
+              <DialogDescription>
+                To reset your password, we need to verify your identity with your email and phone number.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="forgot-email">Email</Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={forgotPasswordData.email}
+                  onChange={(e) => setForgotPasswordData({ ...forgotPasswordData, email: e.target.value })}
+                  className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="forgot-mobile">Mobile Number</Label>
+                <input
+                  id="forgot-mobile"
+                  type="text"
+                  placeholder="9876543210"
+                  value={forgotPasswordData.mobile}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d{0,10}$/.test(value)) {
+                      setForgotPasswordData({ ...forgotPasswordData, mobile: value });
+                    }
+                  }}
+                  pattern="\d{10}"
+                  inputMode="numeric"
+                  required
+                 
+                  className="h-12 w-full rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 px-4"
+                />
+              </div>
+              <Button
+                onClick={handleForgotPassword}
+                className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+                disabled={!forgotPasswordData.email || forgotPasswordData.mobile.length !== 10}
+              >
+                Send OTP
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isForgotOtpDialogOpen} onOpenChange={setIsForgotOtpDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Verify OTP</DialogTitle>
+              <DialogDescription>
+                Enter the 6-digit OTP sent to your mobile and email.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="forgot-otp">OTP</Label>
+                <Input
+                  id="forgot-otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={forgotOtp}
+                  onChange={(e) => setForgotOtp(e.target.value)}
+                  maxLength={6}
+                  className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                  required
+                />
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleForgotOtpVerification}
+                  className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+                  disabled={!forgotOtp || forgotOtp.length !== 6}
+                >
+                  Verify OTP
+                </Button>
+                <Button
+                  onClick={handleForgotPassword}
+                  variant="outline"
+                  className="w-full h-12 rounded-2xl text-base"
+                >
+                  Resend OTP
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Reset Password</DialogTitle>
+              <DialogDescription>
+                Enter your new password and confirm it.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter new password"
+                    value={forgotPasswordData.newPassword}
+                    onChange={(e) => setForgotPasswordData({ ...forgotPasswordData, newPassword: e.target.value })}
+                    className="h-12 rounded-2xl border-gray-200 focus:border-orange-500 pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirm-new-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm new password"
+                    value={forgotPasswordData.confirmPassword}
+                    onChange={(e) => setForgotPasswordData({ ...forgotPasswordData, confirmPassword: e.target.value })}
+                    className="h-12 rounded-2xl border-gray-200 focus:border-orange-500 pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button
+                onClick={handleResetPassword}
+                className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
+                disabled={!forgotPasswordData.newPassword || !forgotPasswordData.confirmPassword}
+              >
+                Reset Password
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
