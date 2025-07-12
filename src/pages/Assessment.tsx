@@ -248,7 +248,8 @@ const Assessment = () => {
         firstName: userCredentials.name,
         lastName: " ",
         email: userCredentials.email,
-        mobile: userCredentials.mobile
+        mobile: userCredentials.mobile,
+        avatar_url: userCredentials.avatar
       };
       const response = await getAssessmentLink(assessmentData.assessmentId, details);
       if (response.success) {

@@ -18,7 +18,7 @@ const Index = () => {
       </Helmet>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between p-6 lg:px-12 bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <header className="flex items-center justify-between p-[1rem] lg:px-12 bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
           <div className="flex items-center space-x-2">
             <img
               src="/lovable-uploads/logo.png"
@@ -125,7 +125,6 @@ const Index = () => {
     
                 {/* Enhanced Why Choose EarlyJobs Section */}
                 <div className="mt-20 bg-gradient-to-r from-orange-500 to-purple-600 rounded-3xl p-12 shadow-2xl relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png')] opacity-10"></div>
                   <h2 className="text-4xl lg:text-5xl font-extrabold text-white mb-8 text-center tracking-tight">
                     Why Choose <span className="text-yellow-300">EarlyJobs</span>?
                   </h2>
