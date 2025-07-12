@@ -137,7 +137,7 @@ const TransactionsForAdmin = () => {
 
                             <div className="p-4 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl shadow-sm">
                                 <p className="text-gray-600">Total Assessments</p>
-                                <p className="text-xl font-semibold text-gray-900">{transactions.length}</p>
+                                <p className="text-xl font-semibold text-gray-900">{total}</p>
                             </div>
                         </div>
                     </div>

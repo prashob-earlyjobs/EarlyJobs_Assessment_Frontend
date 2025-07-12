@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Award, Briefcase, FileText, Brain, Send, Star } from "lucide-react";
+import { ArrowRight, Users, Award, Briefcase, FileText, Brain, Send, MapPin } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -249,18 +249,25 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="w-full py-8 bg-white border-t mt-12">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <div>
-              © {new Date().getFullYear()} EarlyJobs. All rights reserved.
-            </div>
-            <div className="flex gap-6">
-              <a href="/privacy-policy" className="hover:text-orange-600 transition">Privacy Policy</a>
-              <a href="/terms-and-conditions" className="hover:text-orange-600 transition">Terms & Conditions</a>
-              <a href="/refund-policy" className="hover:text-orange-600 transition">Refund Policy</a>
-              <a href="/contact" className="hover:text-orange-600 transition">Contact Us</a>
-            </div>
-          </div>
-        </footer>
+  <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+      <div>© {new Date().getFullYear()} EarlyJobs. All rights reserved.</div>
+      <div className="mt-2 flex items-start gap-2">
+        <MapPin className="w-4 h-4 mt-1 text-orange-600" />
+        <span>
+          53, HustleHub, 5th Cross Rd, near Sony World Signal,<br />
+          4th Block, Koramangala, Bengaluru, Karnataka 560034
+        </span>
+      </div>
+    </div>
+    <div className="flex gap-6">
+      <a href="/privacy-policy" className="hover:text-orange-600 transition">Privacy Policy</a>
+      <a href="/terms-and-conditions" className="hover:text-orange-600 transition">Terms & Conditions</a>
+      <a href="/refund-policy" className="hover:text-orange-600 transition">Refund Policy</a>
+      <a href="/contact" className="hover:text-orange-600 transition">Contact Us</a>
+    </div>
+  </div>
+</footer>
       </div>
     </>
   );
