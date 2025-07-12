@@ -55,8 +55,10 @@ export const sendOtptoMobile = async ({phoneNumber,email},tochangePassword=false
 export const verifyOtpMobile = async ({phoneNumber,email ,otp}) => {
   try {
     const response = await axiosInstance.post("/auth/verify-otp", {phoneNumber,email , otp});
+   
     return response.data;
   } catch (error) {
+    console.log("error",error);
     return error;
   }
 }

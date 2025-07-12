@@ -21,30 +21,32 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { User, Mail, Phone, MapPin, Briefcase, GraduationCap, Eye, EyeOff ,Calendar, Upload, Save, ArrowLeft, Plus, X, FileText, Lock } from "lucide-react";
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Calendar,
+  Upload,
+  Save,
+  ArrowLeft,
+  Plus,
+  X,
+  FileText,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   isUserLoggedIn,
   updateProfile,
   uploadPhoto,
   uploadResume,
-  sendOtptoMobile,
-  verifyOtpMobile,
-  resetPassword,
 } from "@/components/services/servicesapis";
-import { useUser } from "@/context";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const photoInputRef = useRef(null);
-  const resumeInputRef = useRef(null);
-  const {userCredentials} = useUser();
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   const [newSkill, setNewSkill] = useState("");
   const [profileData, setProfileData] = useState({
@@ -80,27 +82,14 @@ const Profile = () => {
       dateOfBirth: "",
       bio: "",
       experience: [],
-      prefJobLocations: [],
+      prefJobLocations: [] as string[],
       preferredJobRole: "",
-      skills: [],
+      skills: [] as string[],
     },
     resumeUrl: "",
     avatar: "",
-    resume: null,
+    resume: null as File | null,
   });
-
-  // Reset Password State
-  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
-  const [resetStep, setResetStep] = useState(1);
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  
-const [showNewPassword, setShowNewPassword] = useState(false);
-const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -122,15 +111,15 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
               )
                 ? response.user.profile.professionalInformation.education
                 : [
-                    {
-                      id: Date.now().toString(),
-                      degree: "",
-                      institution: "",
-                      year: "",
-                      percentage: "",
-                      fieldOfStudy: "",
-                    },
-                  ],
+                  {
+                    id: Date.now().toString(),
+                    degree: "",
+                    institution: "",
+                    year: "",
+                    percentage: "",
+                    fieldOfStudy: "",
+                  },
+                ],
             },
           },
         };
@@ -142,7 +131,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     fetchUserData();
   }, [navigate]);
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     if (field.startsWith("profile.address.")) {
       const subField = field.split(".")[2];
       setProfileData((prev) => ({
@@ -184,7 +173,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     }
   };
 
-  const handlePhotoUpload = async (event) => {
+  const handlePhotoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -203,7 +194,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     }
   };
 
-  const handleResumeUpload = async (event) => {
+  const handleResumeUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -223,7 +216,10 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   };
 
   const addSkill = () => {
-    if (newSkill.trim() && !profileData.profile.skills.includes(newSkill.trim())) {
+    if (
+      newSkill.trim() &&
+      !profileData.profile.skills.includes(newSkill.trim())
+    ) {
       setProfileData((prev) => ({
         ...prev,
         profile: {
@@ -236,7 +232,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     }
   };
 
-  const removeSkill = (skillToRemove) => {
+  const removeSkill = (skillToRemove: string) => {
     setProfileData((prev) => ({
       ...prev,
       profile: {
@@ -262,14 +258,17 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
         ...prev.profile,
         professionalInformation: {
           ...prev.profile.professionalInformation,
-          education: [...prev.profile.professionalInformation.education, newEducation],
+          education: [
+            ...prev.profile.professionalInformation.education,
+            newEducation,
+          ],
         },
       },
     }));
     toast.success("New education entry added!");
   };
 
-  const updateEducation = (id, field, value) => {
+  const updateEducation = (id: string, field: string, value: string) => {
     setProfileData((prev) => ({
       ...prev,
       profile: {
@@ -284,7 +283,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     }));
   };
 
-  const removeEducation = (id) => {
+  const removeEducation = (id: string) => {
     setProfileData((prev) => ({
       ...prev,
       profile: {
@@ -322,15 +321,15 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
             )
               ? response.data.user.profile.professionalInformation.education
               : [
-                  {
-                    id: Date.now().toString(),
-                    degree: "",
-                    institution: "",
-                    year: "",
-                    percentage: "",
-                    fieldOfStudy: "",
-                  },
-                ],
+                {
+                  id: Date.now().toString(),
+                  degree: "",
+                  institution: "",
+                  year: "",
+                  percentage: "",
+                  fieldOfStudy: "",
+                },
+              ],
           },
         },
       };
@@ -339,94 +338,6 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Failed to update profile. Please try again later.");
-    }
-  };
-
-  // Reset Password Handlers
-  const handleSendOtp = async () => {
-    if (!profileData.mobile) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-    setIsSendingOtp(true);
-    try {
-      const response = await sendOtptoMobile({phoneNumber: profileData.mobile, email: profileData.email},true);
-      if (response.success) {
-        toast.success("OTP sent to your phone number!");
-        setResetStep(2);
-      } else {
-        toast.error(response.message || "Failed to send OTP. Please try again.");
-      }
-    } catch (error) {
-      toast.error("Failed to send OTP. Please try again later.");
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP");
-      return;
-    }
-    setIsVerifyingOtp(true);
-    try {
-      const response = await verifyOtpMobile({phoneNumber: profileData.mobile, email: profileData.email, otp});
-      if (response.success) {
-        toast.success("OTP verified successfully!");
-        setResetStep(3);
-      } else {
-        toast.error(response.message || "Invalid OTP. Please try again.");
-      }
-    } catch (error) {
-      toast.error("Failed to verify OTP. Please try again later.");
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-      const passwordRegex =
-    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}$/;
-
-  if (!newPassword || !confirmPassword) {
-    toast.error("Please fill in both password fields");
-    return;
-  }
-
-  if (newPassword !== confirmPassword) {
-    toast.error("Passwords do not match");
-    return;
-  }
-
-  if (newPassword.length < 6) {
-    toast.error("Password must be at least 6 characters long");
-    return;
-  }
-
-  if (!passwordRegex.test(newPassword)) {
-    toast.error(
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-    );
-    return;
-  }
-    setIsUpdatingPassword(true);
-    try {
-      const response = await resetPassword(userCredentials._id, newPassword);
-      if (response.success) {
-        toast.success("Password updated successfully!");
-        setResetPasswordOpen(false);
-        setResetStep(1);
-        setOtp("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        toast.error(response.message || "Failed to update password. Please try again.");
-      }
-    } catch (error) {
-      toast.error("Failed to update password. Please try again later.");
-    } finally {
-      setIsUpdatingPassword(false);
     }
   };
 
@@ -602,16 +513,6 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2 flex items-end text-red-500">
-                  <Button
-                    variant="outline"
-                    className="rounded-2xl w-full border-red-500"
-                    onClick={() => setResetPasswordOpen(true)}
-                  >
-                    <Lock className="h-4 w-4 mr-2" />
-                    Reset Password
-                  </Button>
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -709,7 +610,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                   <Label htmlFor="currentJobTitle">Current Job Title</Label>
                   <Input
                     id="currentJobTitle"
-                    value={profileData.profile.professionalInformation?.currentJobTitle}
+                    value={
+                      profileData.profile.professionalInformation?.currentJobTitle
+                    }
                     onChange={(e) =>
                       handleInputChange(
                         "profile.professionalInformation.currentJobTitle",
@@ -724,7 +627,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                   <Input
                     id="experience"
                     type="number"
-                    value={profileData.profile.professionalInformation?.experience || ""}
+                    value={
+                      profileData.profile.professionalInformation?.experience || ""
+                    }
                     onChange={(e) =>
                       handleInputChange(
                         "profile.professionalInformation.experience",
@@ -739,7 +644,10 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                   <Input
                     id="expectedSalary"
                     type="number"
-                    value={profileData.profile.professionalInformation?.expectedSalaryAnnual}
+                    value={
+                      profileData.profile.professionalInformation
+                        ?.expectedSalaryAnnual
+                    }
                     onChange={(e) =>
                       handleInputChange(
                         "profile.professionalInformation.expectedSalaryAnnual",
@@ -755,7 +663,10 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                   <Input
                     id="noticePeriod"
                     type="number"
-                    value={profileData.profile.professionalInformation?.noticePeriod || ""}
+                    value={
+                      profileData.profile.professionalInformation?.noticePeriod ||
+                      ""
+                    }
                     onChange={(e) =>
                       handleInputChange(
                         "profile.professionalInformation.noticePeriod",
@@ -768,9 +679,14 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="workMode">Preferred Work Mode</Label>
                   <Select
-                    value={profileData.profile.professionalInformation?.workMode}
+                    value={
+                      profileData.profile.professionalInformation?.workMode
+                    }
                     onValueChange={(value) =>
-                      handleInputChange("profile.professionalInformation.workMode", value)
+                      handleInputChange(
+                        "profile.professionalInformation.workMode",
+                        value
+                      )
                     }
                   >
                     <SelectTrigger className="rounded-2xl">
@@ -847,82 +763,91 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {Array.isArray(profileData.profile.professionalInformation.education) &&
-                profileData.profile.professionalInformation.education.map((edu) => (
-                  <div
-                    key={edu.id}
-                    className="p-4 border rounded-2xl relative bg-white shadow-md transition-all duration-200 hover:shadow-lg"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeEducation(edu.id)}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+              {Array.isArray(
+                profileData.profile.professionalInformation.education
+              ) &&
+                profileData.profile.professionalInformation.education.map(
+                  (edu) => (
+                    <div
+                      key={edu.id}
+                      className="p-4 border rounded-2xl relative bg-white shadow-md transition-all duration-200 hover:shadow-lg"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Degree</Label>
-                        <Input
-                          value={edu.degree || ""}
-                          onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="Bachelor of Computer Science"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Institution</Label>
-                        <Input
-                          value={edu.institution || ""}
-                          onChange={(e) =>
-                            updateEducation(edu.id, "institution", e.target.value)
-                          }
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="University Name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Year of Graduation</Label>
-                        <Input
-                          type="number"
-                          value={edu.year || ""}
-                          onChange={(e) => updateEducation(edu.id, "year", e.target.value)}
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="2023"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Percentage/CGPA</Label>
-                        <Input
-                          value={edu.percentage || ""}
-                          type="number"
-                          onChange={(e) =>
-                            updateEducation(edu.id, "percentage", e.target.value)
-                          }
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="85% or 8.5 CGPA"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Field of Study</Label>
-                        <Input
-                          value={edu.fieldOfStudy || ""}
-                          onChange={(e) =>
-                            updateEducation(edu.id, "fieldOfStudy", e.target.value)
-                          }
-                          className="rounded-2xl border-gray-300 focus:border-orange-500"
-                          placeholder="Computer Science, Electrical Engineering, etc."
-                        />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeEducation(edu.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Degree</Label>
+                          <Input
+                            value={edu.degree || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "degree", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="Bachelor of Computer Science"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Institution</Label>
+                          <Input
+                            value={edu.institution || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "institution", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="University Name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Year of Graduation</Label>
+                          <Input
+                            type="number"
+                            value={edu.year || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "year", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="2023"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Percentage/CGPA</Label>
+                          <Input
+                            value={edu.percentage || ""}
+                            type="number"
+                            onChange={(e) =>
+                              updateEducation(edu.id, "percentage", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="85% or 8.5 CGPA"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Field of Study</Label>
+                          <Input
+                            value={edu.fieldOfStudy || ""}
+                            onChange={(e) =>
+                              updateEducation(edu.id, "fieldOfStudy", e.target.value)
+                            }
+                            className="rounded-2xl border-gray-300 focus:border-orange-500"
+                            placeholder="Computer Science, Electrical Engineering, etc."
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              {profileData.profile.professionalInformation.education.length === 0 && (
-                <p className="text-center text-gray-500">
-                  No education entries added yet.
-                </p>
-              )}
+                  )
+                )}
+              {profileData.profile.professionalInformation.education.length ===
+                0 && (
+                  <p className="text-center text-gray-500">
+                    No education entries added yet.
+                  </p>
+                )}
             </CardContent>
           </Card>
 
@@ -936,166 +861,6 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
             </Button>
           </div>
         </div>
-
-        {/* Reset Password Dialog */}
-        <Dialog open={resetPasswordOpen} onOpenChange={(open) => {
-          setResetPasswordOpen(open);
-          if (!open) {
-            setResetStep(1);
-            setOtp("");
-            setNewPassword("");
-            setConfirmPassword("");
-          }
-        }}>
-          <DialogContent className="sm:max-w-[425px] rounded-2xl">
-            {resetStep === 1 && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>Reset Password</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <p className="text-sm text-gray-500">
-                    To reset your password, we need to verify your phone number.
-                  </p>
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                    <Input
-                      id="phoneNumber"
-                      value={profileData.mobile}
-                      readOnly
-                      className="rounded-2xl"
-                      placeholder="+91 1234567890"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setResetPasswordOpen(false)}
-                    className="rounded-2xl"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSendOtp}
-                    className="rounded-2xl bg-orange-600 hover:bg-orange-700"
-                    disabled={isSendingOtp}
-                  >
-                    {isSendingOtp ? "Sending..." : "Send OTP"}
-                  </Button>
-                </DialogFooter>
-              </>
-            )}
-            {resetStep === 2 && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>Verify OTP</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <p className="text-sm text-gray-500">
-                    Enter the 6-digit OTP sent to {profileData.mobile}.
-                  </p>
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">OTP</Label>
-                    <Input
-                      id="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                      className="rounded-2xl"
-                      maxLength={6}
-                      placeholder="123456"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setResetPasswordOpen(false)}
-                    className="rounded-2xl"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleVerifyOtp}
-                    className="rounded-2xl bg-orange-600 hover:bg-orange-700"
-                    disabled={isVerifyingOtp}
-                  >
-                    {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
-                  </Button>
-                </DialogFooter>
-              </>
-            )}
-            {resetStep === 3 && (
-              <>
-  <DialogHeader>
-    <DialogTitle>Set New Password</DialogTitle>
-  </DialogHeader>
-  <div className="space-y-4 py-4">
-    {/* New Password */}
-    <div className="space-y-2">
-      <Label htmlFor="newPassword">New Password</Label>
-      <div className="relative">
-        <Input
-          id="newPassword"
-          type={showNewPassword ? "text" : "password"}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          className="rounded-2xl pr-10"
-          placeholder="Enter new password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowNewPassword(!showNewPassword)}
-          className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        >
-          {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-        </button>
-      </div>
-    </div>
-
-    {/* Confirm Password */}
-    <div className="space-y-2">
-      <Label htmlFor="confirmPassword">Confirm Password</Label>
-      <div className="relative">
-        <Input
-          id="confirmPassword"
-          type={showConfirmPassword ? "text" : "password"}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="rounded-2xl pr-10"
-          placeholder="Confirm new password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        >
-          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <DialogFooter>
-    <Button
-      variant="outline"
-      onClick={() => setResetPasswordOpen(false)}
-      className="rounded-2xl"
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={handleUpdatePassword}
-      className="rounded-2xl bg-orange-600 hover:bg-orange-700"
-      disabled={isUpdatingPassword}
-    >
-      {isUpdatingPassword ? "Updating..." : "Update Password"}
-    </Button>
-  </DialogFooter>
-</>
-            )}
-          </DialogContent>
-        </Dialog>
       </main>
     </div>
   );
