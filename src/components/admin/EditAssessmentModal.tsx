@@ -28,7 +28,7 @@ export interface Assessment {
     skillTags: string[];
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     duration: number; // in minutes
-    questions: string[]; // Assuming questions are objects, adjust type as needed
+    questions?: string[]; // Assuming questions are objects, adjust type as needed
     attempts: number;
     averageScore: number;
     completionRate: number;
@@ -134,7 +134,7 @@ const EditAssessmentModal: React.FC<EditAssessmentModalProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[525px]">
+            <DialogContent className="sm:max-w-[525px] height-[84vh] overflow-y-scroll">
                 <DialogHeader>
                     <DialogTitle>Edit Assessment</DialogTitle>
                     <DialogDescription>
@@ -195,9 +195,7 @@ const EditAssessmentModal: React.FC<EditAssessmentModalProps> = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="technical">Technical</SelectItem>
-                                    <SelectItem value="aptitude">Aptitude</SelectItem>
-                                    <SelectItem value="personality">Personality</SelectItem>
-                                    <SelectItem value="communication">Communication</SelectItem>
+                                    <SelectItem value="non-technical">Non-Technical</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -232,7 +230,7 @@ const EditAssessmentModal: React.FC<EditAssessmentModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <Label htmlFor="questions">Number of Questions</Label>
                         <Input
                             id="questions"
@@ -242,7 +240,7 @@ const EditAssessmentModal: React.FC<EditAssessmentModalProps> = ({
                             readOnly
                             placeholder="0"
                         />
-                    </div>
+                    </div> */}
 
                     <div className="space-y-2">
                         <Label htmlFor="tags">Skill Tags</Label>
