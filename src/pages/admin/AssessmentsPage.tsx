@@ -32,7 +32,8 @@ import {
   Clock,
   CalendarDays,
   Link2,
-  RefreshCcw
+  RefreshCcw,
+  Code, BookOpen
 } from "lucide-react";
 
 
@@ -149,6 +150,20 @@ const AssessmentsPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+ const getTypeColor = (type: string) => {
+  switch (type.toLowerCase()) {
+    case 'mcq':
+      return 'bg-blue-100 text-blue-800'; // Blue for MCQ
+    case 'coding':
+      return 'bg-purple-100 text-purple-800'; // Purple for coding
+    case 'video':
+      return 'bg-orange-100 text-orange-800'; // Orange for video
+    case 'mixed':
+      return 'bg-teal-100 text-teal-800'; // Teal for mixed
+    default:
+      return 'bg-gray-100 text-gray-800'; // Default fallback
+  }
+};
 
   const handleEditAssessment = (assessment: Assessment) => {
     setSelectedAssessmentForEdit(assessment);
@@ -228,9 +243,29 @@ const AssessmentsPage: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">{assessment.title}</h3>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-2">
                             <Badge className={getDifficultyColor(assessment.difficulty)}>
                               {assessment.difficulty}
                             </Badge>
+                             <Badge className={getTypeColor(assessment.type)}>
+                              {assessment.type?.toUpperCase()}
+                            </Badge>
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md 
+                                  ${assessment.category === 'technical'
+                                    ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                    : 'bg-yellow-100 text-yellow-800 border-yellow-300'}
+                                `}
+                              >
+                                {assessment.category === 'technical' ? (
+                                  <Code className="w-3.5 h-3.5" />
+                                ) : (
+                                  <BookOpen className="w-3.5 h-3.5" />
+                                )}
+                                {assessment.category==='technical' ? 'Technical' : 'Non-Technical'}
+                              </Badge>
                           </div>
                             {assessment?.tags?.map((tag, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
@@ -281,16 +316,12 @@ const AssessmentsPage: React.FC = () => {
                         </div>
                        
                         <div className="text-center">
-                          <p className="text-2xl font-semibold text-gray-900">{assessment.attempts}</p>
-                          <p className="text-sm text-gray-500">Attempts</p>
+                          <p className="text-2xl font-semibold text-gray-900">{assessment.pricing.basePrice}<span className="text-sm text-gray-500">Rs</span></p>
+                          <p className="text-sm text-gray-500">Base Price</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-semibold text-gray-900">{assessment.averageScore}%</p>
-                          <p className="text-sm text-gray-500">Avg Score</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-semibold text-gray-900">{assessment.completionRate}%</p>
-                          <p className="text-sm text-gray-500">Completion</p>
+                          <p className="text-2xl font-semibold text-gray-900">{assessment.pricing.discountedPrice}<span className="text-sm text-gray-500">Rs</span></p>
+                          <p className="text-sm text-gray-500">Discounted Price</p>
                         </div>
                       </div>
                     </div>
@@ -330,9 +361,15 @@ const AssessmentsPage: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 flex flex-wrap justify-center gap-[10px]">
-                {candidates.map((candidate) => (
-                  <div key={candidate.interviewId} className="border rounded-lg p-4 max-w-[514px] hover:bg-gray-50 transition-colors" style={{ margin: "0px" }}>
+              <div className="space-y-4 flex flex-wrap gap-[10px]">
+                {candidates.length > 0 ?candidates.map((candidate) => (
+                  
+                  <div key={candidate.interviewId} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors" style={{ margin: "0px" ,  width:
+      window.innerWidth >= 1024 && window.innerWidth <= 1704
+        ? '100%'
+        : window.innerWidth >= 1704
+        ? 'auto'
+        : undefined, }}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12">
@@ -457,7 +494,13 @@ const AssessmentsPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <div className="flex flex-col items-center space-y-4 my-8">
+                      <p className="text-saffron-600 font-medium">No candidates found</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

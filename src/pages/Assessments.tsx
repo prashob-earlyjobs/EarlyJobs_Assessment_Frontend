@@ -241,13 +241,13 @@ const Assessments = () => {
                         <span>{assessment.timeLimit} min</span>
                       </div>
                           </div>
-                          <div className="flex items-center space-x-1" style={{ marginLeft: '0px' }}>
+                          <div className="flex flex-wrap items-center space-x-1" style={{ marginLeft: '0px' }}>
                             {assessment?.tags?.length > 0 && (
                               assessment.tags.map(tag => (
                                 <Badge
                                   key={tag}
                                   variant="secondary"
-                                  className="rounded-full text-[8px] px-2 py-1 bg-blue-100 text-blue-700"
+                                  className="rounded-full text-center text-[8px] px-2 py-1 bg-blue-100 text-blue-700"
                                 >
                                   {tag}
                                 </Badge>

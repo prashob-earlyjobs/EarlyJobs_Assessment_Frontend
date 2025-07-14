@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Mail, Phone, MapPin, Calendar, User, Briefcase, Book, Globe, Wrench, UserCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
 import { UserCredentials } from '../context/index';
 import { motion, AnimatePresence } from "framer-motion";
@@ -138,9 +138,11 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
               {/* User Profile */}
               <div className="flex items-center gap-4">
                 <Avatar className="w-16 h-16 bg-gray-200">
+                 {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> :
                   <AvatarFallback className="text-lg text-gray-700">
                     {user.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
+                }
                 </Avatar>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">{user.name}</h3>
@@ -321,22 +323,22 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-3">Assessments Taken</h4>
                 <div className="space-y-4">
-                  {assessments.map((item) => (
-                    <details key={item.assessment._id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm md:relative">
+                  {assessments.length > 0 && assessments?.map((item) => (
+                    <details key={item.assessment?._id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm md:relative">
                       <summary className="font-medium text-gray-900 cursor-pointer">
-                        {item.assessment.title} ({item.assessment.category})
+                        {item.assessment?.title} ({item.assessment?.category})
                       </summary>
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <p className="text-sm font-medium text-gray-900">Score: {item.result.totalPoints}/{item.result.maxPoints}</p>
-                          <p className="text-sm text-gray-700"> <span className="font-medium text-gray-900"> Status: </span>{item.result.status}</p>
-                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Time Taken: </span>{item.result.timeTaken} Minutes</p>
-                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Feedback: </span>{item.result.feedback.systemFeedback}</p>
+                          <p className="text-sm font-medium text-gray-900">Score: {item.result?.totalPoints}/{item.result?.maxPoints}</p>
+                          <p className="text-sm text-gray-700"> <span className="font-medium text-gray-900"> Status: </span>{item.result?.status}</p>
+                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Time Taken: </span>{item.result?.timeTaken} Minutes</p>
+                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Feedback: </span>{item.result?.feedback.systemFeedback}</p>
                         </div>
                         <div className="h-48">
                           <Pie
                             className="static sm:static md:static xxl:absolute top-[17px] h-[150px] w-[150px]"
-                            data={getPieData(item.result.resultDetails.categoryWiseScore)}
+                            data={getPieData(item.result?.resultDetails.categoryWiseScore)}
                             options={pieOptions}
                           />
                         </div>

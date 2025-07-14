@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Eye, TrendingUp, TrendingDown } from 'lucide-react';
 import { getUsers, getUsersForFranchise } from '@/components/services/servicesapis';
 import { useAdmin } from '@/context/AdminContext';
@@ -81,11 +81,13 @@ const CandidatesPage: React.FC = () => {
                 <div key={candidate._id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback className="text-sm">
-                          {candidate.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                 {candidate.avatar ? <Avatar className="text-sm bg-gray-200"> <AvatarImage src={candidate.avatar} alt={candidate.name} /></Avatar> :
+                      <Avatar className="text-sm bg-gray-200">
+                  <AvatarFallback className="text-sm text-gray-700">
+                    {candidate.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                }
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-gray-900">{candidate.name}</h3>
