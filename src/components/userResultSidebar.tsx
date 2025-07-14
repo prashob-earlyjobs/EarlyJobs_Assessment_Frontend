@@ -93,6 +93,8 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     className="fixed top-0 right-0 h-full w-[50%] bg-white border-l border-gray-200 z-50 shadow-lg overflow-y-auto"
                 >
+                    {
+                        assessment?
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                             <CardTitle className="text-lg font-semibold">Assessment Results</CardTitle>
@@ -164,17 +166,18 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                                     ))}
                                             </ul>
                                             <h4 className="text-sm font-medium">Communication Summary</h4>
-                                            <ul className="list-disc list-inside text-sm">
-                                                {[...assessment.report.overallSummary.communicationSummary]
-                                                    .sort((a, b) => {
-                                                        const isGreenA = a.includes('<span style="color: green;">');
-                                                        const isGreenB = b.includes('<span style="color: green;">');
-                                                        return isGreenA === isGreenB ? 0 : isGreenA ? -1 : 1;
-                                                    })
-                                                    .map((summary, idx) => (
-                                                        <li key={idx} dangerouslySetInnerHTML={{ __html: summary }} />
-                                                    ))}
-                                            </ul>
+                                          <ul className="list-disc list-inside text-sm">
+  {[...(assessment?.report?.overallSummary?.communicationSummary || [])]
+    .sort((a, b) => {
+      const isGreenA = a.includes('<span style="color: green;">');
+      const isGreenB = b.includes('<span style="color: green;">');
+      return isGreenA === isGreenB ? 0 : isGreenA ? -1 : 1;
+    })
+    .map((summary, idx) => (
+      <li key={idx} dangerouslySetInnerHTML={{ __html: summary }} />
+    ))}
+</ul>
+
                                         </div>
                                     </div>
                                 </TabsContent>
@@ -188,7 +191,7 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                                 <div>
                                                     <p className="text-sm text-gray-700">Proctoring Score</p>
                                                     <p className="text-lg font-semibold text-gray-900">
-                                                        {assessment.proctoringEventsData.proctoringEvents.proctoringScore}/10
+                                                        {assessment?.proctoringEventsData?.proctoringEvents?.proctoringScore}/10
                                                     </p>
                                                 </div>
                                             </div>
@@ -198,7 +201,7 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                                 <div>
                                                     <p className="text-sm text-gray-700">Blur Events</p>
                                                     <p className="text-lg font-semibold text-gray-900">
-                                                        {assessment.proctoringEventsData.proctoringEvents.blurEventCount}
+                                                        {assessment?.proctoringEventsData?.proctoringEvents?.blurEventCount}
                                                     </p>
                                                 </div>
                                             </div>
@@ -208,7 +211,7 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                                 <div>
                                                     <p className="text-sm text-gray-700">Camera Disabled</p>
                                                     <p className="text-lg font-semibold text-gray-900">
-                                                        {assessment.proctoringEventsData.proctoringEvents.disableCameraEventCount}
+                                                        {assessment?.proctoringEventsData?.proctoringEvents?.disableCameraEventCount}
                                                     </p>
                                                 </div>
                                             </div>
@@ -218,7 +221,7 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                                 <div>
                                                     <p className="text-sm text-gray-700">Mute Events</p>
                                                     <p className="text-lg font-semibold text-gray-900">
-                                                        {assessment.proctoringEventsData.proctoringEvents.muteEventCount}
+                                                        {assessment?.proctoringEventsData?.proctoringEvents?.muteEventCount}
                                                     </p>
                                                 </div>
                                             </div>
@@ -272,7 +275,9 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                 </TabsContent>
                             </Tabs>
                         </CardContent>
-                    </Card>
+                    </Card>:<p>ffffffffff</p>
+                    }
+
                 </motion.div>
             </>
         </AnimatePresence>

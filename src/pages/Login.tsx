@@ -82,33 +82,44 @@ const Login = () => {
     }
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    if (signupData.password !== signupData.confirmPassword) {
-      toast.error("Passwords don't match!");
-      return;
-    }
-    if (signupData.mobile.length !== 10) {
-      toast.error("Please enter a valid mobile number!");
-      return;
-    }
-    try {
-      const otpResponse = await sendOtptoMobile({
-        phoneNumber: signupData.mobile.replace(/^\+91/, ''),
-        email: signupData.email
-      });
+const handleSignup = async (e) => {
+  e.preventDefault();
 
-      if (!otpResponse.success) {
-        toast.error(otpResponse.data.message);
-        return;
-      }
+  if (signupData.password !== signupData.confirmPassword) {
+    toast.error("Passwords don't match!");
+    return;
+  }
 
-      setIsOtpDialogOpen(true);
-      toast.success("OTP sent to your mobile number and email!");
-    } catch (error) {
-      toast.error("Error during signup or OTP generation");
+  if (signupData.mobile.length !== 10) {
+    toast.error("Please enter a valid mobile number!");
+    return;
+  }
+
+  if (signupData.password.length < 6) {
+    toast.error("Password should be at least 6 characters long!");
+    return;
+  }
+
+  try {
+    const otpResponse = await sendOtptoMobile({
+      phoneNumber: signupData.mobile.replace(/^\+91/, ''),
+      email: signupData.email,
+    });
+
+    if (!otpResponse.success) {
+      console.log("otpResponse", otpResponse);
+      // Simulate API error shape for uniform handling
+      throw new Error(otpResponse.message || "Failed to send OTP");
     }
-  };
+
+    setIsOtpDialogOpen(true);
+    toast.success("OTP sent to your mobile number and email!");
+  } catch (error) {
+    console.log("error", error?.response?.data || error.message || error);
+    toast.error(error?.response?.data?.message || error.message || "Error sending OTP");
+  }
+};
+
 
   const handleResendOtp = async () => {
     try {
@@ -177,9 +188,9 @@ const Login = () => {
       },true);
 
       if (!otpResponse.success) {
-        throw new Error(otpResponse.response.data);
+        throw new Error(otpResponse.data);
       }
-      setUserCredentials(otpResponse.user);
+      setUserCredentials(otpResponse.data.user);
       setIsForgotPasswordDialogOpen(false);
       setIsForgotOtpDialogOpen(true);
 
