@@ -43,14 +43,26 @@ export const isUserLoggedIn = async () => {
   }
 };
 
-export const sendOtptoMobile = async ({phoneNumber,email},tochangePassword=false) => {
+export const sendOtptoMobile = async ({ phoneNumber, email }, tochangePassword = false) => {
   try {
-    const response = await axiosInstance.post("/auth/send-otp", {phoneNumber,email,tochangePassword });
-    return response.data;
+    const response = await axiosInstance.post("/auth/send-otp", {
+      phoneNumber,
+      email,
+      tochangePassword,
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error) {
-    return error;
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error sending OTP",
+    };
   }
-}
+};
+
 
 export const verifyOtpMobile = async ({phoneNumber,email ,otp}) => {
   try {
@@ -58,7 +70,6 @@ export const verifyOtpMobile = async ({phoneNumber,email ,otp}) => {
    
     return response.data;
   } catch (error) {
-    console.log("error",error);
     return error;
   }
 }
