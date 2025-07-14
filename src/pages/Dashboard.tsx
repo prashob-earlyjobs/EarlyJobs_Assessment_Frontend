@@ -29,7 +29,8 @@ import {
   Download,
   ChevronRight,
   FileText,
-  GraduationCap
+  GraduationCap,
+  Code
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAssessmentsByUserId, getUserStats, isUserLoggedIn, userLogout } from "@/components/services/servicesapis";
@@ -66,6 +67,7 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState([{
     id: 0,
     type: "welcome",
+    category: "technical",
     title: "Welcome to EarlyJobs!",
     status: "Profile Updated",
     time: "",
@@ -110,6 +112,7 @@ const Dashboard = () => {
         const recentActivities = result.data.map(assessment => ({
           type: "assessment",
           id: assessment._id,
+          category: assessment.category,
           title: assessment.title || "Untitled Assessment",
           status: assessment.status || "Completed",
           time: assessment.createdAt ? new Date(assessment.createdAt).toLocaleString('en-IN', {
@@ -136,6 +139,7 @@ const Dashboard = () => {
           id: 1,
           type: "error",
           title: "Assessment Fetch Failed",
+          category: "",
           status: "Error",
           time: new Date().toLocaleString('en-IN', {
             year: 'numeric',
@@ -508,16 +512,16 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentActivity.map((activity, index) => (
+                {recentActivity.reverse().map((activity, index) => (
                   <div key={index} className="flex items-center space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
                     <div className={`p-2 rounded-xl ${activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
                       activity.type === 'skill' ? 'bg-purple-100 text-purple-600' :
                         'bg-teal-100 text-teal-600'
                       }`}>
-                      {activity.type === 'assessment' && <BookOpen className="h-4 w-4" />}
-                      {activity.type === 'skill' && <Award className="h-4 w-4" />}
-                      {activity.type === 'job' && <Briefcase className="h-4 w-4" />}
-                      {activity.type === 'welcome' && <Lightbulb className="h-4 w-4" />}
+                    
+                      {
+                        activity.category === 'technical' ? <Code className="h-4 w-4" /> :activity.category === 'non-technical'? <BookOpen className="h-4 w-4" />:<Lightbulb className="h-4 w-4" />
+                      }
 
                     </div>
                     <div className="flex-1 min-w-0">
@@ -527,12 +531,12 @@ const Dashboard = () => {
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge
                           variant="secondary"
-                          className={`text-xs rounded-full ${activity.status === 'Completed' || activity.status === 'Achieved' ? 'bg-green-100 text-green-700' :
+                          className={`text-xs rounded-full ${activity.category === 'technical' || activity.status === 'Profile Updated' ? 'bg-green-100 text-green-700' :
                             activity.status === 'Applied' ? 'bg-blue-100 text-blue-700' :
                               'bg-yellow-100 text-yellow-700'
                             }`}
                         >
-                          {activity.status}
+                          {activity.category==='technical'  ?'Technical':activity.status === 'Profile Updated' ? 'Profile Updated' : 'Non-Technical' }
                         </Badge>
                         <span className="text-xs text-gray-500">{activity.time}</span>
                       </div>

@@ -934,9 +934,9 @@ const Onboarding = () => {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Upload Resume (optional)</Label>
-                  <div className={`border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-blue-300 transition-colors `}>
+                {/* <div className="space-y-2"> */}
+                  {/* <Label>Upload Resume (optional)</Label> */}
+                  {/* <div className={`border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-blue-300 transition-colors `}>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx"
@@ -949,7 +949,6 @@ const Onboarding = () => {
                       {formData.resumeUrl ? (
                         <div className="text-green-600 font-medium">
                           <Check className="h-5 w-5 inline mr-2" />
-                          {/* {formData.resume.name} */}
                         </div>
                       ) : (
                         <>
@@ -958,11 +957,11 @@ const Onboarding = () => {
                         </>
                       )}
                     </label>
-                  </div>
+                  </div> */}
                   {/* {errors.resume && (
                     <p className="text-xs text-red-500">{errors.resume}</p>
                   )} */}
-                </div>
+                {/* </div> */}
               </div>
             )}
 

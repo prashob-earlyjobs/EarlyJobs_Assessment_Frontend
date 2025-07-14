@@ -84,10 +84,7 @@ interface AssessmentDetails {
 const Assessment = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [timeRemaining, setTimeRemaining] = useState(45 * 60); // 45 minutes in seconds
-  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
+
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPayment, setShowPayment] = useState(true);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -202,6 +199,7 @@ const Assessment = () => {
         basePrice: assessmentData.pricing.basePrice  || 0,
         discountedPrice: assessmentData.pricing.discountedPrice  || 0
       },
+      offerCode: offerApplied ? offerCode.trim().toUpperCase() || null: null,
       referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
       isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z") || false,

@@ -115,13 +115,12 @@ const Login = () => {
       const otpResponse = await sendOtptoMobile({
         phoneNumber: signupData.mobile.replace(/^\+91/, ''),
         email: signupData.email
-      },true);
+      });
 
       if (!otpResponse.success) {
         toast.error(otpResponse.data.message);
         return;
       }
-      setUserCredentials(otpResponse.data.user);
       setOtp("");
       toast.success("OTP resent to your mobile number and email!");
     } catch (error) {
