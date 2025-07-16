@@ -110,9 +110,8 @@ const Assessment = () => {
   const [offerApplied, setOfferApplied] = useState(false);
   const [offerError, setOfferError] = useState("");
   const [offerObj, setOfferObj] = useState<OfferObj | null>(null);
-  const [startAssessment, setStartAssessment] = useState(false)
+  const [startAssessment, setStartAssessment] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,7 +122,7 @@ const Assessment = () => {
         if (!response.data.success) {
           throw new Error(response.message || "Failed to fetch assessment data");
         }
-        const currentDate = new Date("2025-07-09T08:04:00Z"); // 01:34 PM IST
+        const currentDate = new Date(); // 06:19 PM IST
         const offerValid = new Date(response.data.data.assessment.offer.validUntil) >= currentDate;
         const assessment = response.data.data.assessment;
         if (assessment.offer && !offerValid) {
@@ -152,11 +151,9 @@ const Assessment = () => {
           setPaymentCompleted(true); // Simulate payment completion
         }
       } catch (error) {
-
-        if (error.response.data.message === "Assessment not found for this user") {
-          return
+        if (error.response?.data?.message === "Assessment not found for this user") {
+          return;
         }
-
         setApiError(error.message || "Failed to fetch assessment data");
         toast.error(error.message || "Failed to fetch assessment data");
       } finally {
@@ -166,15 +163,14 @@ const Assessment = () => {
     fetchData();
   }, [id, userCredentials]);
 
-
   useEffect(() => {
     if (startAssessment) {
       storeAssessmentDetails();
-      setStartAssessment(false)
+      setStartAssessment(false);
     }
-  }, [assessmentLink,startAssessment])
+  }, [assessmentLink, startAssessment]);
 
-  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z")
+  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-16T12:49:00Z")
     ? assessmentData.pricing.discountedPrice
     : assessmentData.pricing.basePrice;
 
@@ -198,13 +194,13 @@ const Assessment = () => {
       transactionAmount: finalAssessmentFee || "0",
       transactionStatus: "success",
       pricing: {
-        basePrice: assessmentData.pricing.basePrice  || 0,
-        discountedPrice: assessmentData.pricing.discountedPrice  || 0
+        basePrice: assessmentData.pricing.basePrice || 0,
+        discountedPrice: assessmentData.pricing.discountedPrice || 0
       },
-      offerCode: offerApplied ? offerCode.trim().toUpperCase() || null: null,
+      offerCode: offerApplied ? offerCode.trim().toUpperCase() || null : null,
       referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
-      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-09T08:04:00Z") || false,
+      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-16T12:49:00Z") || false,
       isPremium: assessmentData.isPremium || false
     };
     try {
@@ -274,8 +270,7 @@ const Assessment = () => {
       setShowPayment(false);
       await addCandidateTransactionDetails("FREE-OFFER");
       await handleStartAssessment();
-        setStartAssessment(true)
-
+      setStartAssessment(true);
       return;
     }
 
@@ -284,50 +279,44 @@ const Assessment = () => {
       return;
     }
 
-    if (!orderId) {
-      try {
-        const orderResponse = await getOrderIdForPayment({
-          amount: finalAssessmentFee * 100,
-          currency: "INR",
-          receipt: `receipt_${id}`,
-        });
-        setOrderId(orderResponse.id);
-      } catch (error) {
-        toast.error("Failed to initialize payment. Please try again.");
-        return;
-      }
-    }
-
-    const options: RazorpayOrderOptions = {
-      key: import.meta.env.VITE_APP_RAZORPAY_KEY || "YOUR_RAZORPAY_KEY",
-      amount: finalAssessmentFee * 100,
-      currency: "INR",
-      name: "EarlyJobs",
-      description: `Assessment Fee for ${assessmentData.title}`,
-      order_id: orderId,
-      handler: async (response) => {
-        toast.success("Payment successful! Starting assessment...");
-        setPaymentCompleted(true);
-        setShowPayment(false);
-        await addCandidateTransactionDetails(response.razorpay_payment_id);
-        await handleStartAssessment();
-        setStartAssessment(true)
-
-      },
-      prefill: {
-        name: userCredentials.name || "Alex Johnson",
-        email: userCredentials.email || "alex@example.com",
-        contact: userCredentials.mobile || "9876543210",
-      },
-      theme: {
-        color: "#ea580c",
-      },
-      modal: {
-        confirm_close: true,
-      },
-    };
-
+    setIsLoading(true);
     try {
+      // Generate a new orderId with the updated finalAssessmentFee
+      const orderResponse = await getOrderIdForPayment({
+        amount: finalAssessmentFee * 100,
+        currency: "INR",
+        receipt: `receipt_${id}`,
+      });
+      setOrderId(orderResponse.id);
+
+      const options: RazorpayOrderOptions = {
+        key: import.meta.env.VITE_APP_RAZORPAY_KEY || "YOUR_RAZORPAY_KEY",
+        amount: finalAssessmentFee * 100,
+        currency: "INR",
+        name: "EarlyJobs",
+        description: `Assessment Fee for ${assessmentData.title}`,
+        order_id: orderResponse.id,
+        handler: async (response) => {
+          toast.success("Payment successful! Starting assessment...");
+          setPaymentCompleted(true);
+          setShowPayment(false);
+          await addCandidateTransactionDetails(response.razorpay_payment_id);
+          await handleStartAssessment();
+          setStartAssessment(true);
+        },
+        prefill: {
+          name: userCredentials.name || "EarlyJobs",
+          email: userCredentials.email || "EarlyJobs",
+          contact: userCredentials.mobile || "",
+        },
+        theme: {
+          color: "#ea580c",
+        },
+        modal: {
+          confirm_close: true,
+        },
+      };
+
       const razorpayInstance = new Razorpay(options);
       razorpayInstance.on("payment.failed", (error) => {
         toast.error(`Payment failed: ${error.error.description}`);
@@ -335,6 +324,8 @@ const Assessment = () => {
       razorpayInstance.open();
     } catch (error) {
       toast.error("Failed to initiate payment. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -376,10 +367,11 @@ const Assessment = () => {
       </div>
     );
   }
+
   const handleVeloxWindow = () => {
     setIsDialogOpen(true);
     window.open(assessmentLink, '_blank');
-  }
+  };
 
   if (showPayment) {
     return (
@@ -400,7 +392,6 @@ const Assessment = () => {
                   <span>Duration:</span>
                   <span>{assessmentData.timeLimit} minutes</span>
                 </div>
-               
                 <div className="flex justify-between">
                   <span>Attempts:</span>
                   <span>1</span>
@@ -506,98 +497,98 @@ const Assessment = () => {
   }
 
   return (
-  <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
-  <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
-    <CardHeader className="text-center pb-4">
-      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-        <CheckCircle className="h-8 w-8 text-white" />
-      </div>
-      <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
-      <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
-    </CardHeader>
-    <CardContent className="space-y-6">
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
-        <div className="space-y-2 text-sm text-gray-600">
-          <div className="flex justify-between">
-            <span>Duration:</span>
-            <span>{assessmentData.timeLimit} minutes</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
+        <CardHeader className="text-center pb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-8 w-8 text-white" />
           </div>
-          <div className="flex justify-between">
-            <span>Attempts:</span>
-            <span>1</span>
+          <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
+          <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex justify-between">
+                <span>Duration:</span>
+                <span>{assessmentData.timeLimit} minutes</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Attempts:</span>
+                <span>1</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Assessment Type:</span>
+                <span>{assessmentData.type}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
+                <span>Status:</span>
+                <span className="text-green-600">Payment Confirmed</span>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span>Assessment Type:</span>
-            <span>{assessmentData.type}</span>
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
+            <p className="text-sm text-green-700 font-medium">
+              Payment successfully processed on</p>
+            <p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "Asia/Kolkata",
+              timeZoneName: "short",
+            })}
+            </p>
           </div>
-          <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
-            <span>Status:</span>
-            <span className="text-green-600">Payment Confirmed</span>
-          </div>
-        </div>
-      </div>
-      <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-        <p className="text-sm text-green-700 font-medium">
-          Payment successfully processed on</p>
-        <p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Kolkata",
-          timeZoneName: "short",
-        })}
-        </p>
-      </div>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={handleVeloxWindow}
+                className="w-full h-12 bg-green-600 hover:bg-green-700 rounded-2xl text-base shadow-lg flex items-center justify-center"
+                disabled={isLoading || !assessmentLink}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-5 w-5 mr-2" />
+                    Start Assessment
+                  </>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md p-6">
+              <div className="text-center space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Assessment Started</h3>
+                <p className="text-sm text-gray-600">Your assessment is started, kindly complete it in 1hr</p>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/dashboard")}
+                  className="w-full mt-4"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Go to Dashboard
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
-            onClick={handleVeloxWindow}
-            className="w-full h-12 bg-green-600 hover:bg-green-700 rounded-2xl text-base shadow-lg flex items-center justify-center"
-            disabled={isLoading || !assessmentLink}
+            variant="outline"
+            onClick={() => navigate("/assessments")}
+            className="w-full h-12 rounded-2xl border-gray-200 mt-2"
           >
-            {isLoading ? (
-              <>
-                <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></span>
-                Loading...
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5 mr-2" />
-                Start Assessment
-              </>
-            )}
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assessments
           </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-md p-6">
-          <div className="text-center space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Assessment Started</h3>
-            <p className="text-sm text-gray-600">Your assessment is started, kindly complete it in 1hr</p>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/dashboard")}
-              className="w-full mt-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go to Dashboard
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Button
-        variant="outline"
-        onClick={() => navigate("/assessments")}
-        className="w-full h-12 rounded-2xl border-gray-200 mt-2"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Assessments
-      </Button>
-    </CardContent>
-  </Card>
-</div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
