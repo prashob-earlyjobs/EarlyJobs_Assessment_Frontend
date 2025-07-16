@@ -123,16 +123,17 @@ const Dashboard = () => {
         }));
 
         // Set recent activity, including the welcome message
-        setRecentActivity([
-          {
-            type: "welcome",
-            title: "Welcome to EarlyJobs!",
-            status: "Profile Updated",
-            time: "",
-            message: "Your profile has been successfully updated. You're all set to start taking assessments!"
-          },
-          ...recentActivities
-        ]);
+      setRecentActivity([
+  {
+    type: "welcome",
+    title: "Welcome to EarlyJobs!",
+    status: "Profile Updated",
+    time: "",
+    message: "Your profile has been successfully updated. You're all set to start taking assessments!"
+  },
+  ...recentActivities
+].reverse());
+
       } catch (error) {
         // Optionally set a default or error activity if desired
         setRecentActivity([{
@@ -372,7 +373,7 @@ const Dashboard = () => {
                   </CardDescription>
                   <Button
                     // onClick={handleBulkApplyBrowse}
-                    onClick={() => toast.info("Access granted to select candidates only")}
+                    onClick={() => toast.info("Access granted to selected candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-yellow-600 hover:bg-gray-50 mb-3"
                   >
@@ -399,7 +400,7 @@ const Dashboard = () => {
                   </CardDescription>
 
                   <Button
-                    onClick={() => toast.info("Access granted to select candidates only")}
+                    onClick={() => toast.info("Access granted to selected candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-blue-700 hover:bg-gray-100 mb-3"
                   >
@@ -426,7 +427,7 @@ const Dashboard = () => {
                   </CardDescription>
                   <Button
                     // onClick={handleBulkApplyBrowse}
-                    onClick={() => toast.info("Access granted to select candidates only")}
+                    onClick={() => toast.info("Access granted to selected candidates only")}
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
                   >
@@ -452,7 +453,7 @@ const Dashboard = () => {
                   </CardDescription>
                   <Button
                     // onClick={() => navigate('/jobs')}
-                    onClick={() => toast.info("Access granted to select candidates only")}
+                    onClick={() => toast.info("Access granted to selected candidates only")}
 
                     variant="secondary"
                     className="w-full rounded-2xl bg-white text-green-600 hover:bg-gray-50"
@@ -512,7 +513,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentActivity.reverse().map((activity, index) => (
+                {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-center space-x-3 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
                     <div className={`p-2 rounded-xl ${activity.type === 'assessment' ? 'bg-orange-100 text-orange-600' :
                       activity.type === 'skill' ? 'bg-purple-100 text-purple-600' :

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Mail, Phone, MapPin, Calendar, User, Briefcase, Book, Globe, Wrench, UserCheck } from 'lucide-react';
+import { X, Mail, Phone, MapPin, Calendar, User, Briefcase, Book, Globe, Wrench, UserCheck, Download, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -8,11 +8,9 @@ import { UserCredentials } from '../context/index';
 import { motion, AnimatePresence } from "framer-motion";
 import { getAssessmentsByUserId, getFranchiser } from './services/servicesapis';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { toast } from "sonner";
 
 
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface UserDetailSidebarProps {
   user: UserCredentials | null;
@@ -137,7 +135,7 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* User Profile */}
               <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16 bg-gray-200">
+                <Avatar className="w-[5rem] h-[5rem] bg-gray-200">
                  {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> :
                   <AvatarFallback className="text-lg text-gray-700">
                     {user.name.slice(0, 2).toUpperCase()}
@@ -156,6 +154,27 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
                   </div>
                 </div>
               </div>
+                {
+                  user.profile.resumeUrl && (
+                 <a
+  href={user.profile.resumeUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center"
+>
+  <Button
+    variant="ghost"
+    size="sm"
+    className="flex items-center gap-1 w-auto h-8 px-2 hover:bg-gray-100 border border-gray-400"
+    aria-label="View Resume"
+  >
+    <FileText className="w-4 h-4 text-gray-700" />
+    <span className="text-sm text-gray-700">View Resume</span>
+  </Button>
+</a>
+
+                  )
+                }
 
               <Separator />
               {franchiser && (

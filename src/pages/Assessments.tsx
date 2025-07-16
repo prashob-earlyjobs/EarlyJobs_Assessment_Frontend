@@ -194,7 +194,8 @@ const Assessments = () => {
               >
                 <CardHeader className="pt-4 pb-4 relative">
                   <div className="flex items-start justify-between ">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-start space-x-3 w-full justify-between">
+                      <div className="flex items-center space-x-2">
                       <div className={`p-3 rounded-2xl ${categoryColour(assessment.category)}`}>
                         {(() => {
                           switch (assessment.category) {
@@ -207,29 +208,12 @@ const Assessments = () => {
                           }
                         })()}
                       </div>
-                      {assessment.isPremium && (
-                        <div className="absolute top-4 right-4 z-10">
-                          <div className="relative">
-                            <Badge
-                              className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white border-0 rounded-full px-3 py-1 text-xs font-medium shadow-lg"
-                            >
-                              <Crown className="h-3 w-3 mr-1" />
-                              Premium
-                              <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-                                <div className="bubble bubble1"></div>
-                                <div className="bubble bubble2"></div>
-                                <div className="bubble bubble3"></div>
-                                <div className="bubble bubble4"></div>
-                              </div>
-                            </Badge>
-                          </div>
-                        </div>
-                      )}
-                      <div>
+                     
+                      <div className={assessment.isPremium &&`max-w-[308px]`}>
                         <CardTitle className="text-xl">{assessment.title}</CardTitle>
-                        <div className="flex flex-col space-x-2 mt-1" style={{ gap: '8px' }}>
+                        <div className="flex flex-col mt-1" style={{ gap: '8px' }}>
                           <div className="flex items-center space-x-2">
-                            <Badge className="rounded-full text-xs px-2 py-1">{assessment.category}</Badge>
+                            <Badge className="rounded-full text-xs px-2 py-1">{assessment.category==="non-technical"?"Non-Technical":"Technical"}</Badge>
                             <Badge
                               variant="outline"
                               className={`rounded-full text-xs px-2 py-1 ${getLevelColor(assessment.difficulty)}`}
@@ -256,6 +240,25 @@ const Assessments = () => {
                           </div>
                         </div>
                       </div>
+                      </div>
+                       {assessment.isPremium && (
+                        <div className="">
+                          <div className="relative">
+                            <Badge
+                              className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white border-0 rounded-full px-3 py-1 text-xs font-medium shadow-lg"
+                            >
+                              <Crown className="h-3 w-3 mr-1" />
+                              Premium
+                              <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+                                <div className="bubble bubble1"></div>
+                                <div className="bubble bubble2"></div>
+                                <div className="bubble bubble3"></div>
+                                <div className="bubble bubble4"></div>
+                              </div>
+                            </Badge>
+                        </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

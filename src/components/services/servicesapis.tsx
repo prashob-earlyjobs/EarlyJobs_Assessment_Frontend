@@ -43,11 +43,12 @@ export const isUserLoggedIn = async () => {
   }
 };
 
-export const sendOtptoMobile = async ({ phoneNumber, email }, tochangePassword = false) => {
+export const sendOtptoMobile = async ({ phoneNumber, email,franchiseId="" }, tochangePassword = false) => {
   try {
     const response = await axiosInstance.post("/auth/send-otp", {
       phoneNumber,
       email,
+      franchiseId,
       tochangePassword,
     });
 
@@ -543,10 +544,11 @@ export const uploadResume = async (file: File, candidateId: string) => {
         "Content-Type": "multipart/form-data",
       },
     });
+    console.log("response", response);
 
-    if (response.data?.url) {
+    if (response.data.fileUrl) {
       toast.success("Resume uploaded successfully!");
-      return response.data.url;
+      return response.data.fileUrl;
     }
     throw new Error("Failed to upload resume");
   } catch (error) {

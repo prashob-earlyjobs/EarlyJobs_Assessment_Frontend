@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, storeAssessmentDetailsApi, matchAssessmentsDetails } from "@/components/services/servicesapis";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export interface IOffer {
   title: string;
@@ -110,6 +111,7 @@ const Assessment = () => {
   const [offerError, setOfferError] = useState("");
   const [offerObj, setOfferObj] = useState<OfferObj | null>(null);
   const [startAssessment, setStartAssessment] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 
   useEffect(() => {
@@ -375,6 +377,7 @@ const Assessment = () => {
     );
   }
   const handleVeloxWindow = () => {
+    setIsDialogOpen(true);
     window.open(assessmentLink, '_blank');
   }
 
@@ -503,52 +506,54 @@ const Assessment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
-        <CardHeader className="text-center pb-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-8 w-8 text-white" />
+  <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
+  <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
+    <CardHeader className="text-center pb-4">
+      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+        <CheckCircle className="h-8 w-8 text-white" />
+      </div>
+      <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
+      <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
+    </CardHeader>
+    <CardContent className="space-y-6">
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
+        <div className="space-y-2 text-sm text-gray-600">
+          <div className="flex justify-between">
+            <span>Duration:</span>
+            <span>{assessmentData.timeLimit} minutes</span>
           </div>
-          <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
-          <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-gray-50 rounded-2xl p-4">
-            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex justify-between">
-                <span>Duration:</span>
-                <span>{assessmentData.timeLimit} minutes</span>
-              </div>
-            
-              <div className="flex justify-between">
-                <span>Attempts:</span>
-                <span>1</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Assessment Type:</span>
-                <span>{assessmentData.type}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
-                <span>Status:</span>
-                <span className="text-green-600">Payment Confirmed</span>
-              </div>
-            </div>
+          <div className="flex justify-between">
+            <span>Attempts:</span>
+            <span>1</span>
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-            <p className="text-sm text-green-700 font-medium">
-              Payment successfully processed on</p><p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-                timeZone: "Asia/Kolkata",
-                timeZoneName: "short",
-              })}
-            </p>
+          <div className="flex justify-between">
+            <span>Assessment Type:</span>
+            <span>{assessmentData.type}</span>
           </div>
+          <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
+            <span>Status:</span>
+            <span className="text-green-600">Payment Confirmed</span>
+          </div>
+        </div>
+      </div>
+      <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
+        <p className="text-sm text-green-700 font-medium">
+          Payment successfully processed on</p>
+        <p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Kolkata",
+          timeZoneName: "short",
+        })}
+        </p>
+      </div>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
           <Button
             onClick={handleVeloxWindow}
             className="w-full h-12 bg-green-600 hover:bg-green-700 rounded-2xl text-base shadow-lg flex items-center justify-center"
@@ -566,17 +571,33 @@ const Assessment = () => {
               </>
             )}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/assessments")}
-            className="w-full h-12 rounded-2xl border-gray-200 mt-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Assessments
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogTrigger>
+        <DialogContent className="max-w-md p-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Assessment Started</h3>
+            <p className="text-sm text-gray-600">Your assessment is started, kindly complete it in 1hr</p>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              className="w-full mt-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Go to Dashboard
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Button
+        variant="outline"
+        onClick={() => navigate("/assessments")}
+        className="w-full h-12 rounded-2xl border-gray-200 mt-2"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Assessments
+      </Button>
+    </CardContent>
+  </Card>
+</div>
   );
 };
 

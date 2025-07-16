@@ -165,6 +165,10 @@ const TransactionsForAdmin = () => {
                                                         currentUser.role === 'super_admin' &&
                                                         <th className="px-4 py-3">Franchise Name</th>
                                                     }
+                                                    {
+                                                        currentUser.role === 'franchise_admin' &&
+                                                        <th className="px-4 py-3">Platform Fee</th>
+                                                    }
                                                     <th className="px-4 py-3 rounded-tr-2xl">{currentUser.role !== 'super_admin' ? 'Your Commission' : 'Franchise Commission'}</th>
                                                 </tr>
                                             </thead>
@@ -184,6 +188,10 @@ const TransactionsForAdmin = () => {
                                                         {
                                                             currentUser.role === 'super_admin' &&
                                                             <td className="px-4 py-3">{transaction.franchiseName || "Unknown"}</td>
+                                                        }
+                                                        {
+                                                            currentUser.role === 'franchise_admin' &&
+                                                            <td className="px-4 py-3">₹{307}</td>
                                                         }
                                                         <td className="px-4 py-3">₹{transaction.franchiseCommission}</td>
                                                     </tr>

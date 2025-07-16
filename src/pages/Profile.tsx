@@ -54,6 +54,7 @@ const Profile = () => {
     email: "",
     mobile: "",
     profile: {
+      resumeUrl: "",
       address: {
         street: "",
         city: "",
@@ -86,9 +87,7 @@ const Profile = () => {
       preferredJobRole: "",
       skills: [] as string[],
     },
-    resumeUrl: "",
     avatar: "",
-    resume: null as File | null,
   });
 
   useEffect(() => {
@@ -206,7 +205,7 @@ const Profile = () => {
       try {
         const url = await uploadResume(file, profileData.email);
         if (url) {
-          setProfileData((prev) => ({ ...prev, resumeUrl: url }));
+          setProfileData((prev) => ({ ...prev, profile: { ...prev.profile, resumeUrl: url} }));
           toast.success("Resume uploaded successfully!");
         }
       } catch {
@@ -311,7 +310,7 @@ const Profile = () => {
       const updatedUserData = {
         ...response.data.user,
         avatar: profileData.avatar,
-        resumeUrl: profileData.resumeUrl,
+        resumeUrl: profileData.profile.resumeUrl,
         profile: {
           ...response.data.user.profile,
           professionalInformation: {
@@ -414,9 +413,9 @@ const Profile = () => {
                     <div>
                       <h3 className="font-medium">Upload Resume</h3>
                       <p className="text-sm text-gray-500">
-                        {profileData.resumeUrl ? (
+                        {profileData.profile.resumeUrl ? (
                           <a
-                            href={profileData.resumeUrl}
+                            href={profileData.profile.resumeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
@@ -435,21 +434,22 @@ const Profile = () => {
                     onClick={() => resumeInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {profileData.resumeUrl ? "Update Resume" : "Upload Resume"}
+                    {profileData.profile.resumeUrl ? "Update Resume" : "Upload Resume"}
                   </Button>
-                </div>
+                  </div>
                 <input
                   ref={resumeInputRef}
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={handleResumeUpload}
                   className="hidden"
-                />
+                  />
                 <p className="text-xs text-gray-500 mt-2">
                   Supported formats: PDF, DOC, DOCX (Max: 10MB)
                 </p>
               </div>
 
+                 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>

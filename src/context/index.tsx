@@ -13,6 +13,7 @@ export interface UserCredentials {
     mobile: string;
     name: string;
     profile: {
+        resumeUrl?: string | null;
         gender: string;
         dateOfBirth: string;
         address: {

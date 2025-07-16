@@ -100,10 +100,17 @@ const handleSignup = async (e) => {
     return;
   }
 
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}[\]:;<>,.?~\\/-]).{6,}$/;
+
+if (!passwordRegex.test(signupData.password)) {
+  toast.error("Password must contain at least one uppercase letter, one number, and one special character!");
+  return;
+}
   try {
     const otpResponse = await sendOtptoMobile({
       phoneNumber: signupData.mobile.replace(/^\+91/, ''),
       email: signupData.email,
+      franchiseId: signupData.referrerId
     });
 
     if (!otpResponse.success) {
