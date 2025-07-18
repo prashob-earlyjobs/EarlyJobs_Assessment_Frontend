@@ -3,15 +3,16 @@ import axiosInstance from "./apiinterseptor";
 import { toast } from "sonner";
 
 export const userLogin = async ({
-  email,
+  emailormobile,
   password,
 }: {
-  email: string;
+  emailormobile: string;
   password: string;
 }) => {
+  console.log(typeof(emailormobile),emailormobile, password);
   try {
     const response = await axiosInstance.post("/auth/login", {
-      email,
+      emailormobile,
       password,
     });
     const data = response.data;
@@ -632,6 +633,28 @@ export const getResultForCandidateAssessment = async (interviewId) => {
   }
 
 }
+
+export const getRecording = async (interviewId: string) => {
+   try {
+    const response = await axiosInstance.get(`/admin/getRecording/${interviewId}`);
+    return response.data;
+  }
+  catch (error) {
+    toast.error(`${error?.response?.data?.message}.`);
+  }
+  
+}
+
+export const getTranscript = async (interviewId: string) => {
+    try {
+    const response = await axiosInstance.get(`/admin/getTranscript/${interviewId}`);
+    return response.data;
+  }
+  catch (error) {
+    toast.error(`${error?.response?.data?.message}.`);
+  }
+}
+
 export const getCandidatesForAssessment = async (assessmentId) => {
   try {
     const response = await axiosInstance.get(`/admin/getCandidatesForAssessment/${assessmentId}`);

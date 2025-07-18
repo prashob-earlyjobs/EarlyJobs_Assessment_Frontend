@@ -21,7 +21,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { userCredentials, setUserCredentials } = useUser();
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginData, setLoginData] = useState({ emailormobile: "", password: "" });
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
@@ -37,6 +37,7 @@ const Login = () => {
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [forgotPasswordData, setForgotPasswordData] = useState({ email: "", mobile: "", newPassword: "", confirmPassword: "" });
   const [forgotOtp, setForgotOtp] = useState("");
+  const [isEnteringNumber, setIsEnteringNumber] = useState(false);
 
   useEffect(() => {
     const checkUserLoggedIn = async () => {
@@ -68,9 +69,33 @@ const Login = () => {
     }
     checkUserLoggedIn();
   }, []);
+useEffect(() => {
+  const value = loginData.emailormobile.trim();
+
+  if (!isNaN(Number(value)) && value.length >= 5) {
+    setIsEnteringNumber(true);
+  } else {
+    setIsEnteringNumber(false);
+  }
+}, [loginData.emailormobile]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if(isEnteringNumber && loginData.emailormobile.length !== 10){
+        toast.error("Please enter a valid mobile number!");
+        return;
+      
+    }
+    const isValidEmailOrMobile = (input) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const mobileRegex = /^[6-9]\d{9}$/;
+  return emailRegex.test(input) || mobileRegex.test(input);
+};
+
+if (!isValidEmailOrMobile(loginData.emailormobile) ) {
+  toast.error("Please enter a valid email or mobile number!");
+  return;
+}
     const response = await userLogin(loginData);
     if (!response.success) {
       toast.error(response.message);
@@ -349,18 +374,19 @@ useEffect(() => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
-                      required
-                    />
-                  </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="emailOrMobile">Email or Mobile Number</Label>
+                  <Input
+                    id="emailOrMobile"
+                    type="text"
+                    placeholder="your@email.com or 9876543210"
+                    value={loginData.emailormobile}
+                    onChange={(e) => setLoginData({ ...loginData, emailormobile: e.target.value })}
+                    className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
+                    required
+                  />
+                </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
