@@ -38,7 +38,6 @@ const Results = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userAssessments, setUserAssessments] = useState([]);
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const { userCredentials } = useUser();
   const [completedAssessments, setCompletedAssessments] = useState([]);
@@ -67,6 +66,7 @@ const Results = () => {
   };
 
   useEffect(() => {
+    console.log("completedAssessments", completedAssessments);
     if (completedAssessments.length > 0) {
       setSelectedAssessment(completedAssessments[0]);
     }
@@ -82,10 +82,8 @@ const Results = () => {
         }
         if (response.data.length === 0) {
           setError("No assessments found. Please complete an assessment to view results.");
-          setUserAssessments([]);
           setCompletedAssessments([]);
         } else {
-          setUserAssessments(response.data);
           const mappedAssessments = await getAssessmentsData(response.data);
           setCompletedAssessments(mappedAssessments);
         }
@@ -196,7 +194,7 @@ const Results = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header />
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {error ? (
+        {error && !completedAssessments ? (
           <div className="text-center mb-8">
             <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="h-12 w-12 text-yellow-600" />
@@ -215,6 +213,8 @@ const Results = () => {
           </div>
         ) : (
           <>
+          {
+            !error?
             <div className="text-center mb-8">
               <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Trophy className="h-12 w-12 text-green-600" />
@@ -231,13 +231,17 @@ const Results = () => {
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    Completed: {new Date(results?.report?.completedAt || results?.createdAt || "2025-07-09T13:27:00Z").toLocaleDateString()}
+                    Completed: {new Date(results?.report?.completedAt || results?.createdAt ).toLocaleDateString()}
                   </span>
                 </div>
               </div>
             </div>
+            : null
+          }
 
             <div className="grid lg:grid-cols-3 gap-8">
+              {
+                !error?
               <div className="lg:col-span-2 space-y-8">
                 <Card className="rounded-3xl border-0 shadow-lg">
                   <CardHeader>
@@ -363,13 +367,31 @@ const Results = () => {
                   </CardContent>
                 </Card>
               </div>
+              :
+              <div className="text-center mb-8 lg:col-span-2 space-y-8">
+            <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle className="h-12 w-12 text-yellow-600" />
+            </div>
+            <h2 className="text-3xl font-semibold text-gray-800 mb-2">Your assessment is not yet reviewed</h2>
+            <p className="text-lg text-gray-600 mb-4">
+              {error}
+            </p>
+            <Button
+              onClick={() => navigate('/assessments')}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl"
+            >
+              <Award className="h-4 w-4 mr-2" />
+              Take an Assessment
+            </Button>
+          </div>
+              }
 
               <div className="space-y-6">
                 <Card className="rounded-3xl border-0 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <CheckCircle className="h-6 w-6 text-green-600" />
-                      <span>Completed Assessments</span>
+                      <span>Assessments</span>
                     </CardTitle>
                     <CardDescription>View your past assessments</CardDescription>
                   </CardHeader>
@@ -392,7 +414,8 @@ const Results = () => {
                     )}
                   </CardContent>
                 </Card>
-
+                {
+                  !error &&
                 <Card className="rounded-3xl border-0 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -422,6 +445,8 @@ const Results = () => {
                     </div>
                   </CardContent>
                 </Card>
+                    }
+
 
                 <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
                   <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

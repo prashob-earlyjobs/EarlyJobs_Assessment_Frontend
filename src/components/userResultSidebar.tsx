@@ -30,7 +30,7 @@ const sidebarVariants = {
     exit: { x: '100%', opacity: 0 },
 };
 
-const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
+const UserResultsSidebar = ({ result, selectedCandidate, recording, transcript, onClose }) => {
     const [assessment, setAssessment] = useState(null);
 
     useEffect(() => {
@@ -70,7 +70,11 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
         },
         maintainAspectRatio: false,
     };
-
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
     return (
         <AnimatePresence mode="wait">
             <>
@@ -104,10 +108,11 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                         </CardHeader>
                         <CardContent className="flex-1 overflow-y-auto p-4 space-y-6">
                             <Tabs defaultValue="overview" className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
+                                <TabsList className="grid w-full grid-cols-4">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
                                     <TabsTrigger value="skills">Skills</TabsTrigger>
                                     <TabsTrigger value="proctoring">Proctoring</TabsTrigger>
+                                    <TabsTrigger value="recording">Recording</TabsTrigger>
                                 </TabsList>
 
                                 {/* Overview Tab */}
@@ -273,6 +278,59 @@ const UserResultsSidebar = ({ result, selectedCandidate, onClose }) => {
                                         </div>
                                     </div>
                                 </TabsContent>
+
+                                   <TabsContent value="recording">
+                                    <div className="space-y-4">
+                                        {
+                                            recording ?
+                                        <video src={recording} controls={true}/>
+                                        :
+                                        <p>Recording not found</p>
+                                        }
+                                       {transcript.length > 0 ? (
+                                        <div className="space-y-4">
+                                            <h2 className="text-xl font-semibold mb-4">Transcript</h2>
+                                            {transcript.map((line, index) => {
+                                                
+                                                const startTime = formatTime(line.start);
+                                                const endTime = formatTime(line.end);
+                                                const duration = line.end - line.start;
+                                                const timetaken = formatTime(duration);
+                                                return(
+                                            <div
+                                                key={index}
+                                                style={{width: "100%"}}
+                                                className={`p-4 rounded-xl shadow-md ${
+                                                line.speaker === 0
+                                                    ? "bg-blue-100 self-start text-left"
+                                                    : "bg-green-100 self-start text-left"
+                                                }`}
+                                            >
+                                                <div style={{display: "flex", justifyContent: "space-between"}}>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>
+                                                    {line.speaker === 0
+                                                        ? `AI bot (${startTime} - ${endTime})`
+                                                        : `${selectedCandidate.firstName} (${startTime} - ${endTime})`}
+                                                    :
+                                                    </strong> 
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {timetaken}
+                                                    </p>
+                                                    </div>
+                                                <p className="whitespace-pre-wrap text-gray-800">{line.text}</p>
+                                            </div>
+                                            )})}
+                                        </div>
+                                        ) : (
+                                        <p>Transcript not found</p>
+                                        )}
+                                    </div>
+                                </TabsContent>
+
+
+
                             </Tabs>
                         </CardContent>
                     </Card>:<p>ffffffffff</p>

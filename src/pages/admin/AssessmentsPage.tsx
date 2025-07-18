@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Search, Edit, Trash, BarChart, Eye } from 'lucide-react';
 import { Assessment } from '@/types/admin';
-import { addAssessment, editAssessment, getAssessmentsfromAdminSearch, getCandidatesForAssessment, getResultForCandidateAssessment } from '@/components/services/servicesapis';
+import { addAssessment, editAssessment, getAssessmentsfromAdminSearch, getCandidatesForAssessment, getResultForCandidateAssessment,getRecording, getTranscript } from '@/components/services/servicesapis';
 import { toast } from 'sonner';
 import EditAssessmentModal from '@/components/admin/EditAssessmentModal';
 import { CandidateDetailsModal } from '@/components/admin/CandidateDetailsModal';
@@ -57,6 +57,8 @@ const AssessmentsPage: React.FC = () => {
   const [candidates, setCandidates] = useState([]);
   const [assessment, setAssessment] = useState(null);
   const [result, setResult] = useState(null);
+  const [recording, setRecording] = useState(null);
+  const[transcript, setTranscript] = useState([]);
 
   useEffect(() => {
     const resetSearchAndFilter = async () => {
@@ -92,6 +94,20 @@ const AssessmentsPage: React.FC = () => {
     setShowDetails(true);
     const response = await getResultForCandidateAssessment(candidate.interviewId);
     setResult(response);
+    const recordingResponse = await getRecording(candidate.interviewId);
+    console.log("recordingResponse", recordingResponse);
+    if (!recordingResponse.success) {
+      throw new Error(recordingResponse.message);
+    }
+    setRecording(recordingResponse.data);
+    const transcriptResponse = await getTranscript(candidate.interviewId);
+    if (!transcriptResponse.success) {
+      throw new Error(transcriptResponse.message);
+    }
+    console.log("transcriptResponse", transcriptResponse.data);
+    setTranscript(transcriptResponse.data);
+
+    
   };
 
   const lastAssessmentRef = useCallback(
@@ -285,13 +301,16 @@ const AssessmentsPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex gap-2 ml-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewAnalytics(assessment)}
-                          >
+                         {
+                          currentUser.role === 'super_admin' &&
+                           <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => handleViewAnalytics(assessment)}
+                           >
                             <BarChart className="h-4 w-4" />
                           </Button>
+                          }
                           <Button
                             variant="outline"
                             size="sm"
@@ -509,6 +528,8 @@ const AssessmentsPage: React.FC = () => {
           <UserResultsSidebar
             result={result}
             selectedCandidate={selectedCandidate}
+            recording={recording}
+            transcript={transcript}
             onClose={() => setResult(null)}
           />
         )}
