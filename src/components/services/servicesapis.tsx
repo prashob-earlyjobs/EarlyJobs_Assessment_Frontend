@@ -9,7 +9,7 @@ export const userLogin = async ({
   emailormobile: string;
   password: string;
 }) => {
-  console.log(typeof(emailormobile),emailormobile, password);
+  console.log(typeof emailormobile, emailormobile, password);
   try {
     const response = await axiosInstance.post("/auth/login", {
       emailormobile,
@@ -44,7 +44,10 @@ export const isUserLoggedIn = async () => {
   }
 };
 
-export const sendOtptoMobile = async ({ phoneNumber, email,franchiseId="" }, tochangePassword = false) => {
+export const sendOtptoMobile = async (
+  { phoneNumber, email, franchiseId = "" },
+  tochangePassword = false
+) => {
   try {
     const response = await axiosInstance.post("/auth/send-otp", {
       phoneNumber,
@@ -65,16 +68,19 @@ export const sendOtptoMobile = async ({ phoneNumber, email,franchiseId="" }, toc
   }
 };
 
-
-export const verifyOtpMobile = async ({phoneNumber,email ,otp}) => {
+export const verifyOtpMobile = async ({ phoneNumber, email, otp }) => {
   try {
-    const response = await axiosInstance.post("/auth/verify-otp", {phoneNumber,email , otp});
-   
+    const response = await axiosInstance.post("/auth/verify-otp", {
+      phoneNumber,
+      email,
+      otp,
+    });
+
     return response.data;
   } catch (error) {
     return error;
   }
-}
+};
 
 export const userSignup = async ({
   name,
@@ -112,19 +118,21 @@ export const userSignup = async ({
   }
 };
 
-export const resetPassword = async (userId:string,newPassword: string) => {
+export const resetPassword = async (userId: string, newPassword: string) => {
   try {
-    const response = await axiosInstance.patch(`/auth/reset-password/${userId}`, {
-      newPassword,
-    });
+    const response = await axiosInstance.patch(
+      `/auth/reset-password/${userId}`,
+      {
+        newPassword,
+      }
+    );
     return response.data;
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
 
     return error;
   }
-  
-}
+};
 export const completeProfile = async (profileData) => {
   try {
     const response = await axiosInstance.put(
@@ -172,15 +180,17 @@ export const getAssessmentById = async (assessmentId) => {
 
 export const updateProfile = async (profileData) => {
   try {
-    const response = await axiosInstance.put('/auth/update-profile', profileData);
+    const response = await axiosInstance.put(
+      "/auth/update-profile",
+      profileData
+    );
     return response.data;
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
 
     return error;
   }
-}
-
+};
 
 export const userLogout = async () => {
   try {
@@ -238,18 +248,24 @@ export const getUsers = async ({ searchQuery, role, page = 1, limit = 10 }) => {
   }
 };
 
-export const getUsersForFranchise = async ({ franchiseId, searchQuery, role, page = 1, limit = 10 }) => {
+export const getUsersForFranchise = async ({
+  franchiseId,
+  searchQuery,
+  role,
+  page = 1,
+  limit = 10,
+}) => {
   try {
-    const response = await axiosInstance.get(`/admin/getUsersForFranchise/${franchiseId}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`);
+    const response = await axiosInstance.get(
+      `/admin/getUsersForFranchise/${franchiseId}?search=${searchQuery}&isActive=undefined&role=${role}&page=${page}&limit=${limit}`
+    );
     return response.data;
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
 
     return error;
   }
-
-}
-
+};
 
 export const setUserStatusAactivity = async (userId, isActive) => {
   try {
@@ -322,18 +338,17 @@ export const editAssessment = async (assessmentData, assessmentId) => {
 };
 
 export const getAssessmentsByUserId = async (userId: string) => {
-
   try {
-    const response = await axiosInstance.get(`assessments/getAssessments/${userId}`);
+    const response = await axiosInstance.get(
+      `assessments/getAssessments/${userId}`
+    );
     return response.data;
-
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
 
     return error;
   }
-}
-
+};
 
 export const getFranchiser = async (franchiserId: string) => {
   try {
@@ -433,8 +448,7 @@ interface Franchiser {
   country: string;
   mobile: string;
   zipCode: string;
-  franchiseId: string
-
+  franchiseId: string;
 }
 
 export const addFranchiser = async (newFranchise: Franchiser) => {
@@ -453,13 +467,15 @@ export const addFranchiser = async (newFranchise: Franchiser) => {
 
 export const getUserStats = async (userId) => {
   try {
-    const response = await axiosInstance.get(`/assessments/getUserStats/${userId}`);
+    const response = await axiosInstance.get(
+      `/assessments/getUserStats/${userId}`
+    );
     return response.data;
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
     return error;
   }
-}
+};
 
 // Offer APIs
 export const getOffers = async () => {
@@ -517,9 +533,13 @@ export const uploadPhoto = async (file: File, candidateId: string) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await axiosInstance.post(`/upload/${candidateId}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await axiosInstance.post(
+      `/upload/${candidateId}`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
     if (response.data?.fileUrl) {
       toast.success("Photo uploaded successfully!");
@@ -539,12 +559,15 @@ export const uploadResume = async (file: File, candidateId: string) => {
     const formData = new FormData();
     formData.append("file", file);
 
-
-    const response = await axiosInstance.post(`/upload/${candidateId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axiosInstance.post(
+      `/upload/${candidateId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     console.log("response", response);
 
     if (response.data.fileUrl) {
@@ -558,120 +581,122 @@ export const uploadResume = async (file: File, candidateId: string) => {
   }
 };
 
-
 export const getAssessmentLink = async (assessmentId, details) => {
   try {
-    const response = await axiosInstance.post(`assessments/getAssessmentLink/${assessmentId}`, details);
+    const response = await axiosInstance.post(
+      `assessments/getAssessmentLink/${assessmentId}`,
+      details
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-}
-
+};
 
 export const verifyFranchiseId = async (franchiseId: string) => {
   try {
-    const response = await axiosInstance.get(`auth/verifyFranchiseId/${franchiseId}`);
+    const response = await axiosInstance.get(
+      `auth/verifyFranchiseId/${franchiseId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
     return error;
   }
-
-}
-
-
-
-
+};
 
 export const storeAssessmentDetailsApi = async (userId, data) => {
   try {
-    const response = await axiosInstance.post(`/assessments/storeAssessmentDetails/${userId}`, data);
+    const response = await axiosInstance.post(
+      `/assessments/storeAssessmentDetails/${userId}`,
+      data
+    );
     return response.data;
   } catch (error) {
-    toast.error(`${error?.response?.data?.message || "Failed to store assessment details"}.`);
+    toast.error(
+      `${
+        error?.response?.data?.message || "Failed to store assessment details"
+      }.`
+    );
     throw error;
   }
-}
+};
 export const matchAssessmentsDetails = async (userId, assessmentId) => {
-
-  const response = await axiosInstance.get(`/assessments/matchAssessmentsDetails/${userId}/${assessmentId}`);
+  const response = await axiosInstance.get(
+    `/assessments/matchAssessmentsDetails/${userId}/${assessmentId}`
+  );
   return response.data;
-
-}
+};
 
 export const getPaidAssessments = async (userId) => {
   try {
-    const response = await axiosInstance.get(`/assessments/getPaidAssessments/${userId}`);
+    const response = await axiosInstance.get(
+      `/assessments/getPaidAssessments/${userId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-
-}
+};
 
 export const getAssessmentsVelox = async () => {
   try {
     const response = await axiosInstance.get(`/admin/getAssessmentsVelox`);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-}
+};
 
 export const getResultForCandidateAssessment = async (interviewId) => {
   try {
-    const response = await axiosInstance.get(`/admin/getResultForCandidateAssessment/${interviewId}`);
+    const response = await axiosInstance.get(
+      `/admin/getResultForCandidateAssessment/${interviewId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-
-}
+};
 
 export const getRecording = async (interviewId: string) => {
-   try {
-    const response = await axiosInstance.get(`/admin/getRecording/${interviewId}`);
+  try {
+    const response = await axiosInstance.get(
+      `/admin/getRecording/${interviewId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-  
-}
+};
 
 export const getTranscript = async (interviewId: string) => {
-    try {
-    const response = await axiosInstance.get(`/admin/getTranscript/${interviewId}`);
+  try {
+    const response = await axiosInstance.get(
+      `/admin/getTranscript/${interviewId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-}
+};
 
 export const getCandidatesForAssessment = async (assessmentId) => {
   try {
-    const response = await axiosInstance.get(`/admin/getCandidatesForAssessment/${assessmentId}`);
+    const response = await axiosInstance.get(
+      `/admin/getCandidatesForAssessment/${assessmentId}`
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-}
+};
 
-
-export const getFranchises= async () => {
+export const getFranchises = async () => {
   try {
     const response = await axiosInstance.get(`/admin/getFranchises`);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
   }
-}
+};
