@@ -17,10 +17,18 @@ import {
   CreditCard,
   Shield,
   Play,
-  X
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { addCandidateTransaction, getAssessmentById, getOrderIdForPayment, redeemOffer, getAssessmentLink, storeAssessmentDetailsApi, matchAssessmentsDetails } from "@/components/services/servicesapis";
+import {
+  addCandidateTransaction,
+  getAssessmentById,
+  getOrderIdForPayment,
+  redeemOffer,
+  getAssessmentLink,
+  storeAssessmentDetailsApi,
+  matchAssessmentsDetails,
+} from "@/components/services/servicesapis";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import { useUser } from "@/context";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -99,13 +107,18 @@ const Assessment = () => {
     timeLimit: 0,
     questions: [],
     pricing: { basePrice: 0, discountedPrice: 0 },
-    offer: { title: "", type: "flat", value: 0, validUntil: new Date() }
+    offer: { title: "", type: "flat", value: 0, validUntil: new Date() },
   });
 
-  const { error: razorpayError, isLoading: razorpayLoading, Razorpay } = useRazorpay();
+  const {
+    error: razorpayError,
+    isLoading: razorpayLoading,
+    Razorpay,
+  } = useRazorpay();
   const [apiError, setApiError] = useState<string | null>(null);
   const [assessmentLink, setAssessmentLink] = useState<string | null>(null);
-  const [assessmentDetails, setAssessmentDetails] = useState<AssessmentDetails | null>(null);
+  const [assessmentDetails, setAssessmentDetails] =
+    useState<AssessmentDetails | null>(null);
   const [offerCode, setOfferCode] = useState("");
   const [offerApplied, setOfferApplied] = useState(false);
   const [offerError, setOfferError] = useState("");
@@ -120,16 +133,22 @@ const Assessment = () => {
       try {
         const response = await getAssessmentById(id);
         if (!response.data.success) {
-          throw new Error(response.message || "Failed to fetch assessment data");
+          throw new Error(
+            response.message || "Failed to fetch assessment data"
+          );
         }
         const currentDate = new Date(); // 06:19 PM IST
-        const offerValid = new Date(response.data.data.assessment.offer.validUntil) >= currentDate;
+        const offerValid =
+          new Date(response.data.data.assessment.offer.validUntil) >=
+          currentDate;
         const assessment = response.data.data.assessment;
         if (assessment.offer && !offerValid) {
           assessment.pricing.discountedPrice = assessment.pricing.basePrice;
         }
         setAssessmentData(assessment);
-        if (response.data.message === "You have already taken this assessment") {
+        if (
+          response.data.message === "You have already taken this assessment"
+        ) {
           setApiError("You have already taken this assessment");
           toast.error("You have already taken this assessment");
         }
@@ -143,7 +162,10 @@ const Assessment = () => {
         }
 
         // Check for existing assessment link
-        const matchResponse = await matchAssessmentsDetails(userCredentials._id, assessment.assessmentId);
+        const matchResponse = await matchAssessmentsDetails(
+          userCredentials._id,
+          assessment.assessmentId
+        );
         if (matchResponse.success) {
           setAssessmentDetails(matchResponse.data);
           setAssessmentLink(matchResponse.data.assessmentLink);
@@ -151,7 +173,9 @@ const Assessment = () => {
           setPaymentCompleted(true); // Simulate payment completion
         }
       } catch (error) {
-        if (error.response?.data?.message === "Assessment not found for this user") {
+        if (
+          error.response?.data?.message === "Assessment not found for this user"
+        ) {
           return;
         }
         setApiError(error.message || "Failed to fetch assessment data");
@@ -170,9 +194,12 @@ const Assessment = () => {
     }
   }, [assessmentLink, startAssessment]);
 
-  const baseAssessmentFee = assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-16T12:49:00Z")
-    ? assessmentData.pricing.discountedPrice
-    : assessmentData.pricing.basePrice;
+  const baseAssessmentFee =
+    assessmentData.offer &&
+    new Date(assessmentData.offer.validUntil) >=
+      new Date("2025-07-16T12:49:00Z")
+      ? assessmentData.pricing.discountedPrice
+      : assessmentData.pricing.basePrice;
 
   const getDiscountAmount = () => {
     if (!offerApplied || !offerObj) return 0;
@@ -195,13 +222,17 @@ const Assessment = () => {
       transactionStatus: "success",
       pricing: {
         basePrice: assessmentData.pricing.basePrice || 0,
-        discountedPrice: assessmentData.pricing.discountedPrice || 0
+        discountedPrice: assessmentData.pricing.discountedPrice || 0,
       },
       offerCode: offerApplied ? offerCode.trim().toUpperCase() || null : null,
       referrerId: userCredentials.referrerId || null,
       franchiserId: userCredentials.franchiserId || null,
-      isOfferAvailable: !!assessmentData.offer && new Date(assessmentData.offer.validUntil) >= new Date("2025-07-16T12:49:00Z") || false,
-      isPremium: assessmentData.isPremium || false
+      isOfferAvailable:
+        (!!assessmentData.offer &&
+          new Date(assessmentData.offer.validUntil) >=
+            new Date("2025-07-16T12:49:00Z")) ||
+        false,
+      isPremium: assessmentData.isPremium || false,
     };
     try {
       await addCandidateTransaction(userCredentials._id, id, details);
@@ -220,12 +251,17 @@ const Assessment = () => {
       assessmentLink: assessmentDetails.publicLink,
       interviewId: assessmentDetails.interviewId || null,
       candidateId: assessmentDetails.candidateId,
-      linkExpiryTime: assessmentDetails.linkExpiryTime
+      linkExpiryTime: assessmentDetails.linkExpiryTime,
     };
     try {
-      const response = await storeAssessmentDetailsApi(userCredentials._id, details);
+      const response = await storeAssessmentDetailsApi(
+        userCredentials._id,
+        details
+      );
       if (!response.success) {
-        throw new Error(response.message || "Failed to store assessment details");
+        throw new Error(
+          response.message || "Failed to store assessment details"
+        );
       }
     } catch (error) {
       toast.error("Failed to store assessment details. Please try again.");
@@ -236,7 +272,12 @@ const Assessment = () => {
     setIsLoading(true);
     setApiError(null);
     try {
-      if (!assessmentData.assessmentId || !userCredentials.name || !userCredentials.email || !userCredentials.mobile) {
+      if (
+        !assessmentData.assessmentId ||
+        !userCredentials.name ||
+        !userCredentials.email ||
+        !userCredentials.mobile
+      ) {
         return toast.error("Please fill all the details in Profile section.");
       }
       const details = {
@@ -245,9 +286,12 @@ const Assessment = () => {
         lastName: " ",
         email: userCredentials.email,
         mobile: userCredentials.mobile,
-        avatar_url: userCredentials.avatar
+        avatar_url: userCredentials.avatar,
       };
-      const response = await getAssessmentLink(assessmentData.assessmentId, details);
+      const response = await getAssessmentLink(
+        assessmentData.assessmentId,
+        details
+      );
       if (response.success) {
         setAssessmentDetails(response.data);
         setAssessmentLink(response.data.publicLink);
@@ -257,7 +301,9 @@ const Assessment = () => {
       }
     } catch (error) {
       setApiError(error.message || "Failed to start assessment");
-      toast.error(error.message || "Failed to start assessment. Please try again.");
+      toast.error(
+        error.message || "Failed to start assessment. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -265,7 +311,9 @@ const Assessment = () => {
 
   const handlePayment = async () => {
     if (finalAssessmentFee <= 0) {
-      toast.success("Offer applied! No payment required. Starting assessment...");
+      toast.success(
+        "Offer applied! No payment required. Starting assessment..."
+      );
       setPaymentCompleted(true);
       setShowPayment(false);
       await addCandidateTransactionDetails("FREE-OFFER");
@@ -370,7 +418,7 @@ const Assessment = () => {
 
   const handleVeloxWindow = () => {
     setIsDialogOpen(true);
-    window.open(assessmentLink, '_blank');
+    window.open(assessmentLink, "_blank");
   };
 
   if (showPayment) {
@@ -381,12 +429,16 @@ const Assessment = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
               <CreditCard className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl text-gray-900">Complete Payment</CardTitle>
+            <CardTitle className="text-2xl text-gray-900">
+              Complete Payment
+            </CardTitle>
             <p className="text-gray-600 mt-2">Secure your assessment slot</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-gray-50 rounded-2xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                {assessmentData.title}
+              </h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Duration:</span>
@@ -406,7 +458,11 @@ const Assessment = () => {
                     ₹{finalAssessmentFee}
                     {offerApplied && offerObj && (
                       <span className="ml-2 text-green-600 text-xs">
-                        (Offer Applied! {offerObj.discountType === "percentage" ? `-${offerObj.discountValue}%` : `-₹${offerObj.discountValue}`})
+                        (Offer Applied!{" "}
+                        {offerObj.discountType === "percentage"
+                          ? `-${offerObj.discountValue}%`
+                          : `-₹${offerObj.discountValue}`}
+                        )
                       </span>
                     )}
                   </span>
@@ -419,7 +475,9 @@ const Assessment = () => {
                 )}
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Have an offer code?</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Have an offer code?
+                </label>
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
@@ -453,9 +511,13 @@ const Assessment = () => {
                     </button>
                   )}
                 </div>
-                {offerError && <p className="text-red-500 text-xs mt-1">{offerError}</p>}
+                {offerError && (
+                  <p className="text-red-500 text-xs mt-1">{offerError}</p>
+                )}
                 {offerApplied && (
-                  <p className="text-green-600 text-xs mt-1">Offer code applied successfully!</p>
+                  <p className="text-green-600 text-xs mt-1">
+                    Offer code applied successfully!
+                  </p>
                 )}
               </div>
             </div>
@@ -469,19 +531,40 @@ const Assessment = () => {
               </p>
               {assessmentData.offer && (
                 <p className="text-xs text-gray-500 mt-2">
-                  Offer valid until: {new Date(assessmentData.offer.validUntil).toLocaleDateString()}
+                  Offer valid until:{" "}
+                  {new Date(
+                    assessmentData.offer.validUntil
+                  ).toLocaleDateString()}
                 </p>
               )}
             </div>
             <Button
               onClick={handlePayment}
               className="w-full h-12 bg-orange-600 hover:bg-orange-700 rounded-2xl text-base shadow-lg"
-              disabled={isLoading || !!apiError || (finalAssessmentFee > 0 && (!orderId || !Razorpay))}
+              disabled={
+                isLoading ||
+                !!apiError ||
+                (finalAssessmentFee > 0 && (!orderId || !Razorpay))
+              }
             >
-              {isLoading ? "Processing..." : assessmentDetails ? "Start Assessment" : finalAssessmentFee <= 0 ? "Start Assessment" : `Pay ₹${finalAssessmentFee} & Start Assessment`}
+              {isLoading
+                ? "Processing..."
+                : assessmentDetails
+                ? "Start Assessment"
+                : finalAssessmentFee <= 0
+                ? "Start Assessment"
+                : `Pay ₹${finalAssessmentFee} & Start Assessment`}
             </Button>
-            {razorpayError && <p className="text-red-500 text-center mt-2">Error loading payment: {razorpayError}</p>}
-            {apiError && <p className="text-red-500 text-center mt-2">{apiError}</p>}
+     
+
+            {razorpayError && (
+              <p className="text-red-500 text-center mt-2">
+                Error loading payment: {razorpayError}
+              </p>
+            )}
+            {apiError && (
+              <p className="text-red-500 text-center mt-2">{apiError}</p>
+            )}
             <Button
               variant="outline"
               onClick={() => navigate("/assessments")}
@@ -503,12 +586,18 @@ const Assessment = () => {
           <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl text-gray-900">Payment Completed</CardTitle>
-          <p className="text-gray-600 mt-2">You're ready to start your assessment</p>
+          <CardTitle className="text-2xl text-gray-900">
+            Payment Completed
+          </CardTitle>
+          <p className="text-gray-600 mt-2">
+            You're ready to start your assessment
+          </p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-gray-50 rounded-2xl p-4">
-            <h3 className="font-semibold text-gray-900 mb-2">{assessmentData.title}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {assessmentData.title}
+            </h3>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>Duration:</span>
@@ -530,17 +619,19 @@ const Assessment = () => {
           </div>
           <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
             <p className="text-sm text-green-700 font-medium">
-              Payment successfully processed on</p>
-            <p className="text-sm text-green-600 mt-1">{assessmentDetails?.createdAt?.toLocaleString("en-IN", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-              timeZone: "Asia/Kolkata",
-              timeZoneName: "short",
-            })}
+              Payment successfully processed on
+            </p>
+            <p className="text-sm text-green-600 mt-1">
+              {assessmentDetails?.createdAt?.toLocaleString("en-IN", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                timeZone: "Asia/Kolkata",
+                timeZoneName: "short",
+              })}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -565,8 +656,12 @@ const Assessment = () => {
             </DialogTrigger>
             <DialogContent className="max-w-md p-6">
               <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Assessment Started</h3>
-                <p className="text-sm text-gray-600">Your assessment is started, kindly complete it in 1hr</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Assessment Started
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Your assessment is started, kindly complete it in 1hr
+                </p>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/dashboard")}

@@ -11,7 +11,8 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Assessments from "./pages/Assessments";
-import Assessment from "./pages/Assessment";
+// import Assessment from "./pages/Assessment";
+import AssessmentDetails from "./pages/AssessmentDetails";
 import VideoQuestion from "./pages/VideoQuestion";
 import Results from "./pages/Results";
 import Jobs from "./pages/Jobs";
@@ -40,11 +41,11 @@ import ContactUs from "./pages/ContactUs";
 import Pricing from "./pages/Pricing";
 import AboutUs from "./pages/AboutUs";
 import Offers from "./pages/admin/Offers";
+import Assessment from "./pages/Assessment";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -60,12 +61,14 @@ const App = () => (
                 <Route path="/signup/:id" element={<Login />} />
                 <Route path="/signup" element={<Login />} />
 
-                <Route path="/onboarding" element={
-                  <ProtectedRoute>
-
-                    <Onboarding />
-
-                  </ProtectedRoute>} />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <Onboarding />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Protected Routes */}
                 <Route
@@ -93,10 +96,18 @@ const App = () => (
                   }
                 />
                 <Route
-                  path="/assessment/:id"
+                  path="/assessmentpayment/:id"
                   element={
                     <ProtectedRoute>
                       <Assessment />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/assessment/:id"
+                  element={
+                    <ProtectedRoute>
+                      <AssessmentDetails />
                     </ProtectedRoute>
                   }
                 />
@@ -165,20 +176,84 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/admin" element={<ProtectedRouteForAdmin> <AdminDashboard /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/users" element={<ProtectedRouteForAdmin> <UsersPage /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/candidates" element={<ProtectedRouteForAdmin> <CandidatesPage /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/assessments" element={<ProtectedRouteForAdmin> <AssessmentsPage /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/franchises" element={<ProtectedRouteForAdmin> <FranchisesPage /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/settings" element={<ProtectedRouteForAdmin> <SettingsPage /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/transactions" element={<ProtectedRouteForAdmin> <TransactionsForAdmin /></ProtectedRouteForAdmin>} />
-                <Route path="/admin/offers" element={
-                  <ProtectedRouteForAdmin>
-                    <Offers />
-                  </ProtectedRouteForAdmin>
-                } />
+
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <AdminDashboard />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <UsersPage />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/candidates"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <CandidatesPage />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/assessments"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <AssessmentsPage />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+
+                <Route
+                  path="/admin/franchises"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <FranchisesPage />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/settings"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <SettingsPage />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/transactions"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      {" "}
+                      <TransactionsForAdmin />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/offers"
+                  element={
+                    <ProtectedRouteForAdmin>
+                      <Offers />
+                    </ProtectedRouteForAdmin>
+                  }
+                />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                <Route
+                  path="/terms-and-conditions"
+                  element={<TermsAndConditions />}
+                />
                 <Route path="/refund-policy" element={<RefundPolicy />} />
                 <Route path="/contact-us" element={<ContactUs />} />
                 <Route path="/pricing" element={<Pricing />} />
