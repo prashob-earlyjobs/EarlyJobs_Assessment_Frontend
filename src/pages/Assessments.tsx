@@ -2,10 +2,22 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   ArrowLeft,
@@ -21,12 +33,16 @@ import {
   MessageSquare,
   BarChart,
   Settings,
-  Zap
+  Zap,
 } from "lucide-react";
 import { getAssessmentsfromSearch } from "@/components/services/servicesapis";
 import Header from "./header";
 import { toast } from "sonner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const LIMIT = 10;
 
@@ -47,9 +63,9 @@ const Assessments = () => {
     (node: HTMLDivElement | null) => {
       if (loading) return;
       if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver(entries => {
+      observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          setPage(prev => prev + 1);
+          setPage((prev) => prev + 1);
         }
       });
       if (node) observer.current.observe(node);
@@ -70,7 +86,7 @@ const Assessments = () => {
     try {
       const response = await getAssessmentsfromSearch(params);
       const fetched = response.data.assessments;
-      setAssessments(prev => [...prev, ...fetched]);
+      setAssessments((prev) => [...prev, ...fetched]);
       setHasMore(fetched.length === LIMIT);
     } catch (err) {
       toast.error("Failed to fetch assessments:");
@@ -102,7 +118,7 @@ const Assessments = () => {
     }
   };
 
-  const skills = ['technical', 'aptitude', 'personality', 'communication'];
+  const skills = ["technical", "aptitude", "personality", "communication"];
   const levels = ["Beginner", "Intermediate", "Advanced"];
 
   const categoryColour = (category: string) => {
@@ -121,10 +137,10 @@ const Assessments = () => {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
     }).format(price);
   };
 
@@ -133,9 +149,12 @@ const Assessments = () => {
       <Header />
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Skill Assessments</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Skill Assessments
+          </h2>
           <p className="text-lg text-gray-600">
-            Choose from our comprehensive library of assessments to showcase your abilities.
+            Choose from our comprehensive library of assessments to showcase
+            your abilities.
           </p>
         </div>
 
@@ -190,63 +209,81 @@ const Assessments = () => {
               <Card
                 key={assessment._id}
                 ref={isLast ? lastAssessmentRef : null}
-                className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                onClick={() => navigate(`/assessment/${assessment._id}`)}
               >
                 <CardHeader className="pt-4 pb-4 relative">
                   <div className="flex items-start justify-between ">
                     <div className="flex items-start space-x-3 w-full justify-between">
                       <div className="flex items-center space-x-2">
-                      <div className={`p-3 rounded-2xl ${categoryColour(assessment.category)}`}>
-                        {(() => {
-                          switch (assessment.category) {
-                            case "technical":
-                              return <Code className="h-6 w-6" />;
-                            case "non-technical":
-                              return <BarChart className="h-6 w-6" />;
-                            default:
-                              return <Award className="h-6 w-6" />;
-                          }
-                        })()}
-                      </div>
-                     
-                      <div className={assessment.isPremium &&`max-w-[308px]`}>
-                        <CardTitle className="text-xl">{assessment.title}</CardTitle>
-                        <div className="flex flex-col mt-1" style={{ gap: '8px' }}>
-                          <div className="flex items-center space-x-2">
-                            <Badge className="rounded-full text-xs px-2 py-1">{assessment.category==="non-technical"?"Non-Technical":"Technical"}</Badge>
-                            <Badge
-                              variant="outline"
-                              className={`rounded-full text-xs px-2 py-1 ${getLevelColor(assessment.difficulty)}`}
+                        <div
+                          className={`p-3 rounded-2xl ${categoryColour(
+                            assessment.category
+                          )}`}
+                        >
+                          {(() => {
+                            switch (assessment.category) {
+                              case "technical":
+                                return <Code className="h-6 w-6" />;
+                              case "non-technical":
+                                return <BarChart className="h-6 w-6" />;
+                              default:
+                                return <Award className="h-6 w-6" />;
+                            }
+                          })()}
+                        </div>
+
+                        <div
+                          className={assessment.isPremium && `max-w-[308px]`}
+                        >
+                          <CardTitle className="text-xl">
+                            {assessment.title}
+                          </CardTitle>
+                          <div
+                            className="flex flex-col mt-1"
+                            style={{ gap: "8px" }}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Badge className="rounded-full text-xs px-2 py-1">
+                                {assessment.category === "non-technical"
+                                  ? "Non-Technical"
+                                  : "Technical"}
+                              </Badge>
+                              <Badge
+                                variant="outline"
+                                className={`rounded-full text-xs px-2 py-1 ${getLevelColor(
+                                  assessment.difficulty
+                                )}`}
+                              >
+                                {assessment.difficulty}
+                              </Badge>
+                              <div className="flex items-center space-x-1 text-sm text-gray-500">
+                                <Clock className="h-4 w-4" />
+                                <span>{assessment.timeLimit} min</span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex flex-wrap items-center space-x-1"
+                              style={{ marginLeft: "0px" }}
                             >
-                              {assessment.difficulty}
-                            </Badge>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
-                        <Clock className="h-4 w-4" />
-                        <span>{assessment.timeLimit} min</span>
-                      </div>
-                          </div>
-                          <div className="flex flex-wrap items-center space-x-1" style={{ marginLeft: '0px' }}>
-                            {assessment?.tags?.length > 0 && (
-                              assessment.tags.map(tag => (
-                                <Badge
-                                  key={tag}
-                                  variant="secondary"
-                                  className="rounded-full text-center text-[8px] px-2 py-1 bg-blue-100 text-blue-700"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))
-                            )}
+                              {assessment?.tags?.length > 0 &&
+                                assessment.tags.map((tag) => (
+                                  <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="rounded-full text-center text-[8px] px-2 py-1 bg-blue-100 text-blue-700"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                            </div>
                           </div>
                         </div>
                       </div>
-                      </div>
-                       {assessment.isPremium && (
+                      {assessment.isPremium && (
                         <div className="">
                           <div className="relative">
-                            <Badge
-                              className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white border-0 rounded-full px-3 py-1 text-xs font-medium shadow-lg"
-                            >
+                            <Badge className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white border-0 rounded-full px-3 py-1 text-xs font-medium shadow-lg">
                               <Crown className="h-3 w-3 mr-1" />
                               Premium
                               <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
@@ -256,42 +293,36 @@ const Assessments = () => {
                                 <div className="bubble bubble4"></div>
                               </div>
                             </Badge>
-                        </div>
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pb-[24px]">
-                 <Tooltip>
-  <TooltipTrigger asChild>
-    <CardDescription className="text-sm text-gray-600 mb-3 h-[64px] leading-snug line-clamp-3 cursor-default">
-      {assessment.description}
-    </CardDescription>
-  </TooltipTrigger>
-  <TooltipContent className="max-w-xs text-sm text-gray-600">
-    {assessment.description}
-  </TooltipContent>
-</Tooltip>
-                  {/* <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-6 text-sm text-gray-500">
-                      
-                     
-                    </div>
-                  </div> */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CardDescription className="text-sm text-gray-600 mb-3 h-[64px] leading-snug line-clamp-3 cursor-default">
+                        {assessment.description}
+                      </CardDescription>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-sm text-gray-600">
+                      {assessment.description}
+                    </TooltipContent>
+                  </Tooltip>
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 mb-6 border border-[#2C84DB]">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <Zap className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-medium text-gray-700">{assessment.offer?.title}</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          {assessment.offer?.title}
+                        </span>
                       </div>
                       {assessment?.offer?.value > 0 && (
                         <Badge className="bg-green-100 text-green-700 border-0 rounded-full px-2 py-1 text-xs font-medium">
-                          {
-                            assessment.offer.type === "percentage"
-                              ? `${assessment.offer.value}% OFF`
-                              : formatPrice(assessment.offer.value)
-                          }
+                          {assessment.offer.type === "percentage"
+                            ? `${assessment.offer.value}% OFF`
+                            : formatPrice(assessment.offer.value)}
                         </Badge>
                       )}
                     </div>
@@ -321,14 +352,23 @@ const Assessments = () => {
                     </div>
                     {assessment.offer?.validUntil && (
                       <div className="text-xs mt-2 text-gray-400">
-                        <span className="font-medium text-gray-700">Valid until: </span>{new Date(assessment.offer.validUntil).toLocaleDateString()}
+                        <span className="font-medium text-gray-700">
+                          Valid until:{" "}
+                        </span>
+                        {new Date(
+                          assessment.offer.validUntil
+                        ).toLocaleDateString()}
                       </div>
                     )}
                   </div>
+                  
                   <Button
-                    onClick={() => navigate(`/assessment/${assessment._id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click navigation
+                      navigate(`/assessmentpayment/${assessment._id}`);
+                    }}
                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all duration-300"
-                    style={{ maxHeight: '46px' }}
+                    style={{ maxHeight: "46px" }}
                   >
                     <Play className="h-4 w-4 mr-2" />
                     Start Test
@@ -340,7 +380,9 @@ const Assessments = () => {
         </div>
 
         {loading && (
-          <div className="text-center py-6 text-gray-600">Loading more assessments...</div>
+          <div className="text-center py-6 text-gray-600">
+            Loading more assessments...
+          </div>
         )}
 
         {!loading && assessments.length === 0 && (
@@ -348,9 +390,12 @@ const Assessments = () => {
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="h-12 w-12 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No assessments found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No assessments found
+            </h3>
             <p className="text-gray-600 mb-6">
-              Try adjusting your search criteria or browse all available assessments.
+              Try adjusting your search criteria or browse all available
+              assessments.
             </p>
             <Button
               onClick={() => {
@@ -390,7 +435,7 @@ function getIcon(skill: string) {
 
 export default Assessments;
 
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.innerHTML = `
 .bubble {
   position: absolute;
@@ -457,7 +502,10 @@ style.innerHTML = `
   100% { transform: translate(0, 0); opacity: 0.4; }
 }
 `;
-if (typeof document !== "undefined" && !document.getElementById("bubble-keyframes")) {
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("bubble-keyframes")
+) {
   style.id = "bubble-keyframes";
   document.head.appendChild(style);
 }
