@@ -21,6 +21,7 @@ import {
 import {
     ArrowLeft,
     Bell,
+    LogIn,
     LogOut,
     User,
 } from "lucide-react";
@@ -58,60 +59,60 @@ const Header = () => {
     const handleProfileClick = () => {
         navigate('/profile');
     };
+   
+    // useEffect(() => {
+    //     // Simulate fetching user data
+    //     const fetchUserData = async () => {
+    //         try {
 
-    useEffect(() => {
-        // Simulate fetching user data
-        const fetchUserData = async () => {
-            try {
+    //             const response = await isUserLoggedIn();
+    //             if (!response.success) {
+    //                 toast.error("You need to log in first!");
+    //                 navigate('/login');
+    //                 return;
+    //             }
+    //             // setUserCredentials({
+    //             //     authProvider: response.user.authProvider,
+    //             //     avatar: response.user.avatar,
+    //             //     createdAt: response.user.createdAt,
+    //             //     email: response.user.email,
+    //             //     isActive: response.user.isActive,
+    //             //     isEmailVerified: response.user.isEmailVerified,
+    //             //     isPhoneVerified: response.user.isPhoneVerified,
+    //             //     lastLogin: response.user.lastLogin,
+    //             //     mobile: response.user.mobile,
+    //             //     role: response.user.role,
+    //             //     name: response.user.name,
+    //             //     profile: {
+    //             //         gender: response.user.profile.gender || '',
+    //             //         dateOfBirth: response.user.profile.dateOfBirth || '',
+    //             //         address: {
+    //             //             street: response.user.profile.address?.street || '',
+    //             //             city: response.user.profile.address?.city || '',
+    //             //             state: response.user.profile.address?.state || '',
+    //             //             country: response.user.profile.address?.country || '',
+    //             //             zipCode: response.user.profile.address?.zipCode || '',
+    //             //         },
+    //             //         preferredJobRole: response.user.profile.preferredJobRole || '',
+    //             //         skills: response.user.profile.skills || [],
+    //             //         experience: response.user.profile.experience || [],
+    //             //         education: response.user.profile.education || [],
+    //             //         bio: response.user.profile.bio || '',
+    //             //         prefJobLocations: response.user.profile.prefJobLocations || [],
+    //             //     },
+    //             //     updatedAt: response.user.updatedAt,
+    //             //     _id: response.user._id,
+    //             // });
+    //             setUserDetails(response.user);
+    //         } catch (error) {
+    //             toast.error("Failed to fetch user data. Please try again later.");
 
-                const response = await isUserLoggedIn();
-                if (!response.success) {
-                    toast.error("You need to log in first!");
-                    navigate('/login');
-                    return;
-                }
-                // setUserCredentials({
-                //     authProvider: response.user.authProvider,
-                //     avatar: response.user.avatar,
-                //     createdAt: response.user.createdAt,
-                //     email: response.user.email,
-                //     isActive: response.user.isActive,
-                //     isEmailVerified: response.user.isEmailVerified,
-                //     isPhoneVerified: response.user.isPhoneVerified,
-                //     lastLogin: response.user.lastLogin,
-                //     mobile: response.user.mobile,
-                //     role: response.user.role,
-                //     name: response.user.name,
-                //     profile: {
-                //         gender: response.user.profile.gender || '',
-                //         dateOfBirth: response.user.profile.dateOfBirth || '',
-                //         address: {
-                //             street: response.user.profile.address?.street || '',
-                //             city: response.user.profile.address?.city || '',
-                //             state: response.user.profile.address?.state || '',
-                //             country: response.user.profile.address?.country || '',
-                //             zipCode: response.user.profile.address?.zipCode || '',
-                //         },
-                //         preferredJobRole: response.user.profile.preferredJobRole || '',
-                //         skills: response.user.profile.skills || [],
-                //         experience: response.user.profile.experience || [],
-                //         education: response.user.profile.education || [],
-                //         bio: response.user.profile.bio || '',
-                //         prefJobLocations: response.user.profile.prefJobLocations || [],
-                //     },
-                //     updatedAt: response.user.updatedAt,
-                //     _id: response.user._id,
-                // });
-                setUserDetails(response.user);
-            } catch (error) {
-                toast.error("Failed to fetch user data. Please try again later.");
-
-            }
+    //         }
 
 
-        };
-        fetchUserData();
-    }, []);
+    //     };
+    //     fetchUserData();
+    // }, []);
     const handleLogout = async () => {
         try {
             const response = await userLogout();
@@ -141,6 +142,7 @@ const Header = () => {
 
         }
     }, [showNotifications]);
+  
 
     return (
         <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -162,6 +164,7 @@ const Header = () => {
                             className="h-[3.5rem] w-auto cursor-pointer"
                         />
                     </div>
+{   userCredentials!==null  ?
 
                     <div className="flex items-center space-x-4">
                         <Popover open={showNotifications} onOpenChange={setShowNotifications}>
@@ -213,17 +216,31 @@ const Header = () => {
 
                         <div className="flex items-center space-x-3 cursor-pointer" onClick={handleProfileClick}>
                             <Avatar className="h-10 w-10">
-                                <AvatarImage src={userDetails.avatar} />
+                                
+                                <AvatarImage src={userCredentials.avatar} />
                                 <AvatarFallback className="bg-gradient-to-r from-orange-500 to-purple-600 text-white">
-                                    {userDetails.name.split(' ').map(n => n[0]).join('')?.toUpperCase()}
+                                    {userCredentials?.name?.split(' ').map(n => n[0]).join('')?.toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="hidden md:block">
-                                <p className="text-sm font-medium text-gray-900">{userDetails.name}</p>
-                                <p className="text-xs text-gray-500">{userDetails.profile.preferredJobRole}</p>
+                                <p className="text-sm font-medium text-gray-900">{userCredentials.name}</p>
+                                <p className="text-xs text-gray-500">{userCredentials.profile?.preferredJobRole}</p>
                             </div>
                         </div>
                     </div>
+                    :
+                    <div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate('/login')}
+                            className="rounded-2xl p-3 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                        >
+                            <LogIn className="h-5 w-5" />
+                            Login
+                        </Button>
+                    </div>
+}
                 </div>
             </div>
             <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

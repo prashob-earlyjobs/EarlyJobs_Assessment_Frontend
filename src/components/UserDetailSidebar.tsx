@@ -338,35 +338,7 @@ const UserDetailSidebar: React.FC<UserDetailSidebarProps> = ({ user, onClose }) 
 
               <Separator />
 
-              {/* Assessments Taken */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Assessments Taken</h4>
-                <div className="space-y-4">
-                  {assessments.length > 0 && assessments?.map((item) => (
-                    <details key={item.assessment?._id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm md:relative">
-                      <summary className="font-medium text-gray-900 cursor-pointer">
-                        {item.assessment?.title} ({item.assessment?.category})
-                      </summary>
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium text-gray-900">Score: {item.result?.totalPoints}/{item.result?.maxPoints}</p>
-                          <p className="text-sm text-gray-700"> <span className="font-medium text-gray-900"> Status: </span>{item.result?.status}</p>
-                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Time Taken: </span>{item.result?.timeTaken} Minutes</p>
-                          <p className="text-sm text-gray-700"><span className="font-medium text-gray-900">Feedback: </span>{item.result?.feedback.systemFeedback}</p>
-                        </div>
-                        <div className="h-48">
-                          <Pie
-                            className="static sm:static md:static xxl:absolute top-[17px] h-[150px] w-[150px]"
-                            data={getPieData(item.result?.resultDetails.categoryWiseScore)}
-                            options={pieOptions}
-                          />
-                        </div>
-                      </div>
-                    </details>
-                  ))}
-                  {assessments.length === 0 && <p className="text-gray-600">No assessments taken yet.</p>}
-                </div>
-              </div>
+             
             </div>
           </div>
         </motion.div>

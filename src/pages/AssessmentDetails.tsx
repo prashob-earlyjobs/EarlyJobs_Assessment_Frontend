@@ -23,12 +23,12 @@ import {
   Crown,
   BookOpen,
 } from "lucide-react";
-import {
-  getAssessmentById,
-  getAssessmentsfromSearch,
-} from "@/components/services/servicesapis";
+import { getAssessmentById, getAssessmentsfromSearch } from "../components/services/servicesapis";
 import Header from "./header";
 import { toast } from "sonner";
+import { useUser } from "@/context";
+import Login from "./Login";
+import { Dialog, DialogContent,DialogTitle, DialogOverlay } from "@/components/ui/dialog";
 
 const AssessmentDetails = () => {
   const { id } = useParams();
@@ -37,16 +37,16 @@ const AssessmentDetails = () => {
   const [suggestedAssessments, setSuggestedAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+  const { userCredentials } = useUser();
+  const [showPopup, setShowPopup] = useState(false);
 
-  const LIMIT = 10; // Limit to 3 suggestions
+  const LIMIT = 10;
 
   useEffect(() => {
     const fetchAssessment = async () => {
-      console.log("ID from useParams:", id);
       setLoading(true);
       try {
         const response = await getAssessmentById(id);
-        console.log("Fetched assessment:", response.data.data.assessment);
         setAssessment(response.data.data.assessment);
       } catch (err) {
         toast.error("Failed to fetch assessment details");
@@ -59,10 +59,9 @@ const AssessmentDetails = () => {
     fetchAssessment();
   }, [id, navigate]);
 
-  // Separate useEffect for suggested assessments that depends on assessment data
   useEffect(() => {
     const fetchSuggestedAssessments = async () => {
-      if (!assessment) return; // Don't fetch if assessment data is not available
+      if (!assessment) return;
 
       setLoadingSuggestions(true);
       try {
@@ -72,13 +71,11 @@ const AssessmentDetails = () => {
           type: "",
           difficulty: "",
           searchQuery: "",
-          category: assessment.category, // Use current assessment's category
+          category: assessment.category,
         };
 
         const response = await getAssessmentsfromSearch(params);
         const allSuggestions = response.data.assessments || response.data || [];
-
-        // Filter out the current assessment from suggestions
         const filteredSuggestions = allSuggestions.filter(
           (suggestion) => suggestion._id !== assessment._id
         );
@@ -93,7 +90,7 @@ const AssessmentDetails = () => {
     };
 
     fetchSuggestedAssessments();
-  }, [assessment]); // Depend on assessment data
+  }, [assessment]);
 
   const getLevelColor = (level) => {
     switch (level) {
@@ -328,7 +325,11 @@ const AssessmentDetails = () => {
                 </div>
                 <Button
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent card click navigation
+                    if (userCredentials === null) {
+                      setShowPopup(true);
+                      return;
+                    }
+                    e.stopPropagation();
                     navigate(`/assessmentpayment/${assessment._id}`);
                   }}
                   className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all duration-300"
@@ -405,6 +406,14 @@ const AssessmentDetails = () => {
             </Card>
           </div>
         </div>
+
+        {/* Login Dialog Popup */}
+       <Dialog open={showPopup} onOpenChange={setShowPopup} >
+  {/* <DialogOverlay /> */}
+  <DialogContent className="w-full rounded-2xl p-6 shadow-lg" style={{height:'85vh',overflowY:'scroll'}} >
+    <Login />
+  </DialogContent>
+</Dialog>
       </main>
     </div>
   );
