@@ -17,16 +17,16 @@ import { useUser } from "@/context";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { userCredentials, setUserCredentials } = useUser();
   const [loginData, setLoginData] = useState({ emailormobile: "", password: "" });
+  const { id } = useParams();
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
     mobile: "",
-    referrerId: id || "",
+    referrerId: "",
     password: "",
     confirmPassword: ""
   });
@@ -38,6 +38,7 @@ const Login = () => {
   const [forgotPasswordData, setForgotPasswordData] = useState({ email: "", mobile: "", newPassword: "", confirmPassword: "" });
   const [forgotOtp, setForgotOtp] = useState("");
   const [isEnteringNumber, setIsEnteringNumber] = useState(false);
+
 
   useEffect(() => {
     const checkUserLoggedIn = async () => {
@@ -64,20 +65,23 @@ const Login = () => {
       }
     };
 
-    if (id) {
+    if (id && location.pathname.includes('/signup')) {
       verifyId();
     }
-    checkUserLoggedIn();
+    if(location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')){
+      
+      checkUserLoggedIn();
+    }
   }, []);
-useEffect(() => {
-  const value = loginData.emailormobile.trim();
+// useEffect(() => {
+//   const value = loginData.emailormobile.trim();
 
-  if (!isNaN(Number(value)) && value.length >= 5) {
-    setIsEnteringNumber(true);
-  } else {
-    setIsEnteringNumber(false);
-  }
-}, [loginData.emailormobile]);
+//   if (!isNaN(Number(value)) && value.length >= 5) {
+//     setIsEnteringNumber(true);
+//   } else {
+//     setIsEnteringNumber(false);
+//   }
+// }, [loginData.emailormobile]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -102,8 +106,15 @@ if (!isValidEmailOrMobile(loginData.emailormobile) ) {
       return;
     } else {
       Cookies.set("accessToken", response.data.accessToken);
+      setUserCredentials(response.data.user);
       toast.success("Login successful!");
-      navigate('/dashboard');
+      if (location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')) {
+        navigate('/dashboard');
+        return;
+              }
+setTimeout(() => {
+  window.location.reload();
+}, 100); 
     }
   };
 
@@ -194,15 +205,29 @@ if (!passwordRegex.test(signupData.password)) {
         toast.error(signupResponse.data.message);
         return;
       }
+      console.log("signupResponse", signupResponse);
 
       Cookies.set("accessToken", signupResponse.data.accessToken);
+      setUserCredentials(signupResponse.data.user);
+
       setIsOtpDialogOpen(false);
       toast.success("Account created successfully!");
-      navigate('/onboarding');
+    if (location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')) {
+  navigate('/onboarding');
+  return;
+}
+// setTimeout(() => {
+//   window.location.reload();
+// }, 100); // wait for navigation to complete
     } catch (error) {
       toast.error("Error verifying OTP");
     }
   };
+
+
+  useEffect(() => {
+    console.log("userCredentials", userCredentials);
+  },[userCredentials])
 
   const handleForgotPassword = async () => {
     if (forgotPasswordData.mobile.length !== 10) {
@@ -231,9 +256,7 @@ if (!passwordRegex.test(signupData.password)) {
       toast.error("User does not exist with this mobile number or email");
     }
   };
-useEffect(() => {
-  console.log(userCredentials);
-}, [userCredentials]);
+
   const handleForgotOtpVerification = async () => {
     if (forgotOtp.length !== 6) {
       toast.error("Please enter a 6-digit OTP");
@@ -324,7 +347,13 @@ useEffect(() => {
     } else {
       setDefaultTab('login');
     }
-    setSignupData({ ...signupData, referrerId: id || "" });
+    // setSignupData({ ...signupData, referrerId: id || "" });
+     if (id && (location.pathname.includes("signup") || location.pathname.includes("login"))) {
+    setSignupData((prev) => ({
+      ...prev,
+      referrerId: id
+    }));
+  }
   }, [id, location.pathname]);
 
   return (
@@ -484,7 +513,7 @@ useEffect(() => {
                       id="referrerId"
                       type="text"
                       placeholder="Enter Referrer ID"
-                      value={id ? id : signupData.referrerId}
+                      value={id && window.location.pathname.includes("signup") || window.location.pathname.includes("login")  ? id : signupData.referrerId}
                       onChange={(e) => setSignupData({ ...signupData, referrerId: e.target.value })}
                       className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                     />

@@ -37,9 +37,10 @@ export const userLogin = async ({
 export const isUserLoggedIn = async () => {
   try {
     const response = await axiosInstance.get("/auth/is-logged-in");
-
+    
     return response.data;
   } catch (error) {
+
     return error;
   }
 };
@@ -139,6 +140,7 @@ export const completeProfile = async (profileData) => {
       "/auth/complete-profile",
       profileData
     );
+
     return response.data;
   } catch (error) {
     toast.error(`${error?.response?.data?.message}.`);
