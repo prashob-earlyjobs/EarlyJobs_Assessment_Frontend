@@ -216,9 +216,9 @@ if (!passwordRegex.test(signupData.password)) {
   navigate('/onboarding');
   return;
 }
-// setTimeout(() => {
-//   window.location.reload();
-// }, 100); // wait for navigation to complete
+setTimeout(() => {
+  window.location.reload();
+}, 100); // wait for navigation to complete
     } catch (error) {
       toast.error("Error verifying OTP");
     }
