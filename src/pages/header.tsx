@@ -161,7 +161,7 @@ const Header = () => {
                             src="/images/logo.png"
                             onClick={() => navigate('/dashboard')}
                             alt="EarlyJobs Logo"
-                            className="h-[3.5rem] w-auto cursor-pointer"
+                            className="h-[5rem] w-auto cursor-pointer"
                         />
                     </div>
 {   userCredentials!==null  ?
