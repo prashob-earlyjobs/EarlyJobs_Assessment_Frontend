@@ -2,7 +2,7 @@ const PrivacyPolicy = () => (
   <div className="max-w-3xl mx-auto py-16 px-4">
     <div className="flex flex-col items-center mb-8">
       <img
-        src="/lovable-uploads/logo.png"
+        src="/images/logo.png"
         alt="EarlyJobs Logo"
         className="h-16 w-auto mb-4"
       />

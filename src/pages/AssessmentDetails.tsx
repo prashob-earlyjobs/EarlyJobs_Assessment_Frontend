@@ -31,7 +31,10 @@ import Login from "./Login";
 import { Dialog, DialogContent,DialogTitle, DialogOverlay } from "@/components/ui/dialog";
 
 const AssessmentDetails = () => {
-  const { id } = useParams();
+  const { id,referalCode } = useParams();
+  // if(referalCode){
+    console.log("referalCode", referalCode);
+  // }
   const navigate = useNavigate();
   const [assessment, setAssessment] = useState(null);
   const [suggestedAssessments, setSuggestedAssessments] = useState([]);
@@ -365,7 +368,7 @@ const AssessmentDetails = () => {
                         key={suggestion._id}
                         className="rounded-2xl border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                         onClick={() =>
-                          navigate(`/assessmentpayment/${suggestion._id}`)
+                          navigate(`/assessment/${suggestion._id}`)
                         }
                       >
                         <CardContent className="p-4">

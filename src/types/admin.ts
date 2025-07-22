@@ -32,6 +32,7 @@ export interface Assessment {
   timeLimit: number; // in minutes
   passingScore: number; // in percentage
   tags: string[];
+  shortId: string;
   pricing: {
     basePrice: number;
     discountedPrice: number;

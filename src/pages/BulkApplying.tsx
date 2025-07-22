@@ -124,7 +124,7 @@ const BulkApplying = () => {
             </Button>
             <Separator orientation="vertical" className="h-6" />
             <img
-              src="/lovable-uploads/logo.png"
+              src="/images/logo.png"
               alt="EarlyJobs Logo"
               className="h-8 w-auto"
             />

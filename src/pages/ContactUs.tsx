@@ -4,7 +4,7 @@ const ContactUs = () => (
   <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
     <div className="flex flex-col items-center mb-12">
       <img
-        src="/lovable-uploads/logo.png"
+        src="/images/logo.png"
         alt="EarlyJobs Logo"
         className="h-20 w-auto mb-6"
       />

@@ -39,7 +39,7 @@ const Certificate: React.FC<CertificateProps> = ({
         {/* Header */}
         <div className="text-center mb-4">
           <img
-            src="/lovable-uploads/logo.png"
+            src="/images/logo.png"
             alt="EarlyJobs Logo"
             className="h-16 w-auto mx-auto mb-3"
           />

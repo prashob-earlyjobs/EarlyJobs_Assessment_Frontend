@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Assessment } from '@/types/admin';
-import { addAssessment, getAssessmentsVelox } from '../services/servicesapis';
+import { addAssessment, getAssessmentsVelox, getShortIdForUrl } from '../services/servicesapis';
 import { toast } from 'sonner';
 
 type AssessmentWithOptionalId = Omit<Assessment, 'assessmentId'> & { assessmentId?: string | null };
@@ -46,6 +46,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
   const [offerValue, setOfferValue] = useState('');
   const [offerValidUntil, setOfferValidUntil] = useState('');
   const [isPremium, setIsPremium] = useState(false);
+  const [shortId, setShortId] = useState('');
 
   useEffect(() => {
     const getAssessmentsFromVelox = async () => {
@@ -58,8 +59,22 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
         return
       }
     };
+    const getShortId= async () => {
+      
+      try {
+        const response = await getShortIdForUrl();
+        if(!response.success){
+          throw new Error(response.message)
+        }
+       setShortId(response.shortId)
+      } catch (error) {
+        toast.error(`${error?.response?.data?.message || "Failed to get assessment details"}.`);
+        return
+      }
+    }
     if (open) {
       getAssessmentsFromVelox();
+      getShortId()
     }
   }, [open]);
 
@@ -110,6 +125,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
       completionRate: 0,
       createdDate: new Date().toISOString().split('T')[0],
       passingScore: 0,
+      shortId,
       pricing: {
         basePrice: parseFloat(basePrice),
         discountedPrice: parseFloat(discountedPrice),
@@ -146,6 +162,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
       setOfferValidUntil('');
       setIsPremium(false);
       onOpenChange(false);
+      setShortId('');
       toast.success('Assessment added successfully!');
 
 
@@ -351,6 +368,7 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
 
           <div className="space-y-2">
             <Label htmlFor="offerValidUntil">Offer Valid Until *</Label>
@@ -362,6 +380,16 @@ export const AddAssessmentModal: React.FC<AddAssessmentModalProps> = ({
               min={new Date().toISOString().split('T')[0]} // Current date as minimum
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="shortId">Assessment ID </Label>
+            <Input
+              id="shortId"
+              value={shortId}
+              readOnly
+            />
+          </div>
+          </div>
+
 
           <div className="space-y-2 flex items-center justify-start">
             <Input

@@ -61,7 +61,13 @@ const App = () => (
                 <Route path="/signup/:id" element={<Login />} />
                 <Route path="/signup" element={<Login />} />
                 <Route
-                  path="/assessment/:id"
+                  path="/assessment/:assessmentname/:id/:referalCode"
+                  element={
+                      <AssessmentDetails />
+                  }
+                />
+                 <Route
+                  path="/assessment/:assessmentname/:id"
                   element={
                       <AssessmentDetails />
                   }

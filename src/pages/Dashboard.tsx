@@ -182,7 +182,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <img
-                src="/lovable-uploads/logo.png"
+                src="/images/logo.png"
                 alt="EarlyJobs Logo"
                 className="h-12 w-auto"
               />
@@ -378,7 +378,7 @@ const Dashboard = () => {
                     className="w-full rounded-2xl bg-white text-yellow-600 hover:bg-gray-50 mb-3"
                   >
                     Build Resume
-                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
+                    <img src="/images/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -405,7 +405,7 @@ const Dashboard = () => {
                     className="w-full rounded-2xl bg-white text-blue-700 hover:bg-gray-100 mb-3"
                   >
                     Launch Career Tutor
-                    <img src="/lovable-uploads/lock.svg" alt="Lock Icon" className="h-4 w-4 ml-2" />
+                    <img src="/images/lock.svg" alt="Lock Icon" className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -432,7 +432,7 @@ const Dashboard = () => {
                     className="w-full rounded-2xl bg-white text-teal-600 hover:bg-gray-50 mb-3"
                   >
                     Browse Plans
-                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
+                    <img src="/images/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -459,7 +459,7 @@ const Dashboard = () => {
                     className="w-full rounded-2xl bg-white text-green-600 hover:bg-gray-50"
                   >
                     Browse Jobs
-                    <img src="/lovable-uploads/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
+                    <img src="/images/lock.svg" alt="Arrow Right" className="h-4 w-4 ml-2" />
 
                   </Button>
                 </CardContent>
