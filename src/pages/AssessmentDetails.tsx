@@ -368,7 +368,7 @@ const AssessmentDetails = () => {
                         key={suggestion._id}
                         className="rounded-2xl border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                         onClick={() =>
-                          navigate(`/assessment/${suggestion._id}`)
+                          navigate(`/assessment/${suggestion.title.toLowerCase().replace(/\s+/g, "-")}/${suggestion.shortId ? suggestion.shortId : suggestion._id}/${referalCode?referalCode:""}`)
                         }
                       >
                         <CardContent className="p-4">
