@@ -623,6 +623,21 @@ export const storeAssessmentDetailsApi = async (userId, data) => {
     throw error;
   }
 };
+export const getShortIdForUrl= async () => {
+   try {
+    const response = await axiosInstance.get(
+      "/assessments/getShortIdForUrl"
+    );
+    return response.data;
+  } catch (error) {
+    toast.error(
+      `${
+        error?.response?.data?.message || "Failed to store assessment details"
+      }.`
+    );
+    throw error;
+  }
+};
 export const matchAssessmentsDetails = async (userId, assessmentId) => {
   const response = await axiosInstance.get(
     `/assessments/matchAssessmentsDetails/${userId}/${assessmentId}`

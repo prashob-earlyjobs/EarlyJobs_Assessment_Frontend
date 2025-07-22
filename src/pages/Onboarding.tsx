@@ -837,7 +837,7 @@ const Onboarding = () => {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
         <img
-              src="/lovable-uploads/logo.png"
+              src="/images/logo.png"
               alt="EarlyJobs Logo"
               className="h-20 w-auto"
             />

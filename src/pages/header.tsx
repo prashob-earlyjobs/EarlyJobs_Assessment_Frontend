@@ -158,7 +158,7 @@ const Header = () => {
                         }
 
                         <img
-                            src="/lovable-uploads/logo.png"
+                            src="/images/logo.png"
                             onClick={() => navigate('/dashboard')}
                             alt="EarlyJobs Logo"
                             className="h-[3.5rem] w-auto cursor-pointer"

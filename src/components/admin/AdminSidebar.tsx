@@ -95,7 +95,7 @@ export const AdminSidebar: React.FC = () => {
         <div className={`p-6 ${isCollapsed ? 'p-[8px] pt-[18px]' : ''}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : ''} gap-3`} >
             <img
-              src="/lovable-uploads/logo.png"
+              src="/images/logo.png"
               alt="EarlyJobs"
               className={`${isCollapsed ? 'w-[3rem] h-8' : 'w-10 h-10'} object-contain`}
             />

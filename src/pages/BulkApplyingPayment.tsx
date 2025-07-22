@@ -56,7 +56,7 @@ const BulkApplyingPayment = () => {
         currency: "INR",
         name: "EarlyJobs",
         description: `Bulk Application - ${plan.count} Jobs`,
-        image: "/lovable-uploads/logo.png",
+        image: "/images/logo.png",
         handler: function (response: { razorpay_payment_id?: string;[key: string]: unknown }) {
           toast.success("Payment successful! Processing your applications...");
 
@@ -124,7 +124,7 @@ const BulkApplyingPayment = () => {
             </Button>
             <Separator orientation="vertical" className="h-6" />
             <img
-              src="/lovable-uploads/logo.png"
+              src="/images/logo.png"
               alt="EarlyJobs Logo"
               className="h-8 w-auto"
             />

@@ -200,7 +200,7 @@ const Jobs = () => {
                 Back
               </Button>
               <img
-                src="/lovable-uploads/logo.png"
+                src="/images/logo.png"
                 alt="EarlyJobs Logo"
                 className="h-10 w-auto"
               />

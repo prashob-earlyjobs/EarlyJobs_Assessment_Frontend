@@ -210,7 +210,12 @@ const Assessments = () => {
                 key={assessment._id}
                 ref={isLast ? lastAssessmentRef : null}
                 className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(`/assessment/${assessment._id}`)}
+                onClick={() =>
+                navigate(
+                  `/assessment/${assessment.title.toLowerCase().replace(/\s+/g, "-")}/${assessment.shortId ? assessment.shortId : assessment._id}`
+                )
+              }
+
               >
                 <CardHeader className="pt-4 pb-4 relative">
                   <div className="flex items-start justify-between ">
@@ -263,7 +268,7 @@ const Assessments = () => {
                               </div>
                             </div>
                             <div
-                              className="flex flex-wrap items-center space-x-1"
+                              className="flex flex-wrap items-center space-x-1 gap-[8px]"
                               style={{ marginLeft: "0px" }}
                             >
                               {assessment?.tags?.length > 0 &&

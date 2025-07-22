@@ -21,12 +21,12 @@ const Login = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { userCredentials, setUserCredentials } = useUser();
   const [loginData, setLoginData] = useState({ emailormobile: "", password: "" });
-  const { id } = useParams();
+  const { id, referalCode } = useParams();
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
     mobile: "",
-    referrerId: "",
+    referrerId: referalCode || "",
     password: "",
     confirmPassword: ""
   });
@@ -56,16 +56,20 @@ const Login = () => {
     };
 
     const verifyId = async () => {
-      const response = await verifyFranchiseId(id);
-      if (!response.success) {
+      const response = referalCode ? await verifyFranchiseId(referalCode) : await verifyFranchiseId(id);
+      if (!response.success && location.pathname.includes('/signup')) {
         toast.error(response.message);
         navigate('/signup');
-      } else {
+      } else if(!response.success ) {
+        toast.success("Invalid Franchise ID!");
+        navigate(`/assessment/${id}`);
+      }
+      else {
         toast.success("Franchise ID verified successfully!");
       }
     };
 
-    if (id && location.pathname.includes('/signup')) {
+    if ((id && location.pathname.includes('/signup')) || referalCode) {
       verifyId();
     }
     if(location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')){
@@ -378,7 +382,7 @@ setTimeout(() => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mx-auto mb-4">
             <img
-              src="/lovable-uploads/logo.png"
+              src="/images/logo.png"
               alt="EarlyJobs"
               className="h-20 w-32"
             />
@@ -513,7 +517,7 @@ setTimeout(() => {
                       id="referrerId"
                       type="text"
                       placeholder="Enter Referrer ID"
-                      value={id && window.location.pathname.includes("signup") || window.location.pathname.includes("login")  ? id : signupData.referrerId}
+                      value={id && window.location.pathname.includes("signup") || window.location.pathname.includes("login")  ? id : referalCode ? referalCode : signupData.referrerId}
                       onChange={(e) => setSignupData({ ...signupData, referrerId: e.target.value })}
                       className="h-12 rounded-2xl border-gray-200 focus:border-orange-500"
                     />
