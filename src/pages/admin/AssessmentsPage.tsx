@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Search, Edit, Trash, BarChart, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash, BarChart, Eye, Copy } from 'lucide-react';
 import { Assessment } from '@/types/admin';
 import { addAssessment, editAssessment, getAssessmentsfromAdminSearch, getCandidatesForAssessment, getResultForCandidateAssessment,getRecording, getTranscript } from '@/components/services/servicesapis';
 import { toast } from 'sonner';
@@ -45,7 +45,6 @@ const AssessmentsPage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedAssessmentForEdit, setSelectedAssessmentForEdit] = useState<Assessment | null>(null);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -180,7 +179,18 @@ const AssessmentsPage: React.FC = () => {
       return 'bg-gray-100 text-gray-800'; // Default fallback
   }
 };
+  const handleCopyToClipboard = (assessment) => {
+    const title = assessment?.title.replace(/\s+/g, '-').toLowerCase();
+  const inviteLink = `https://earlyjobs.ai/assessment/${title}/${assessment.shortId ? assessment.shortId : assessment._id}/${currentUser.role ==='franchise_admin'? currentUser.franchiseId:""}`;
 
+    navigator.clipboard.writeText(inviteLink)
+      .then(() => {
+        toast.success('Invite link copied to clipboard!');
+      })
+      .catch((err) => {
+        toast.error('Failed to copy invite link.');
+      });
+  };
   const handleEditAssessment = (assessment: Assessment) => {
     setSelectedAssessmentForEdit(assessment);
     setShowEditModal(true);
@@ -204,10 +214,7 @@ const AssessmentsPage: React.FC = () => {
     }
   };
 
-  const handleDeleteAssessment = (assessmentId: string) => {
-    setAssessments(prev => prev.filter(a => a._id !== assessmentId));
-    setDeleteConfirmId(null);
-  };
+
 
   const handleViewAnalytics = (assessment: Assessment) => {
     setSelectedAssessment(assessment);
@@ -318,12 +325,13 @@ const AssessmentsPage: React.FC = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                         
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setDeleteConfirmId(assessment._id)}
+                            onClick={() => handleCopyToClipboard(assessment)}
                           >
-                            <Trash className="h-4 w-4" />
+                          <Copy className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -545,23 +553,7 @@ const AssessmentsPage: React.FC = () => {
         onSave={handleUpdateAssessment}
         initialData={selectedAssessmentForEdit}
       />
-      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the assessment
-              and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteConfirmId && handleDeleteAssessment(deleteConfirmId)}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+     
       {/* <CandidateDetailsModal
         open={showDetails}
         onOpenChange={setShowDetails}

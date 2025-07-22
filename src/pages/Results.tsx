@@ -99,7 +99,7 @@ const Results = () => {
         }
       } catch (error) {
         setError(error.message || "Failed to fetch assessments");
-        toast.error(error.message || "Failed to fetch assessments");
+        // toast.error(error.message || "Failed to fetch assessments");
       } finally {
         setLoading(false);
       }
@@ -147,7 +147,7 @@ const Results = () => {
         setVideoUrl(videoResponse.data);
       } catch (error) {
         setVideoError(error.message || "Video recording not available");
-        toast.error(error.message || "Video recording not available");
+        // toast.error(error.message || "Video recording not available");
       } finally {
         setVideoLoading(false);
       }
@@ -162,7 +162,7 @@ const Results = () => {
         setTranscript(transcriptResponse.data);
       } catch (error) {
         setTranscriptError(error.message || "Transcript not available");
-        toast.error(error.message || "Transcript not available");
+        // toast.error(error.message || "Transcript not available");
       } finally {
         setTranscriptLoading(false);
       }
@@ -644,7 +644,7 @@ const formatTime = (seconds) => {
                       onClick={handleDownloadReport}
                       variant="outline"
                       className="w-full rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300"
-                      disabled={!certificateData}
+                      disabled={!certificateData || error}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Certificate

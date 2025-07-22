@@ -426,8 +426,12 @@ const Assessment = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md rounded-3xl border-0 shadow-2xl">
           <CardHeader className="text-center pb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="h-8 w-8 text-white" />
+            <div className="h-[5rem] flex items-center justify-center mx-auto mb-4">
+               <img
+                src="/images/logo.png"
+                alt="EarlyJobs Logo"
+                className="h-[5rem] w-auto"
+              />
             </div>
             <CardTitle className="text-2xl text-gray-900">
               Complete Payment
