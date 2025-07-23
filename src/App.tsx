@@ -61,16 +61,12 @@ const App = () => (
                 <Route path="/signup/:id" element={<Login />} />
                 <Route path="/signup" element={<Login />} />
                 <Route
-                  path="/assessment/:assessmentname/:id/:referalCode"
-                  element={
-                      <AssessmentDetails />
-                  }
+                  path="/assessments/:assessmentname/:id/:referalCode"
+                  element={<AssessmentDetails />}
                 />
-                 <Route
-                  path="/assessment/:assessmentname/:id"
-                  element={
-                      <AssessmentDetails />
-                  }
+                <Route
+                  path="/assessments/:assessmentname/:id"
+                  element={<AssessmentDetails />}
                 />
 
                 <Route
@@ -99,14 +95,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/assessments"
-                  element={
-                    <ProtectedRoute>
-                      <Assessments />
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/assessments" element={<Assessments />} />
                 <Route
                   path="/assessmentpayment/:id"
                   element={
