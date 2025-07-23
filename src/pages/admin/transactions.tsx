@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, CreditCard } from "lucide-react";
+import { ArrowLeft, Clock, CreditCard, Tag } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { getTransactionsForSprAdmin, getTransactionsForFranchisenAdmin } from "@/components/services/servicesapis";
 import { useAdmin } from "@/context/AdminContext";
+import { response } from "express";
 
 const LIMIT = 10;
 
@@ -24,9 +25,11 @@ const TransactionsForAdmin = () => {
     const fetchTransactions = async () => {
         setLoading(true);
         if (currentUser.role === 'super_admin') {
+
             try {
                 const response = await getTransactionsForSprAdmin(page, LIMIT);
                 if (response.success) {
+                    console.log("Transactions fetched successfully:", response.data.transactions);
                     setTransactions(response.data.transactions);
                     setTotal(response.data.pagination.total);
                     setTotalAmount(response.data.earnings.totalAmount);
@@ -161,6 +164,7 @@ const TransactionsForAdmin = () => {
                                                     <th className="px-4 py-3">Candidate Name</th>
                                                     <th className="px-4 py-3">Assessment Title</th>
                                                     <th className="px-4 py-3">Amount</th>
+                                                    <th className="px-4 py-3">Offer Code</th>
                                                     {
                                                         currentUser.role === 'super_admin' &&
                                                         <th className="px-4 py-3">Franchise Name</th>
@@ -185,6 +189,18 @@ const TransactionsForAdmin = () => {
                                                         <td className="px-4 py-3">{transaction.candidateName || "Unknown"}</td>
                                                         <td className="px-4 py-3">{transaction.assessmentTitle || "Unknown"}</td>
                                                         <td className="px-4 py-3">₹{transaction.transactionAmount}</td>
+                                                        <td className="px-4 py-3">
+                                                            {transaction.offerCode ? (
+                                                                <div className="flex items-center space-x-1">
+                                                                    <Tag className="h-4 w-4 text-green-600" />
+                                                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 rounded-full px-2 py-1 text-xs">
+                                                                        {transaction.offerCode}
+                                                                    </Badge>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-400 text-xs">No offer</span>
+                                                            )}
+                                                        </td>
                                                         {
                                                             currentUser.role === 'super_admin' &&
                                                             <td className="px-4 py-3">{transaction.franchiseName || "Unknown"}</td>
