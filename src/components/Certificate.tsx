@@ -103,8 +103,8 @@ const Certificate: React.FC<CertificateProps> = ({
         </div>
 
         {/* QR Code Placeholder */}
-        <div className="absolute top-8 right-8 w-16 h-16 bg-gray-200 border border-gray-300 flex items-center justify-center text-xs text-gray-500">
-          QR Code
+        <div className="absolute top-8 right-8 w-16 h-16 flex items-center justify-center">
+            <img src="/images/qrcode_earlyjobs.png" className="border border-gray-300 rounded-md" alt="QR Code" />
         </div>
       </div>
     </div>
