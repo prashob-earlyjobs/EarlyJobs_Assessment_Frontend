@@ -1,31 +1,120 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import html2pdf from "html2pdf.js";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Calendar, User, CheckCircle } from "lucide-react";
+import { Award, Calendar, User, CheckCircle, Download, Share2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { uploadPhoto } from "@/components/services/servicesapis";
+import {
+  FacebookShareButton,
+  LinkedinShareButton,
+  WhatsappShareButton,
+  FacebookIcon,
+  LinkedinIcon,
+  WhatsappIcon,
+} from "react-share";
 
 interface CertificateProps {
   candidateName: string;
   assessmentName: string;
   score: number;
   date: string;
+  commScore: number;
+  proctScore: number;
   skillsVerified: string[];
   certificateId: string;
   interviewId?: string;
   isPDFGenerating?: boolean;
 }
 
+interface UploadResponse {
+  fileUrl?: string;
+  message?: string;
+  ok?: boolean;
+}
+
+const ShareCertificate = ({ shareUrl }: { shareUrl: string }) => {
+  const shareText = "I just completed an assessment on earlyjobs.ai! 🎉\n\nCheck it out:";
+
+  // Native copy to clipboard function
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Certificate link copied to clipboard!");
+    } catch (error) {
+      console.error("Error copying to clipboard:", error);
+      
+      // Fallback for older browsers
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast.success("Certificate link copied to clipboard!");
+      } catch (fallbackError) {
+        console.error("Fallback copy failed:", fallbackError);
+        toast.error("Failed to copy link to clipboard");
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-3 bg-white shadow-lg p-6 rounded-xl border border-gray-200 w-[12rem]">
+      <p className="text-sm font-semibold text-gray-800">Share via:</p>
+      <div className="flex flex-col gap-3">
+        <LinkedinShareButton
+          url={shareUrl}
+          title={shareText}
+        >
+          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
+            <LinkedinIcon size={32} round />
+            <span className="text-gray-700 font-medium">LinkedIn</span>
+          </div>
+        </LinkedinShareButton>
+        
+        <WhatsappShareButton
+          url={shareUrl}
+          title={shareText}
+        >
+          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
+            <WhatsappIcon size={32} round />
+            <span className="text-gray-700 font-medium">WhatsApp</span>
+          </div>
+        </WhatsappShareButton>
+        
+        {/* <FacebookShareButton
+          url={shareUrl}
+        >
+          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
+            <FacebookIcon size={32} round />
+            <span className="text-gray-700 font-medium">Facebook</span>
+          </div>
+        </FacebookShareButton> */}
+        
+        <button
+          onClick={handleCopyToClipboard}
+          className="flex items-center gap-3 text-gray-600 hover:bg-gray-100 p-2 rounded-md transition w-full text-left"
+        > 
+          <Copy className="h-8 w-8" />
+          <span className="font-medium">Copy Link</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Certificate: React.FC<CertificateProps> = ({
   candidateName,
   assessmentName,
   score,
   date,
+  commScore,
+  proctScore,
   skillsVerified,
   certificateId,
-  isPDFGenerating
-  
+  isPDFGenerating,
 }) => {
   return (
     <div className="w-full h-full bg-white" id="certificate" style={{ overflow: "hidden" }}>
@@ -43,7 +132,9 @@ const Certificate: React.FC<CertificateProps> = ({
             alt="EarlyJobs Logo"
             className="h-16 w-auto mx-auto mb-3"
           />
-          <h1 className={`text-4xl font-bold text-gray-800 ${isPDFGenerating && "mb-[1rem]"}`}>CERTIFICATE OF ACHIEVEMENT</h1>
+          <h1 className={`text-4xl font-bold text-gray-800 ${isPDFGenerating && "mb-[1rem]"}`}>
+            CERTIFICATE OF ACHIEVEMENT
+          </h1>
           <div className="w-32 h-1 bg-gradient-to-r from-orange-500 to-purple-600 mx-auto mb-4" />
         </div>
 
@@ -58,9 +149,37 @@ const Certificate: React.FC<CertificateProps> = ({
           <p className="text-lg text-gray-600 mb-2">with a score of</p>
 
           {/* Score badge */}
-          <div className="flex justify-center items-center gap-2 bg-green-100 px-3 py-1 rounded-full w-fit mx-auto mb-6">
-            <Award className="h-6 w-6 text-green-600" />
-            <span className={`text-2xl font-bold text-green-700 ${isPDFGenerating && "mb-[1.5rem]"}`}>{score || 0}%</span>
+          <div className="flex flex-wrap justify-center items-center gap-2 px-4 py-2 rounded-full w-fit mx-auto mb-6">
+            <Badge
+              className={`bg-white text-green-700 px-3 ${isPDFGenerating ? "" : "py-1"} rounded-full flex items-center gap-1 border border-green-600`}
+            >
+              <span className={`text-sm font-medium ${isPDFGenerating && "mb-[1rem]"}`}>
+                Overall Score:
+              </span>
+              <span className={`text-sm font-bold text-green-600 ${isPDFGenerating && "mb-[1rem]"}`}>
+                {score}/10
+              </span>
+            </Badge>
+            <Badge
+              className="bg-white text-green-700 px-3 py-1 rounded-full flex items-center gap-1 border border-green-600"
+            >
+              <span className={`text-sm font-medium ${isPDFGenerating && "mb-[1rem]"}`}>
+                Communication:
+              </span>
+              <span className={`text-sm font-bold text-green-600 ${isPDFGenerating && "mb-[1rem]"}`}>
+                {commScore}/10
+              </span>
+            </Badge>
+            <Badge
+              className="bg-white text-green-700 px-3 py-1 rounded-full flex items-center gap-1 border border-green-600"
+            >
+              <span className={`text-sm font-medium ${isPDFGenerating && "mb-[1rem]"}`}>
+                Proctoring:
+              </span>
+              <span className={`text-sm font-bold text-green-600 ${isPDFGenerating && "mb-[1rem]"}`}>
+                {proctScore}/10
+              </span>
+            </Badge>
           </div>
         </div>
 
@@ -77,7 +196,7 @@ const Certificate: React.FC<CertificateProps> = ({
                 variant="secondary"
                 className="px-3 py-1 bg-purple-100 text-purple-700"
               >
-                <span className={`${isPDFGenerating && "mb-[0.5rem]"}`}>{skill}</span> 
+                <span className={`${isPDFGenerating && "mb-[0.5rem]"}`}>{skill}</span>
               </Badge>
             ))}
           </div>
@@ -88,7 +207,9 @@ const Certificate: React.FC<CertificateProps> = ({
           <div className="text-center">
             <div className="w-48 border-b-2 border-gray-400 mb-2 mx-auto"></div>
             <p className="text-sm text-gray-600">Authorized Signature</p>
-            <p  className={`text-xs text-gray-500 ${isPDFGenerating && "mb-[0.5rem]"}`}>EarlyJobs Certification Authority</p>
+            <p className={`text-xs text-gray-500 ${isPDFGenerating && "mb-[0.5rem]"}`}>
+              EarlyJobs Certification Authority
+            </p>
           </div>
           <div className="text-right space-y-2 text-gray-600">
             <div className="flex items-center gap-2">
@@ -97,14 +218,20 @@ const Certificate: React.FC<CertificateProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              <span className={`text-sm ${isPDFGenerating && "mb-[0.5rem]"}`}>Certificate ID: {certificateId}</span>
+              <span className={`text-sm ${isPDFGenerating && "mb-[0.5rem]"}`}>
+                Certificate ID: {certificateId}
+              </span>
             </div>
           </div>
         </div>
 
         {/* QR Code Placeholder */}
         <div className="absolute top-8 right-8 w-16 h-16 flex items-center justify-center">
-            <img src="/images/qrcode_earlyjobs.png" className="border border-gray-300 rounded-md" alt="QR Code" />
+          <img
+            src="/images/qrcode_earlyjobs.png"
+            className="border border-gray-300 rounded-md"
+            alt="QR Code"
+          />
         </div>
       </div>
     </div>
@@ -115,23 +242,29 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
   candidateName,
   assessmentName,
   score,
+  commScore,
+  proctScore,
   interviewId,
   date,
   skillsVerified,
   certificateId,
 }) => {
   const certificateRef = useRef<HTMLDivElement>(null);
-  const [isPDFGenerating, setIsPDFGenerating] = useState(false);
+  const [isPDFGenerating, setIsPDFGenerating] = useState(true);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const certificateData: CertificateProps = {
     candidateName,
     assessmentName,
     score,
     date,
+    commScore,
+    proctScore,
     skillsVerified: skillsVerified || [],
     certificateId,
     interviewId,
-    isPDFGenerating
+    isPDFGenerating,
   };
 
   const generateAndDownloadPDF = async () => {
@@ -167,9 +300,7 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast.error("Failed to generate PDF. Please try again.");
-    }
-    finally {
-      
+    } finally {
       setIsPDFGenerating(false);
     }
   };
@@ -195,32 +326,68 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
 
       const blob = await html2pdf().set(opt).from(certificateRef.current).output("blob");
       const file = new File([blob], `${certificateId}.pdf`, { type: "application/pdf" });
+
       const response = await uploadPhoto(file, interviewId);
-
-      if (!response.ok) {
-        throw new Error(response.message || "Upload failed");
+      if (response) {
+        setFileUrl(response);
+        toast.success("Certificate PDF uploaded successfully!");
+        return response;
+      } else {
+        throw new Error(response || "Upload failed");
       }
-
-      toast.success("Certificate PDF uploaded successfully!");
-      return response;
     } catch (error) {
       console.error("Error uploading PDF:", error);
-      toast.error(error.message || "Failed to upload certificate. Please try again.");
-      throw error;
+      toast.error(error instanceof Error ? error.message : "Failed to upload certificate. Please try again.");
+    }
+    finally {
+      setIsPDFGenerating(false);
     }
   };
+
+  // Move the URL processing logic inside a useEffect that depends on fileUrl
+  useEffect(() => {
+    if (fileUrl && typeof fileUrl === 'string') {
+      const match = fileUrl.match(/s3\.ap-south-1\.amazonaws\.com\/(.+?)\/(.+?)\.pdf/);
+      
+      if (match && match.length === 3) {
+        const extractedInterviewId = match[1];
+        const fileName = match[2];
+
+        console.log("Extracted interviewId:", extractedInterviewId);
+        console.log("Extracted fileName:", fileName);
+        setFileUrl(`https://earlyjobs.ai/certificate/${extractedInterviewId}/${fileName}`);
+      }
+    }
+  }, [fileUrl]);
+
+  useEffect(() => {
+    console.log("isPDFGenerating:", isPDFGenerating);
+  }, [isPDFGenerating]);
 
   const handleDownloadAndSend = async () => {
     try {
       await generateAndDownloadPDF();
       await sendPDFToBackend();
+      setShowShareOptions(true);
     } catch (error) {
-      //ff
+      console.error("Error in handleDownloadAndSend:", error);
     }
   };
 
+  useEffect(() => {
+    sendPDFToBackend();
+  }, []);
+
+  const toggleShareOptions = () => {
+    if (!fileUrl) {
+      toast.error("Please download the certificate first to share it.");
+      return;
+    }
+    setShowShareOptions(!showShareOptions);
+  };
+
   return (
-    <div className="p-6">
+    <div className="relative">
       <Card className="shadow-lg">
         <div
           ref={certificateRef}
@@ -237,14 +404,32 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
         </div>
       </Card>
 
-      <div className="mt-4 flex justify-center space-x-4">
+      <div className="mt-6 flex justify-center space-x-6">
         <button
           onClick={handleDownloadAndSend}
-          className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition"
+          className="bg-orange-500 text-white px-6 py-3 rounded-xl hover:bg-orange-600 transition flex items-center gap-3 shadow-md hover:shadow-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isPDFGenerating}
         >
-          Download
+          <Download className="h-5 w-5" />
+          <span className="font-semibold">Download Certificate</span>
+        </button>
+        <button
+          onClick={toggleShareOptions}
+          className="bg-purple-600 text-white p-[16px] rounded-full hover:bg-purple-700 transition flex items-center gap-3 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+        >
+          <Share2 className="h-5 w-5" />
         </button>
       </div>
+
+      {showShareOptions && fileUrl && (
+        <div className="mt-6 flex justify-center" style={{
+          position: "absolute",
+          bottom: "63px",
+          right: "18rem"
+        }}>
+          <ShareCertificate shareUrl={fileUrl} />
+        </div>
+      )}
     </div>
   );
 };

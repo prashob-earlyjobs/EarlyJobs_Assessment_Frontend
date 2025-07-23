@@ -42,6 +42,7 @@ import Pricing from "./pages/Pricing";
 import AboutUs from "./pages/AboutUs";
 import Offers from "./pages/admin/Offers";
 import Assessment from "./pages/Assessment";
+import FileToShow from "./pages/FileToShow";
 
 const queryClient = new QueryClient();
 
@@ -61,8 +62,17 @@ const App = () => (
                 <Route path="/signup/:id" element={<Login />} />
                 <Route path="/signup" element={<Login />} />
                 <Route
-                  path="/assessments/:assessmentname/:id/:referalCode"
-                  element={<AssessmentDetails />}
+                  path="/assessment/:assessmentname/:id/:referalCode"
+                  element={
+                      <AssessmentDetails />
+                  }
+                />
+                <Route
+                  path="/certificate/:interviewId/:fileName"
+                  element={
+                    <FileToShow />
+
+                  }
                 />
                 <Route
                   path="/assessments/:assessmentname/:id"

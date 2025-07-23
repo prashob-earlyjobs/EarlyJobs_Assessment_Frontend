@@ -201,6 +201,7 @@ export const userLogout = async () => {
       throw new Error("Logout failed");
     }
     Cookies.remove("accessToken");
+    localStorage.removeItem("userCredentials");
     axiosInstance.defaults.headers.Authorization = ""; // Clear the Authorization header
     toast.success("Logged out successfully!");
     return response.data;
