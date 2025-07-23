@@ -192,7 +192,9 @@ const Results = () => {
         setCertificateData({
           candidateName: userCredentials.name,
           assessmentName: matchedAssessment.assessmentData.title,
-          score: finalPercentage,
+          score: results?.report.score,
+          commScore: results?.report.communicationScore,
+          proctScore: results?.proctoringEventsData?.proctoringEvents?.proctoringScore,
           date: new Date().toLocaleDateString(),
           skillsVerified,
           interviewId: matchedAssessment.interviewId,
@@ -201,6 +203,7 @@ const Results = () => {
       }
     }
   }, [error, selectedAssessment, completedAssessments, userCredentials, results]);
+
 
   const handleDownloadReport = () => {
     if (certificateData) {
@@ -303,7 +306,7 @@ const formatTime = (seconds) => {
                       <CardDescription>Overall and communication performance</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid md:grid-cols-2 gap-6">
+                      <div className="flex flex-wrap justify-center gap-8">
                         <div className="text-center">
                           <div className={`w-32 h-32 rounded-full border-8 ${getScoreBg(results?.report?.score || 0)} flex items-center justify-center mx-auto mb-4`}>
                             <div className="text-center">
@@ -321,6 +324,16 @@ const formatTime = (seconds) => {
                                 {results?.report?.communicationScore || 0}/10
                               </div>
                               <div className="text-sm text-gray-600">Communication Score</div>
+                            </div>
+                          </div>
+                        </div>
+                         <div className="text-center">
+                          <div className={`w-32 h-32 rounded-full border-8 ${getScoreBg(results?.report?.communicationScore || 0)} flex items-center justify-center mx-auto mb-4`}>
+                            <div className="text-center">
+                              <div className={`text-4xl font-bold ${getScoreColor(results?.proctoringEventsData?.proctoringEvents?.proctoringScore || 0)}`}>
+                                {results?.proctoringEventsData.proctoringEvents.proctoringScore || 0}/10
+                              </div>
+                              <div className="text-sm text-gray-600">Proctoring Score</div>
                             </div>
                           </div>
                         </div>
@@ -622,10 +635,10 @@ const formatTime = (seconds) => {
                   </Card>
                 )}
 
-                <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
-                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog} >
+                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" style={{paddingLeft: "0rem", paddingRight: "0rem"}}>
                     <DialogHeader>
-                      <DialogTitle className="flex items-center justify-between">
+                      <DialogTitle className="flex items-center justify-between" style={{marginLeft: "2rem", }}>
                         <span>Your Certificate</span>
                       </DialogTitle>
                     </DialogHeader>

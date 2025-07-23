@@ -42,6 +42,7 @@ import Pricing from "./pages/Pricing";
 import AboutUs from "./pages/AboutUs";
 import Offers from "./pages/admin/Offers";
 import Assessment from "./pages/Assessment";
+import FileToShow from "./pages/FileToShow";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,13 @@ const App = () => (
                   path="/assessment/:assessmentname/:id/:referalCode"
                   element={
                       <AssessmentDetails />
+                  }
+                />
+                <Route
+                  path="/certificate/:interviewId/:fileName"
+                  element={
+                    <FileToShow />
+
                   }
                 />
                  <Route
