@@ -118,7 +118,7 @@ const Assessments = () => {
     }
   };
 
-  const skills = ["technical", "aptitude", "personality", "communication"];
+  const skills = ["technical","non-technical"];
   const levels = ["Beginner", "Intermediate", "Advanced"];
 
   const categoryColour = (category: string) => {
@@ -176,10 +176,10 @@ const Assessments = () => {
                   <SelectValue placeholder="All Skills" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Skills</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   {skills.map((skill) => (
                     <SelectItem key={skill} value={skill}>
-                      {skill}
+                      { skill==="technical" ? "Technical" : "Non-Technical"}
                     </SelectItem>
                   ))}
                 </SelectContent>
