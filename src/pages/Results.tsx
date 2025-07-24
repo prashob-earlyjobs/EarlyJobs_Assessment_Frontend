@@ -659,8 +659,9 @@ const formatTime = (seconds) => {
                       className="w-full rounded-2xl border-gray-200 hover:bg-blue-50 hover:border-blue-300"
                       disabled={!certificateData || error}
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Certificate
+                      <Eye className="w-5 h-5" />
+
+                      View Certificate
                     </Button>
                     <Button
                       onClick={() => navigate('/assessments')}
