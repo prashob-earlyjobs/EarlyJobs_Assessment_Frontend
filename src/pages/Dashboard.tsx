@@ -50,12 +50,11 @@ const notifications = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const userName = "Alex Johnson";
-  const { userCredentials, setUserCredentials } = useUser();
+  const { userCredentials } = useUser();
   const [stats, setStats] = useState([{ key: "totalAssessments", label: "Total Assessments", value: "0", icon: Award, color: "text-purple-600" },
 
   { key: "userAssessments", label: "Assessments Completed", value: "0", icon: BookOpen, color: "text-blue-600" },]);
-  const [userDetails, setUserDetails] = useState({
+  const [userDetails] = useState({
     name: "",
     email: "",
     profile: {
@@ -73,34 +72,9 @@ const Dashboard = () => {
     time: "",
     message: "Your profile has been successfully updated. You're all set to start taking assessments!"
   },]);
-  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [showCertificateDialog, setShowCertificateDialog] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-
-
-
-
-  const handleBulkApplyBrowse = () => {
-    navigate('/bulk-applying');
-  };
 
   const handleProfileClick = () => {
     navigate('/profile');
-  };
-
-  const handleDownloadCertificate = () => {
-    setShowCertificateDialog(true);
-  };
-
-  
-
-  const certificateData = {
-    candidateName: userDetails.name,
-    assessmentName: "React Developer Assessment",
-    score: 85,
-    date: new Date().toLocaleDateString(),
-    skillsVerified: ["JavaScript", "React", "Node.js", "Problem Solving"],
-    certificateId: "EJ-CERT-2024-001"
   };
 
   useEffect(() => {
@@ -124,15 +98,15 @@ const Dashboard = () => {
 
         // Set recent activity, including the welcome message
       setRecentActivity([
-  {
-    type: "welcome",
-    title: "Welcome to EarlyJobs!",
-    status: "Profile Updated",
-    time: "",
-    message: "Your profile has been successfully updated. You're all set to start taking assessments!"
-  },
-  ...recentActivities
-].reverse());
+          {
+            type: "welcome",
+            title: "Welcome to EarlyJobs!",
+            status: "Profile Updated",
+            time: "",
+            message: "Your profile has been successfully updated. You're all set to start taking assessments!"
+          },
+          ...recentActivities
+        ].reverse());
 
       } catch (error) {
         // Optionally set a default or error activity if desired
@@ -267,19 +241,7 @@ const Dashboard = () => {
       {/* Logout Confirmation Dialog */}
 
 
-      <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>Your Certificate</span>
-             
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <CertificateWithPDF {...certificateData} />
-          </div>
-        </DialogContent>
-      </Dialog>
+     
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
@@ -489,7 +451,7 @@ const Dashboard = () => {
                     className="h-16 rounded-2xl border-gray-200 hover:bg-purple-50 hover:border-purple-300 flex flex-col space-y-1"
                   >
                     <Award className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm">Download Certificate</span>
+                    <span className="text-sm">View Certificate</span>
                   </Button>
                   <Button
                     variant="outline"

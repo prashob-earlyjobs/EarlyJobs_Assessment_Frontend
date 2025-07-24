@@ -182,7 +182,10 @@ const Certificate: React.FC<CertificateProps> = ({
         </div>
 
         {/* Footer */}
-        <div className={`flex justify-between items-end mt-12 px-12 ${isPDFGenerating && "mt-[1rem]"}`}>
+        <div className={`flex justify-between items-end mt-12 px-12 ${isPDFGenerating && "mt-[1rem]"}`} style={{position: "absolute",
+    display: "flex",
+    width: "100%",
+    bottom: "24px"}}>
           <div className="text-center">
             <div className="w-48 border-b-2 border-gray-400 mb-2 mx-auto"></div>
             <p className="text-sm text-gray-600">Authorized Signature</p>
@@ -210,6 +213,13 @@ const Certificate: React.FC<CertificateProps> = ({
             src="/images/qrcode_earlyjobs.png"
             className="border border-gray-300 rounded-md"
             alt="QR Code"
+          />
+        </div>
+        <div className={`absolute ${isPDFGenerating && "mb-[0.5rem]"} bottom-[4.5rem] left-[4.5rem]`}>
+          <img
+            src="/images/signature.png"
+            alt="Signature of Cofounder"
+            className="max-w-[11rem]"
           />
         </div>
       </div>

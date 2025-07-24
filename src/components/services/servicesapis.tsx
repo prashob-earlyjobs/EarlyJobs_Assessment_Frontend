@@ -193,7 +193,23 @@ export const updateProfile = async (profileData) => {
     return error;
   }
 };
+export const getColleges = async (search) => {
+  console.log("search", search);
+  try {
+    const response = await axiosInstance.get(
+      `/auth/colleges?search=${encodeURIComponent(search)}`
+    );
+    if(response.status !== 200){
+      throw new Error("Failed to fetch colleges");
+    }
+    console.log("response", response);
+    return response.data;
+  } catch (error) {
+    toast.error(`${error?.response?.data?.message}.`);
 
+    return error;
+  }
+};
 export const userLogout = async () => {
   try {
     const response = await axiosInstance.post("/auth/logout");
