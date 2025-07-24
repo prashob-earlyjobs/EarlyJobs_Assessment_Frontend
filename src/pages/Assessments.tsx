@@ -212,7 +212,7 @@ const Assessments = () => {
                 className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                 onClick={() =>
                 navigate(
-                  `/assessment/${assessment.title.toLowerCase().replace(/\s+/g, "-")}/${assessment.shortId ? assessment.shortId : assessment._id}`
+                  `/assessments/${assessment.title.toLowerCase().replace(/\s+/g, "-")}/${assessment.shortId ? assessment.shortId : assessment._id}`
                 )
               }
 

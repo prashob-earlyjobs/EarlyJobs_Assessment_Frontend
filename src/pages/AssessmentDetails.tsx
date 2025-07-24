@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ArrowLeft,
   Clock,
   Users,
@@ -22,6 +28,9 @@ import {
   Zap,
   Crown,
   BookOpen,
+  Share2,
+  Copy,
+  ChevronDown,
 } from "lucide-react";
 import { getAssessmentById, getAssessmentsfromSearch } from "../components/services/servicesapis";
 import Header from "./header";
@@ -32,9 +41,7 @@ import { Dialog, DialogContent,DialogTitle, DialogOverlay } from "@/components/u
 
 const AssessmentDetails = () => {
   const { id,referalCode } = useParams();
-  // if(referalCode){
-    console.log("referalCode", referalCode);
-  // }
+  console.log("referalCode", referalCode);
   const navigate = useNavigate();
   const [assessment, setAssessment] = useState(null);
   const [suggestedAssessments, setSuggestedAssessments] = useState([]);
@@ -85,7 +92,7 @@ const AssessmentDetails = () => {
 
         setSuggestedAssessments(filteredSuggestions);
       } catch (err) {
-        console.error("Error fetching suggested assessments:", err);
+        // console.error("Error fetching suggested assessments:", err);
         toast.error("Failed to load suggested assessments");
       } finally {
         setLoadingSuggestions(false);
@@ -149,6 +156,49 @@ const AssessmentDetails = () => {
     }
   };
 
+  // Native share functionality
+  const handleNativeShare = async () => {
+    const shareData = {
+      title: `${assessment.title} - Assessment`,
+      text: `Check out this ${assessment.category} assessment: ${assessment.title}. Duration: ${assessment.timeLimit} minutes.`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        toast.error("Native sharing not supported on this device");
+      }
+    } catch (error) {
+      // console.error("Error sharing:", error);
+      // toast.error("Failed to share assessment");
+    }
+  };
+
+  // Copy to clipboard functionality
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Assessment link copied to clipboard!");
+    } catch (error) {
+      // console.error("Error copying to clipboard:", error);
+      
+      // Fallback for older browsers
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = window.location.href;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast.success("Assessment link copied to clipboard!");
+      } catch (fallbackError) {
+        toast.error("Failed to copy link to clipboard");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -183,14 +233,43 @@ const AssessmentDetails = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header />
       <main className="max-w-7xl mx-auto px-6 py-8">
-        <Button
-          onClick={() => navigate("/assessments")}
-          variant="outline"
-          className="mb-6 rounded-2xl flex items-center"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Assessments
-        </Button>
+        {/* Replace the single button with a flex container */}
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            onClick={() => navigate("/assessments")}
+            variant="outline"
+            className="rounded-2xl flex items-center"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Assessments
+          </Button>
+          
+          {/* Share Dropdown Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="rounded-2xl flex items-center"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleCopyToClipboard} className="cursor-pointer">
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to clipboard
+              </DropdownMenuItem>
+              {navigator.share && (
+                <DropdownMenuItem onClick={handleNativeShare} className="cursor-pointer">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share via...
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Assessment Content */}
@@ -412,7 +491,6 @@ const AssessmentDetails = () => {
 
         {/* Login Dialog Popup */}
        <Dialog open={showPopup} onOpenChange={setShowPopup} >
-  {/* <DialogOverlay /> */}
   <DialogContent className="w-full rounded-2xl p-6 shadow-lg" style={{height:'85vh',overflowY:'scroll'}} >
     <Login />
   </DialogContent>
