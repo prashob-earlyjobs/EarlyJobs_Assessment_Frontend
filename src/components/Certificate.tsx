@@ -13,6 +13,7 @@ import {
   LinkedinIcon,
   WhatsappIcon,
 } from "react-share";
+import copy from "copy-to-clipboard";
 
 interface CertificateProps {
   candidateName: string;
@@ -34,31 +35,14 @@ interface UploadResponse {
 }
 
 const ShareCertificate = ({ shareUrl }: { shareUrl: string }) => {
-  const shareText = "I just completed an assessment on earlyjobs.ai! 🎉\n\nCheck it out:";
+  const shareText =
+    "I just completed an assessment on earlyjobs.ai! 🎉\n\nCheck it out:";
 
-  // Native copy to clipboard function
-  const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Certificate link copied to clipboard!");
-    } catch (error) {
-      console.error("Error copying to clipboard:", error);
-      
-      // Fallback for older browsers
-      try {
-        const textArea = document.createElement('textarea');
-        textArea.value = shareUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        toast.success("Certificate link copied to clipboard!");
-      } catch (fallbackError) {
-        console.error("Fallback copy failed:", fallbackError);
-        toast.error("Failed to copy link to clipboard");
-      }
-    }
+  const handleCopy = () => {
+    copy(`${shareUrl}`);
+    toast.success("Link copied to clipboard!");
   };
+  console.log("shareUrl", shareUrl);
 
   return (
     <div className="flex flex-col items-start gap-3 bg-white shadow-lg p-6 rounded-xl border border-gray-200 w-[12rem]">
@@ -67,38 +51,33 @@ const ShareCertificate = ({ shareUrl }: { shareUrl: string }) => {
         <LinkedinShareButton
           url={shareUrl}
           title={shareText}
+          className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition"
         >
-          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
-            <LinkedinIcon size={32} round />
-            <span className="text-gray-700 font-medium">LinkedIn</span>
-          </div>
+          <LinkedinIcon size={32} round />
+          <span className="text-gray-700 font-medium">LinkedIn</span>
         </LinkedinShareButton>
-        
         <WhatsappShareButton
           url={shareUrl}
           title={shareText}
+          className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition"
         >
-          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
-            <WhatsappIcon size={32} round />
-            <span className="text-gray-700 font-medium">WhatsApp</span>
-          </div>
+          <WhatsappIcon size={32} round />
+          <span className="text-gray-700 font-medium">WhatsApp</span>
         </WhatsappShareButton>
-        
-        {/* <FacebookShareButton
+        <FacebookShareButton
           url={shareUrl}
+          title={shareText}
+          className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition"
         >
-          <div className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-md transition cursor-pointer">
-            <FacebookIcon size={32} round />
-            <span className="text-gray-700 font-medium">Facebook</span>
-          </div>
-        </FacebookShareButton> */}
-        
+          <FacebookIcon size={32} round />
+          <span className="text-gray-700 font-medium">Facebook</span>
+        </FacebookShareButton>
         <button
-          onClick={handleCopyToClipboard}
-          className="flex items-center gap-3 text-gray-600 hover:bg-gray-100 p-2 rounded-md transition w-full text-left"
+          onClick={handleCopy}
+          className="flex items-center gap-3 text-gray-600 hover:bg-gray-100 p-2 rounded-md transition"
         > 
-          <Copy className="h-8 w-8" />
-          <span className="font-medium">Copy Link</span>
+            <Copy className="h-4 w-4 mr-2" />
+           <span className="font-medium">Copy Link</span>
         </button>
       </div>
     </div>
@@ -266,7 +245,9 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
     interviewId,
     isPDFGenerating,
   };
-
+useEffect(() => {
+  console.log("fileUrl", fileUrl);
+},[fileUrl])
   const generateAndDownloadPDF = async () => {
     if (!certificateRef.current) {
       toast.error("Certificate content is not available.");
@@ -341,41 +322,21 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
     }
     finally {
       setIsPDFGenerating(false);
+      
     }
   };
-
-  // Move the URL processing logic inside a useEffect that depends on fileUrl
-  useEffect(() => {
-    if (fileUrl && typeof fileUrl === 'string') {
-      const match = fileUrl.match(/s3\.ap-south-1\.amazonaws\.com\/(.+?)\/(.+?)\.pdf/);
-      
-      if (match && match.length === 3) {
-        const extractedInterviewId = match[1];
-        const fileName = match[2];
-
-        console.log("Extracted interviewId:", extractedInterviewId);
-        console.log("Extracted fileName:", fileName);
-        setFileUrl(`https://earlyjobs.ai/certificate/${extractedInterviewId}/${fileName}`);
-      }
-    }
-  }, [fileUrl]);
-
-  useEffect(() => {
-    console.log("isPDFGenerating:", isPDFGenerating);
-  }, [isPDFGenerating]);
 
   const handleDownloadAndSend = async () => {
     try {
       await generateAndDownloadPDF();
       await sendPDFToBackend();
-      setShowShareOptions(true);
     } catch (error) {
       console.error("Error in handleDownloadAndSend:", error);
     }
   };
-
   useEffect(() => {
     sendPDFToBackend();
+
   }, []);
 
   const toggleShareOptions = () => {
@@ -385,6 +346,22 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
     }
     setShowShareOptions(!showShareOptions);
   };
+try {
+  const url = new URL(fileUrl);
+  const parts = url.pathname.split("/"); // splits path into array
+
+  // Expected path format: /bucket-name/interviewId/fileName.pdf
+  // So we get last two parts
+  const interviewId = parts[parts.length - 2];
+  const fileWithExt = parts[parts.length - 1];
+
+  if (fileWithExt.endsWith(".pdf")) {
+    const fileName = fileWithExt.replace(".pdf", "");
+    setFileUrl(`https://earlyjobs.ai/certificate/${interviewId}/${fileName}`);
+  }
+} catch (error) {
+  console.error("Invalid URL:", error);
+}
 
   return (
     <div className="relative">
@@ -414,7 +391,8 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
           <span className="font-semibold">Download Certificate</span>
         </button>
         <button
-          onClick={toggleShareOptions}
+      
+          onClick={() => {toggleShareOptions();setShowShareOptions(!showShareOptions)}}
           className="bg-purple-600 text-white p-[16px] rounded-full hover:bg-purple-700 transition flex items-center gap-3 shadow-md hover:shadow-lg transform hover:-translate-y-1"
         >
           <Share2 className="h-5 w-5" />
@@ -423,11 +401,11 @@ const CertificateWithPDF: React.FC<CertificateProps> = ({
 
       {showShareOptions && fileUrl && (
         <div className="mt-6 flex justify-center" style={{
-          position: "absolute",
-          bottom: "63px",
-          right: "18rem"
-        }}>
-          <ShareCertificate shareUrl={fileUrl} />
+    position: "absolute",
+    bottom: "63px",
+    right: "18rem"
+}}>
+          <ShareCertificate shareUrl={fileUrl? `${fileUrl}` : ""} />
         </div>
       )}
     </div>
