@@ -181,7 +181,7 @@ const AssessmentsPage: React.FC = () => {
 };
   const handleCopyToClipboard = (assessment) => {
     const title = assessment?.title.replace(/\s+/g, '-').toLowerCase();
-  const inviteLink = `https://earlyjobs.ai/assessment/${title}/${assessment.shortId ? assessment.shortId : assessment._id}/${currentUser.role ==='franchise_admin'? currentUser.franchiseId:""}`;
+  const inviteLink = `https://earlyjobs.ai/assessments/${title}/${assessment.shortId ? assessment.shortId : assessment._id}/${currentUser.role ==='franchise_admin'? currentUser.franchiseId:""}`;
 
     navigator.clipboard.writeText(inviteLink)
       .then(() => {
@@ -244,7 +244,7 @@ const AssessmentsPage: React.FC = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search assessments..."
+                    placeholder="Search s..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 w-64"
@@ -254,8 +254,8 @@ const AssessmentsPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {assessments.map((assessment, index) => {
-                  const isLast = index === assessments.length - 1;
+                {s.map((, index) => {
+                  const isLast = index === s.length - 1;
                   return (
                     <div
                       key={assessment._id}
